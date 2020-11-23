@@ -6,34 +6,34 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // import App from './App';
 // import reportWebVitals from './reportWebVitals';
 
-const Header = () => (
-  <div>
-    <h1>Give Feedback</h1>
-  </div>
-);
+// const Header = () => (
+//   <div>
+//     <h1>Give Feedback</h1>
+//   </div>
+// );
 
-const Statistics = ({ good, neutral, bad }) => {
-  const feedbackValue = good + neutral + bad;
-  console.log(feedbackValue);
-  const hasFeed = feedbackValue <= 0 ? "none" : "block";
-  const noFeed = feedbackValue > 0 ? "none" : "block";
-  return (
-    <div>
-      <h1>Statistics 1.9</h1>
-      <h3>good {good}</h3>
-      <h3>neutral {neutral}</h3>
-      <h3>bad {bad}</h3>
-      <h3>all {good + neutral + bad}</h3>
-      <h3 style={{ display: hasFeed }}>
-        average {(good * 1 + neutral * 0 + bad * -1) / (good + neutral + bad)}
-      </h3>
-      <h3 style={{ display: hasFeed }}>
-        positive {(good / (good + neutral + bad)) * 100} %{" "}
-      </h3>
-      <h3 style={{ display: noFeed }}>no feedback given</h3>
-    </div>
-  );
-};
+// const Statistics = ({ good, neutral, bad }) => {
+//   const feedbackValue = good + neutral + bad;
+//   console.log(feedbackValue);
+//   const hasFeed = feedbackValue <= 0 ? "none" : "block";
+//   const noFeed = feedbackValue > 0 ? "none" : "block";
+//   return (
+//     <div>
+//       <h1>Statistics 1.9</h1>
+//       <h3>good {good}</h3>
+//       <h3>neutral {neutral}</h3>
+//       <h3>bad {bad}</h3>
+//       <h3>all {good + neutral + bad}</h3>
+//       <h3 style={{ display: hasFeed }}>
+//         average {(good * 1 + neutral * 0 + bad * -1) / (good + neutral + bad)}
+//       </h3>
+//       <h3 style={{ display: hasFeed }}>
+//         positive {(good / (good + neutral + bad)) * 100} %{" "}
+//       </h3>
+//       <h3 style={{ display: noFeed }}>no feedback given</h3>
+//     </div>
+//   );
+// };
 
 const Header2 = () => (
   <div>
