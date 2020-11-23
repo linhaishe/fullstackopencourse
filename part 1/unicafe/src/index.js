@@ -13,9 +13,13 @@ const Header =()=>(
   const Statistics =({good,neutral,bad})=>(
   <div>
     <h1>Statistics</h1>
-    <p>good: {good}</p>
-    <p>neutral: {neutral}</p>
-    <p>bad: {bad}</p>
+    <h3>good: {good}</h3>
+    <h3>neutral: {neutral}</h3>
+    <h3>bad: {bad}</h3>
+    <h3>all: {good + neutral + bad}</h3>
+    <h3>average: {(good*1+neutral*0+bad*-1)/(good + neutral + bad)}</h3>
+    <h3>positive: {(good/(good + neutral + bad))* 100} % </h3>
+
   </div>
   )
 
