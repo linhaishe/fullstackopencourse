@@ -1,6 +1,8 @@
 import ReactDOM from 'react-dom';
 import React,{ useState } from 'react'
 import './index.css';
+import Table from 'react-bootstrap/Table'
+import 'bootstrap/dist/css/bootstrap.min.css';
 // import App from './App';
 // import reportWebVitals from './reportWebVitals';
 
@@ -43,10 +45,45 @@ const Header =()=>(
     // const noFeed2 = feedbackValue>0?'none':'block'
 
     return(
-      <div>
-      <h3 style={{ display: hasFeed2 }}>{text} {value}</h3>
-      {/* <h3>no feedback given</h3> */}
-      </div>
+<>
+    {/* <Table responsive="sm">
+  <tbody>
+    <tr>
+      <td>{text}</td>
+      <td>{value}</td>
+    </tr>
+  </tbody>
+</Table> */}
+<Table striped bordered hover>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>{text}</th>
+      <th>{value}</th>
+      <th>Username</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>{text}</td>
+      <td>{value}</td>
+      <td>@mdo</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Jacob</td>
+      <td>Thornton</td>
+      <td>@fat</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td colSpan="2">Larry the Bird</td>
+      <td>@twitter</td>
+    </tr>
+  </tbody>
+</Table>
+</>
     )
   }
 
