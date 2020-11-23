@@ -17,24 +17,58 @@ const Header =()=>(
     const noFeed = feedbackValue>0?'none':'block'
     return (
       <div>
-        <h1>Statistics</h1>
-        <h3>good: {good}</h3>
-        <h3>neutral: {neutral}</h3>
-        <h3>bad: {bad}</h3>
-        <h3>all: {good + neutral + bad}</h3>
-        <h3 style={{ display: hasFeed }}>average: {(good*1+neutral*0+bad*-1)/(good + neutral + bad)}</h3>
-        <h3 style={{ display: hasFeed }}>positive: {(good/(good + neutral + bad))* 100} % </h3>
+        <h1>Statistics 1.9</h1>
+        <h3>good {good}</h3>
+        <h3>neutral {neutral}</h3>
+        <h3>bad {bad}</h3>
+        <h3>all {good + neutral + bad}</h3>
+        <h3 style={{ display: hasFeed }}>average {(good*1+neutral*0+bad*-1)/(good + neutral + bad)}</h3>
+        <h3 style={{ display: hasFeed }}>positive {(good/(good + neutral + bad))* 100} % </h3>
         <h3 style={{ display: noFeed }}>no feedback given</h3>
       </div>
       )
   }
 
+  const Header2 =()=>(
+    <div>
+      <h1>Statistics 1.10</h1>
+    </div>
+  )
+
+  const Statistics2 =({good,neutral,bad,text,value})=>{
+    //calculate AVERAGE AND POSOTIVE
+    const feedbackValue = good+neutral+bad
+    console.log(feedbackValue);
+    const hasFeed2 = feedbackValue<=0?'none':'block'
+    // const noFeed2 = feedbackValue>0?'none':'block'
+
+    return(
+      <div>
+      <h3 style={{ display: hasFeed2 }}>{text} {value}</h3>
+      {/* <h3>no feedback given</h3> */}
+      </div>
+    )
+  }
+
+  const FeedbackText =({good,neutral,bad,text,value})=>{
+    const feedbackValue = good+neutral+bad
+    console.log(feedbackValue);
+    // const hasFeed2 = feedbackValue<=0?'none':'block'
+    const noFeed2 = feedbackValue>0?'none':'block'
+return (
+  <h3 style={{ display: noFeed2 }}>no feedback given</h3>
+
+)
+  }
 const App = () => {
   // save clicks of each button to own state
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
 
+  const all = good + neutral + bad;
+  const average = (good*1+neutral*0+bad*-1)/(good + neutral + bad)
+  const positive = (good/(good + neutral + bad))* 100 + "%"
   return (
     <div>
       <Header/>
@@ -42,6 +76,15 @@ const App = () => {
       <button onClick={()=>setNeutral(neutral+1)}>netural</button>
       <button onClick={()=>setBad(bad+1)}>bad</button>
       <Statistics good={good} neutral={neutral} bad={bad}/>
+
+      <Header2/>
+      <Statistics2 text="good" value ={good}/>
+      <Statistics2 text="neutral" value ={neutral}/>
+      <Statistics2 text="bad" value ={bad}/>
+      <Statistics2 text="all" value ={all}/>
+      <Statistics2 text="average" value ={average} good={good} neutral={neutral} bad={bad}/>
+      <Statistics2 text="positive" value ={positive} good={good} neutral={neutral} bad={bad}/>
+      <FeedbackText good={good} neutral={neutral} bad={bad}/>
     </div>
   )
 }
