@@ -10,18 +10,24 @@ const Header =()=>(
   </div>
   )
 
-  const Statistics =({good,neutral,bad})=>(
-  <div>
-    <h1>Statistics</h1>
-    <h3>good: {good}</h3>
-    <h3>neutral: {neutral}</h3>
-    <h3>bad: {bad}</h3>
-    <h3>all: {good + neutral + bad}</h3>
-    <h3>average: {(good*1+neutral*0+bad*-1)/(good + neutral + bad)}</h3>
-    <h3>positive: {(good/(good + neutral + bad))* 100} % </h3>
-
-  </div>
-  )
+  const Statistics =({good,neutral,bad})=>{
+    const feedbackValue = good+neutral+bad
+    console.log(feedbackValue);
+    const hasFeed = feedbackValue<=0?'none':'block'
+    const noFeed = feedbackValue>0?'none':'block'
+    return (
+      <div>
+        <h1>Statistics</h1>
+        <h3>good: {good}</h3>
+        <h3>neutral: {neutral}</h3>
+        <h3>bad: {bad}</h3>
+        <h3>all: {good + neutral + bad}</h3>
+        <h3 style={{ display: hasFeed }}>average: {(good*1+neutral*0+bad*-1)/(good + neutral + bad)}</h3>
+        <h3 style={{ display: hasFeed }}>positive: {(good/(good + neutral + bad))* 100} % </h3>
+        <h3 style={{ display: noFeed }}>no feedback given</h3>
+      </div>
+      )
+  }
 
 const App = () => {
   // save clicks of each button to own state
