@@ -17,6 +17,18 @@ const getRandomInt = function getRandomInt(min, max) {
   //不含最大值，含最小值
 }
 
+const Votes = ({voteCount}) => {
+  if (voteCount === 1) {
+    return (
+      <div>has 1 vote</div>
+    )
+  }
+
+  return (
+    <div>has {voteCount} votes</div>
+  )
+}
+
 
 //投票累计
 // const anecdotesVote = function(){
@@ -31,7 +43,6 @@ const AnecdotesItem =({selected,voted,setVoted,copy})=>{
   return <div>
     
   <p>{anecdotes[selected]}</p>
-  <p>has {voted} votes</p>
   </div>
   
 }
@@ -62,6 +73,7 @@ const App = () => {
   return (
     <div>
       <AnecdotesItem selected={selected} voted={voted} setVoted={setVoted} copy={copy}/>
+      <Votes voteCount={votes[selected]}/>
       <button onClick={()=>setVoted(voted+1)}>vote</button>
       <button onClick={()=>setSelected(getRandomInt(0,6))}>next anecdotes</button>
     </div>
