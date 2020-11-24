@@ -1,23 +1,6 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
-const getRandomInt = function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; 
-  //不含最大值，含最小值
-}
-
-const App = (props) => {
-  const [selected, setSelected] = useState(0)
-  return (
-    <div>
-      <p>{props.anecdotes[selected]}</p>
-      <button onClick={()=>setSelected(getRandomInt(0,6))}>next anecdotes</button>
-    </div>
-  )
-}
-
 const anecdotes = [
   'If it hurts, do it more often',
   'Adding manpower to a late software project makes it later!',
@@ -27,8 +10,67 @@ const anecdotes = [
   'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
 ]
 
+const getRandomInt = function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; 
+  //不含最大值，含最小值
+}
+
+
+//投票累计
+// const anecdotesVote = function(){
+//   const ary = new Uint8Array(10);
+//   const copy = [...ary];
+//   copy[selected]+=1
+// }
+
+const AnecdotesItem =({selected,voted,setVoted,copy})=>{
+  console.log('格言',anecdotes[selected])
+
+  return <div>
+    
+  <p>{anecdotes[selected]}</p>
+  <p>has {voted} votes</p>
+  </div>
+  
+}
+
+  //vote array
+  const ary = new Uint8Array(6);
+  const copy = [...ary];
+  //不能自动加1，需要在按钮按下之后才加1
+
+
+  console.log('votearray',copy)
+
+
+const App = () => {
+  const [selected, setSelected] = useState(0)
+  const [voted, setVoted] = useState(0)
+  // copy[selected]+=1
+  //我需要将VOTE按钮触发=投票数增加=为出现的箴言投票 = voted+1
+  //q:投票数量未根据箴言进行变化，而是在原有的基础上不断增加
+
+  //需要vote的数量根据箴言进行显示...?????
+  //将VOTE放在一个数组里，根据 数组[SELECTED] 可输出投票数，
+
+  //此时，可得到 箴言序列+投票数量
+  //记录投票数量，放进ARRAY中保存
+  //用数组显示投票数量
+
+  return (
+    <div>
+      <AnecdotesItem selected={selected} voted={voted} setVoted={setVoted} copy={copy}/>
+      <button onClick={()=>setVoted(voted+1)}>vote</button>
+      <button onClick={()=>setSelected(getRandomInt(0,6))}>next anecdotes</button>
+    </div>
+  )
+}
+
+
 ReactDOM.render(
-  <App anecdotes={anecdotes} />,
+  <App />,
   document.getElementById('root')
 )
 
