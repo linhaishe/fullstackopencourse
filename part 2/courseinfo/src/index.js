@@ -19,7 +19,15 @@ const Header = ({ course }) => {
 }
 
 const Total = ({ course }) => {
-  const sum = course.parts[0].exercises + course.parts[1].exercises + course.parts[2].exercises
+  const exercisesCount = course.parts.map(count=>count.exercises)
+  // const reducer = (acc, cur) => acc + cur;
+  // const sum = exercisesCount.reduce(reducer)
+
+  var sum = exercisesCount.reduce(
+  ( acc, cur ) => acc + cur,
+  0
+);
+
   return(
     <p>Number of exercises {sum}</p>
   ) 
