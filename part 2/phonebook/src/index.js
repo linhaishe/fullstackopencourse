@@ -1,109 +1,62 @@
-import React from "react";
+import React, { useState } from 'react'
 import ReactDOM from "react-dom";
 
-const Header = ({ course }) => {
-  console.log({ course });
+//显示人名组件
+const Name = ({ persons }) => {
+  console.log({ persons })
   return (
-    <div>
-      <h1>{course.name}</h1>
-    </div>
-  );
-};
-
-const Content = ({ course }) => {
-  console.log({ course });
-
-  return (
-    <div>
-      <p>{course.parts[0].name}</p>
-      <p>{course.parts[0].exercises}</p>
-      <p>{course.parts[1].name}</p>
-      <p>{course.parts[1].exercises}</p>
-      <p>{course.parts[2].name}</p>
-      <p>{course.parts[2].exercises}</p>
-    </div>
-  );
-};
-
-const Total = ({ course }) => {
-  return (
-    <div>
-      <p>
-        {course.parts[0].exercises +
-          course.parts[1].exercises +
-          course.parts[2].exercises}
-      </p>
-    </div>
-  );
-};
+    <li>{persons.name}</li>
+  )
+}
 
 const App = () => {
-  // const course = 'Half Stack application development'
-  // const part1 = 'Fundamentals of React'
-  // const exercises1 = 10
-  // const part2 = 'Using props to pass data'
-  // const exercises2 = 7
-  // const part3 = 'State of a component'
-  // const exercises3 = 14
+  //这个状态用props传进来的初始人名数组作为状态初始化，保存到notes中。
+  const [ persons, setPersons ] = useState([
+    { name: 'Arto Hellas' },
+    { name: 'Ada Lovelace'}
+  ]) 
+  const [ newName, setNewName ] = useState('')
 
-  // const part = ['Fundamentals of React','Using props to pass data','State of a component'];
-  // const exercises = [10,7,14];
+  const addName = (event) => {    
+    event.preventDefault()    
+    console.log('button clicked', event.target) 
+    //设定一个对象格式，确定数据的保存格式为一个对象
+    const nameObject = {
+      name: newName
+    }
+    	//添加新便笺到便笺列表中，concat方式数组添加
+      setPersons(persons.concat(nameObject))
+      //重置受控input元素的值
+      setNewName('')
+  }
 
-  // const course = "Half Stack application development";
-  // const part1 = {
-  //   name: "Fundamentals of React",
-  //   exercises: 10,
-  // };
-  // const part2 = {
-  //   name: "Using props to pass data",
-  //   exercises: 7,
-  // };
-  // const part3 = {
-  //   name: "State of a component",
-  //   exercises: 14,
-  // };
-
-  // const course = "Half Stack application development";
-  // const parts = [
-  //   {
-  //     name: "Fundamentals of React",
-  //     exercises: 10,
-  //   },
-  //   {
-  //     name: "Using props to pass data",
-  //     exercises: 7,
-  //   },
-  //   {
-  //     name: "State of a component",
-  //     exercises: 14,
-  //   },
-  // ];
-
-  const course = {
-    name: "Half Stack application development",
-    parts: [
-      {
-        name: "Fundamentals of React",
-        exercises: 10,
-      },
-      {
-        name: "Using props to pass data",
-        exercises: 7,
-      },
-      {
-        name: "State of a component",
-        exercises: 14,
-      },
-    ],
-  };
-
+  const handleNameChange = (event) => {    
+    console.log(event.target.value)    
+    setNewName(event.target.value)  
+  }
+  
   return (
     <div>
-      <Header course={course} />
-      <Content course={course} />
-      <Total course={course} />
+      <h2>Phonebook</h2>
+      <ul>
+        {/* 数的顺序会影响显示，person,name不等于name,person */}
+        {persons.map((persons,name) => 
+          <Name key={name} persons={persons} />
+        )}
+      </ul>
+      <form onSubmit={addName}>
+        <div>
+          name: <input value={newName} onChange={handleNameChange}/>
+        </div>
+        <div>
+          <button type="submit">add</button>
+        </div>
+      </form>
+      <h2>Numbers</h2>
+      ...
     </div>
-  );
-};
+  )
+}
+export default App
 
 ReactDOM.render(<App />, document.getElementById("root"));
