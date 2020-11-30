@@ -59,14 +59,6 @@ const App = () => {
     setNewName(event.target.value)  
   }
 
-  // const myFunction = function myFunction(){
-  //   alert("你好，我是一个警告框！");
-  // }
-
-  // const alert=()=>{
-  //   alert("你好，我是一个警告框！");
-  // }
-  
   return (
     <div>
       <h2>Phonebook</h2>
