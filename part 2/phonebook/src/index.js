@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 const Name = ({ persons }) => {
   console.log({ persons })
   return (
-    <li>{persons.name}</li>
+    <p>{persons.name}</p>
   )
 }
 
@@ -38,12 +38,6 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <ul>
-        {/* 数的顺序会影响显示，person,name不等于name,person */}
-        {persons.map((persons,name) => 
-          <Name key={name} persons={persons} />
-        )}
-      </ul>
       <form onSubmit={addName}>
         <div>
           name: <input value={newName} onChange={handleNameChange}/>
@@ -53,7 +47,12 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-      ...
+      <p>
+        {/* 数的顺序会影响显示，person,name不等于name,person */}
+        {persons.map((persons,name) => 
+          <Name key={name} persons={persons} />
+        )}
+      </p>
     </div>
   )
 }
