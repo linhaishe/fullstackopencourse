@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 const Name = ({ persons }) => {
   console.log({ persons })
   return (
-    <p>{persons.name}</p>
+    <li>{persons.name}</li>
   )
 }
 
@@ -34,6 +34,14 @@ const App = () => {
     console.log(event.target.value)    
     setNewName(event.target.value)  
   }
+
+  const myFunction = function myFunction(){
+    alert("你好，我是一个警告框！");
+  }
+
+  // const alert=()=>{
+  //   alert("你好，我是一个警告框！");
+  // }
   
   return (
     <div>
@@ -43,7 +51,7 @@ const App = () => {
           name: <input value={newName} onChange={handleNameChange}/>
         </div>
         <div>
-          <button type="submit">add</button>
+          <button type="submit" onClick={myFunction}>add</button>
         </div>
       </form>
       <h2>Numbers</h2>
