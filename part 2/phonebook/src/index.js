@@ -41,11 +41,11 @@ const App = () => {
     console.log('addnameObject',nameObject)
     console.log('nameObject.name',nameObject.name)
 //如果为空值则提醒
-    if(String(nameObject.name).replace(/(^\s*)|(\s*$)/g, "").length===0){
+    if(String(nameObject.name).replace(/(^\s*)|(\s*$)/g, "").length===0||String(nameObject.number).replace(/(^\s*)|(\s*$)/g, "").length===0){
       console.log('nameObject.name',nameObject.name)
       alert('empty string,plz reconfirm')
       //未存在则添加
-    }else if(JSON.stringify(personsCopy).indexOf(JSON.stringify(nameObject))===-1){
+    }else if(JSON.stringify(personsCopy).indexOf(JSON.stringify(newName))===-1){
          //添加新便笺到便笺列表中，concat方式数组添加
          setPersons(persons.concat(nameObject))
          //重置受控input元素的值
@@ -60,6 +60,7 @@ const App = () => {
     
     //question : 不去除前后无效空字符串，否则也会被添加
     //question: 不能只根据人名进行判断是否存在，必须人名和电话相同才能判断？
+
 
     	// //添加新便笺到便笺列表中，concat方式数组添加
       // setPersons(persons.concat(nameObject))
