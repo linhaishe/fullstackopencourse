@@ -6,9 +6,37 @@ const Person = ({ persons }) => {
   console.log({ persons })
   return (
   <li>{persons.name} {persons.number}</li>
-
   )
 }
+
+const Filter2 = ({result})=>{
+  return (
+    <li>{result.name} {result.number}</li>
+  )
+}
+
+// const Filter =({newFilterword,setNewFilterword,persons})=>{
+
+//  //const personsCopy ={...persons}
+
+//  const filterByValue = function filterByValue(arr, word) {
+//   return arr.filter(o =>
+//       Object.keys(o).some(k => o[k].toLowerCase().includes(word.toLowerCase())));
+// }
+
+// const result = filterByValue(persons,newFilterword);
+// console.log('result',result)
+
+//   const handleFilterwordChange =(event)=>{
+//     setNewFilterword(event.target.value)
+//   }
+
+//   return(
+//     <div>
+//       filter shown with a <input value={newFilterword} onChange={handleFilterwordChange}/>
+//     </div>
+//   )
+// }
 
 const App = () => {
   //这个状态用props传进来的初始人名数组作为状态初始化，保存到notes中。
@@ -20,14 +48,16 @@ const App = () => {
   ]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
+  const [ newFilterword, setNewFilterword] = useState('')
+
 
 
   const addName = (event) => {
     const personsCopy = {...persons}
-    console.log('personsCopy',{personsCopy})
+    console.log('personsCopy',personsCopy)
     console.log('newName',newName)
     console.log('personsCopy0.name',personsCopy[0].name)
-    console.log('addnameconsole',{persons})
+    console.log('personspersons',persons)
     // alert('提交的名字: ' + newName);    
     event.preventDefault()    
     console.log('button clicked', event.target) 
@@ -80,9 +110,29 @@ const App = () => {
 
   }
 
+const filterByValue = function filterByValue(arr, word) {
+  return arr.filter(o =>
+      Object.keys(o).some(k => o[k].toLowerCase().includes(word.toLowerCase())));
+}
+
+const result = filterByValue(persons,newFilterword);
+
+console.log('result',result)
+
+  const handleFilterwordChange =(event)=>{
+    setNewFilterword(event.target.value)
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
+      filter shown with a <input value={newFilterword} onChange={handleFilterwordChange}/>
+
+      <p>{result.map((result,i) => 
+          <Filter2 key={i} result={result} />
+        )}</p>
+        
+      <h1>add a new</h1>
       <form onSubmit={addName}>
         <div>
           name: <input value={newName} onChange={handleNameChange}/>
