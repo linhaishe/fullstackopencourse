@@ -1,10 +1,17 @@
 import React, { useState } from 'react'
 import ReactDOM from "react-dom";
 
+import axios from 'axios';
+
 import Persons from './components/Persons'
 import PersonsForm from './components/PersonsForm'
 import Filter from './components/Filter'
 
+// const promise = axios.get('http://localhost:3001/persons');
+// console.log(promise)
+// promise.then(response => {
+//   console.log(response)
+// })
 
 const App = () => {
   //这个状态用props传进来的初始人名数组作为状态初始化，保存到notes中。
