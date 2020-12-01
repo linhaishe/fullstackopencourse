@@ -8,7 +8,7 @@ const Person = ({ persons }) => {
   <li>{persons.name} {persons.number}</li>
   )
 }
-
+//不在组件中写任何函数和算法，并在APP根组件下进行遍历显示
 const Filter2 = ({result})=>{
   return (
     <li>{result.name} {result.number}</li>
@@ -131,7 +131,7 @@ console.log('result',result)
       <p>{result.map((result,i) => 
           <Filter2 key={i} result={result} />
         )}</p>
-        
+
       <h1>add a new</h1>
       <form onSubmit={addName}>
         <div>
