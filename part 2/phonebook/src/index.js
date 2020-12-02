@@ -87,18 +87,40 @@ const App = () => {
     setNewFilterword(event.target.value);
   };
 
-  //根据输入的自负筛选电话簿
-  const filterByValue = function filterByValue(arr, word) {
-    return arr.filter((o) =>
-      Object.keys(o).some((k) =>
-        o[k].toLowerCase().includes(word.toLowerCase())
-      )
-    );
-  };
-  //得到筛选结果
-  const result = filterByValue(persons, newFilterword);
+  //根据输入的自字符进行筛选
+  // const filterByValue = function filterByValue(arr, word) {
+  //   return arr.filter((o) =>
+  //     Object.keys(o).some((k) =>
+  //       o[k].toLowerCase().includes(word.toLowerCase())
+  //     )
+  //   );
+  // };
+  //TypeError: o[k].toLowerCase is not a function
 
-  console.log("result", result);
+  //input数据转化为字符串便于筛选function 运行
+  // const inputValue = newFilterword.toString();
+  // console.log("typeof inputValue", typeof inputValue);
+
+  //得到筛选结果
+  // const result = filterByValue(persons, inputValue);
+
+  function filterByValue(values, str) {
+    return values
+      .map(function (value) {
+        return String(value).toLowerCase();
+      })
+      .find(function (value) {
+        return value.includes(str.toString().toLowerCase());
+      });
+  }
+
+  const result = persons.filter(function (item) {
+    return filterByValue(Object.values(item), newFilterword);
+  });
+
+  console.log("result2222", result);
+  console.log("persons2222", persons);
+  console.log("newFilterword2222", newFilterword);
 
   return (
     <div>
