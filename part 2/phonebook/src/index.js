@@ -63,10 +63,19 @@ const App = () => {
       JSON.stringify(personsCopy).indexOf(JSON.stringify(newName)) === -1
     ) {
       //添加新便笺到便笺列表中，concat方式数组添加
-      setPersons(persons.concat(nameObject));
+      // setPersons(persons.concat(nameObject));
       //重置受控input元素的值
-      setNewName("");
-      setNewNumber("");
+      // setNewName("");
+      // setNewNumber("");
+
+      axios
+      .post('http://localhost:3001/persons', nameObject)
+      .then(response => {
+        setPersons(persons.concat(response.data))
+        setNewName("");
+        setNewNumber("");
+      })
+
     } else {
       //存在则提醒
       alert(`${newName} is already added to phonebook`);
