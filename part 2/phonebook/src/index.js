@@ -78,12 +78,46 @@ const App = () => {
           setNewNumber("");
         });
     } else {
-      //存在则提醒
-      alert(`${newName} is already added to phonebook`);
+      //存在则提醒,并询问是否替换内容
+      const duplicateCheck = persons.find((person) => person.name === newName);
+      //名字相同，电话不同,则询问是否替换
+      if (
+        typeof duplicateCheck !== "undefined" &&
+        duplicateCheck.number !== newNumber
+      ) {
+        personService
+          .update(duplicateCheck.id, {
+            name: duplicateCheck.name,
+            number: newNumber,
+          })
+          .then((returnedPerson) => {
+            if (
+              window.confirm(
+                `${returnedPerson.name} is already added to phonebook,replace the old number with a new one?`
+              )
+            ) {
+              setPersons(
+                persons.map((person) =>
+                  person.id !== duplicateCheck.id ? person : returnedPerson
+                )
+              );
+            }
+            setNewName("");
+            setNewNumber("");
+          });
+        //为什么要加return?
+        // return;
+      } else if (typeof duplicateCheck !== "undefined") {
+        //名字电话相同则提醒已存在
+        alert(`${newName} is already added to phonebook`);
+        setNewName("");
+        setNewNumber("");
+        // return;
+      }
     }
 
     //question : 不去除前后无效空字符串，否则也会被添加
-    //question: 不能只根据人名进行判断是否存在，必须人名和电话相同才能判断？
+    //question:需刷新后替换的新数据才会显示，如何优化？
   };
 
   function filterByValue(values, str) {
