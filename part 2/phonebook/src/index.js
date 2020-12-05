@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import axios from "axios";
+import personService from "./services/persons";
 
 import Persons from "./components/Persons";
 import PersonsForm from "./components/PersonsForm";
@@ -21,12 +22,12 @@ const App = () => {
 
   useEffect(() => {
     console.log("effect");
-    axios.get("http://localhost:3001/persons").then((response) => {
-      console.log("response",response);
+    // axios.get("http://localhost:3001/persons")
+    personService.getAll().then((response) => {
+      console.log("response", response);
       console.log("promise fulfilled");
       setPersons(response.data);
-      console.log("response.data",response.data);
-
+      console.log("response.data", response.data);
     });
   }, []);
   console.log("render", persons.length, "notes");
@@ -68,14 +69,14 @@ const App = () => {
       // setNewName("");
       // setNewNumber("");
 
-      axios
-      .post('http://localhost:3001/persons', nameObject)
-      .then(response => {
-        setPersons(persons.concat(response.data))
-        setNewName("");
-        setNewNumber("");
-      })
-
+      personService
+        .create(nameObject)
+        // .post("http://localhost:3001/persons", nameObject)
+        .then((response) => {
+          setPersons(persons.concat(response.data));
+          setNewName("");
+          setNewNumber("");
+        });
     } else {
       //存在则提醒
       alert(`${newName} is already added to phonebook`);
