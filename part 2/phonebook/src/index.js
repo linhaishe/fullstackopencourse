@@ -8,7 +8,8 @@ import personService from "./services/persons";
 import Persons from "./components/Persons";
 import PersonsForm from "./components/PersonsForm";
 import Filter from "./components/Filter";
-import Notification from "./components/Notification";
+import SuccessNotification from "./components/SuccessNotification";
+import ErrorNotification from "./components/ErrorNotification";
 
 axios.get("http://localhost:3001/persons").then((response) => {
   const persons = response.data;
@@ -22,6 +23,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [newFilterword, setNewFilterword] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     console.log("effect");
@@ -111,6 +113,15 @@ const App = () => {
             }
             setNewName("");
             setNewNumber("");
+          })
+          .catch((error) => {
+            console.log("fail");
+            setErrorMessage(
+              `Information of '${newName}' has already been removed from the server`
+            );
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
           });
         //为什么要加return?
         // return;
@@ -159,6 +170,14 @@ const App = () => {
         })
         .catch((err) => {
           console.log(err);
+          setErrorMessage(
+            `Information of '${
+              persons[id - 1].name
+            }' has already been removed from the server`
+          );
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
         });
     }
   };
@@ -195,7 +214,8 @@ const App = () => {
   // const result = filterByValue(persons, inputValue);
   return (
     <div>
-      <Notification message={successMessage} />
+      <ErrorNotification message={errorMessage} />
+      <SuccessNotification message={successMessage} />
       <h2>Phonebook</h2>
       filter shown with{" "}
       <input value={newFilterword} onChange={handleFilterwordChange} />
