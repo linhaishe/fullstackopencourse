@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
+import "./index.css";
 
 import axios from "axios";
 import personService from "./services/persons";
@@ -7,6 +8,7 @@ import personService from "./services/persons";
 import Persons from "./components/Persons";
 import PersonsForm from "./components/PersonsForm";
 import Filter from "./components/Filter";
+import Notification from "./components/Notification";
 
 axios.get("http://localhost:3001/persons").then((response) => {
   const persons = response.data;
@@ -19,6 +21,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [newFilterword, setNewFilterword] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     console.log("effect");
@@ -73,6 +76,10 @@ const App = () => {
         .create(nameObject)
         // .post("http://localhost:3001/persons", nameObject)
         .then((response) => {
+          setSuccessMessage(`Note '${newName}' was add successfully`);
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 5000);
           setPersons(persons.concat(response.data));
           setNewName("");
           setNewNumber("");
@@ -188,6 +195,7 @@ const App = () => {
   // const result = filterByValue(persons, inputValue);
   return (
     <div>
+      <Notification message={successMessage} />
       <h2>Phonebook</h2>
       filter shown with{" "}
       <input value={newFilterword} onChange={handleFilterwordChange} />
