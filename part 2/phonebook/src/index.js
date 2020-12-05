@@ -24,10 +24,10 @@ const App = () => {
     console.log("effect");
     // axios.get("http://localhost:3001/persons")
     personService.getAll().then((response) => {
-      console.log("response", response);
+      console.log("getAll()response", response);
       console.log("promise fulfilled");
       setPersons(response.data);
-      console.log("response.data", response.data);
+      console.log("getAll()response.data", response.data);
     });
   }, []);
   console.log("render", persons.length, "notes");
@@ -86,6 +86,42 @@ const App = () => {
     //question: 不能只根据人名进行判断是否存在，必须人名和电话相同才能判断？
   };
 
+  function filterByValue(values, str) {
+    return values
+      .map(function (value) {
+        return String(value).toLowerCase();
+      })
+      .find(function (value) {
+        return value.includes(str.toString().toLowerCase());
+      });
+  }
+
+  const filterResult = persons.filter(function (item) {
+    return filterByValue(Object.values(item), newFilterword);
+  });
+
+  console.log("result2222", filterResult);
+  console.log("persons2222", persons);
+  console.log("newFilterword2222", newFilterword);
+
+  const handleDelete = (id) => {
+    console.log("handleDelete", persons);
+    if (
+      window.confirm(`Do you really want to delete ${persons[id - 1].name}?`)
+    ) {
+      personService
+        .deleteperson(id)
+        .then((response) => {
+          //为什么这里console出来空数组？
+          console.log("deletedeletedelete", response.data);
+          setPersons(persons.filter((n) => n.id !== id));
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+
   const handleNameChange = (event) => {
     console.log(event.target.value);
     setNewName(event.target.value);
@@ -116,33 +152,14 @@ const App = () => {
 
   //得到筛选结果
   // const result = filterByValue(persons, inputValue);
-
-  function filterByValue(values, str) {
-    return values
-      .map(function (value) {
-        return String(value).toLowerCase();
-      })
-      .find(function (value) {
-        return value.includes(str.toString().toLowerCase());
-      });
-  }
-
-  const result = persons.filter(function (item) {
-    return filterByValue(Object.values(item), newFilterword);
-  });
-
-  console.log("result2222", result);
-  console.log("persons2222", persons);
-  console.log("newFilterword2222", newFilterword);
-
   return (
     <div>
       <h2>Phonebook</h2>
-      filter shown with a{" "}
+      filter shown with{" "}
       <input value={newFilterword} onChange={handleFilterwordChange} />
       <p>
-        {result.map((result, i) => (
-          <Filter key={i} result={result} />
+        {filterResult.map((filterResult, i) => (
+          <Filter key={i} filterResult={filterResult} />
         ))}
       </p>
       <h1>add a new</h1>
@@ -157,7 +174,11 @@ const App = () => {
       <p>
         {/* 数的顺序会影响显示，person,name不等于name,person */}
         {persons.map((persons, i) => (
-          <Persons key={i} persons={persons} />
+          <Persons
+            key={i}
+            persons={persons}
+            handleDelete={() => handleDelete(persons.id)}
+          />
         ))}
       </p>
     </div>

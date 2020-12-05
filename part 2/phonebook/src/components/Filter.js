@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 // const Filter =({newFilterword,setNewFilterword,persons})=>{
 
@@ -23,13 +23,13 @@ import React from 'react'
 //   )
 // }
 
-
 //不在组件中写任何函数和算法，并在APP根组件下进行遍历显示
-const Filter = ({result})=>{
-    return (
-      <li>{result.name} {result.number}</li>
-    )
-  }
+const Filter = ({ filterResult }) => {
+  return (
+    <li>
+      {filterResult.name} {filterResult.number}
+    </li>
+  );
+};
 
-
-export default Filter
+export default Filter;
