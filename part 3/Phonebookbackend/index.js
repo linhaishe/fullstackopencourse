@@ -88,20 +88,21 @@ app.get('/api/persons/:id', (request, response) => {
   }
 
   app.post('/api/persons', (request, response) => {
-    console.log(person)
-    const body = request.body
 
+    const body = request.body
+    const duplicateCheck = persons.find((person) => person.name === body.name);
+    console.log(body)
+    // const person = persons.find(person => person.id === id)
     if (!body.name || !body.number) {
       return response.status(400).json({ 
         error: 'name or phone number is  missing' 
       })
-    }
-    
-    if(body.name && body.number){
-      return response.status(400).json({ 
-        error: 'name must be unique' 
-      })
-    }
+    }else if(duplicateCheck.name === body.name
+){
+  return response.status(400).json({ 
+  error: 'name must be unique' 
+})
+} 
 
     const person = {
       name: body.name,
@@ -110,6 +111,7 @@ app.get('/api/persons/:id', (request, response) => {
     }
 
     persons = persons.concat(person)
+
     response.json(person)
 
   })
