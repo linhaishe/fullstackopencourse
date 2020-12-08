@@ -3,6 +3,9 @@
 const express = require('express')
 const app = express()
 
+//Receiving data
+app.use(express.json())
+
 let persons = 
     [
       { 
@@ -74,6 +77,41 @@ app.get('/api/persons/:id', (request, response) => {
     persons = persons.filter(person => person.id !== id)
 
     response.status(204).end()
+  })
+
+//找出当前列表中最大的 id 号，并将其赋值给 maxId 变量+1
+  const generateId = () => {
+    const maxId = persons.length > 0
+      ? Math.max(...persons.map(n => n.id))
+      : 0
+    return maxId + 1
+  }
+
+  app.post('/api/persons', (request, response) => {
+    console.log(person)
+    const body = request.body
+
+    if (!body.name || !body.number) {
+      return response.status(400).json({ 
+        error: 'name or phone number is  missing' 
+      })
+    }
+    
+    if(body.name && body.number){
+      return response.status(400).json({ 
+        error: 'name must be unique' 
+      })
+    }
+
+    const person = {
+      name: body.name,
+      number:body.number,
+      id: generateId(),
+    }
+
+    persons = persons.concat(person)
+    response.json(person)
+
   })
 
 
