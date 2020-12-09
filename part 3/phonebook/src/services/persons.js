@@ -1,7 +1,7 @@
 import axios from "axios";
 // const baseUrl = "http://localhost:3001/persons";
 //建立后端后，此页面没有效果了
-const baseUrl = "/api/persons";
+const baseUrl = "/persons";
 
 const getAll = () => {
   // return axios.get(baseUrl);
