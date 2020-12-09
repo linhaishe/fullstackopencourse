@@ -1,17 +1,18 @@
 //Node 的内置web server模块,Node 还不支持 ES6模块，es6 ver :import http from 'http'
 // const http = require('http')
 const express = require("express");
+const app = express();
 const morgan = require("morgan");
 const cors = require('cors')
 
-const app = express();
-
 app.use(cors())
+app.use(express.json());
+app.use(express.static('build'))
 
-morgan.token("POST", (req, res) => JSON.stringify(req.body));
 
 //Receiving data
-app.use(express.json());
+
+morgan.token("POST", (req, res) => JSON.stringify(req.body));
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :POST")
 );
