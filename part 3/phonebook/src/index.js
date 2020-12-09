@@ -11,10 +11,10 @@ import Filter from "./components/Filter";
 import SuccessNotification from "./components/SuccessNotification";
 import ErrorNotification from "./components/ErrorNotification";
 
-// axios.get("http://localhost:3001/persons").then((response) => {
-//   const persons = response.data;
-//   console.log("axios", persons);
-// });
+axios.get("http://localhost:3001/api/persons").then((response) => {
+  const persons = response.data;
+  console.log("axios", persons);
+});
 
 const App = () => {
   //这个状态用props传进来的初始人名数组作为状态初始化，保存到notes中。

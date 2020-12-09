@@ -3,12 +3,11 @@
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
-const cors = require('cors')
+const cors = require("cors");
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
-app.use(express.static('build'))
-
+app.use(express.static("build"));
 
 //Receiving data
 
@@ -59,7 +58,9 @@ app.get("/info", (req, res) => {
 });
 
 //open http://localhost:3001/api/persons
-app.get("/api/persons", (req, res) => {
+// /api/persons获取数据失败为什么？ /persons获取数据成功
+// 创建build之前，获取数据来源写的就是/persons ，副本未变，可查。即使改了source code 副本也不会改变。所以写api/person会取不到数据，因为没有改api,因为你自己没跟教程教的走！
+app.get("/persons", (req, res) => {
   res.json(persons);
 });
 
@@ -70,7 +71,7 @@ app.get("/api/persons", (req, res) => {
 
 // Fetching a single resource
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   const person = persons.find((person) => person.id === id);
   if (person) {
@@ -80,7 +81,7 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   persons = persons.filter((person) => person.id !== id);
 
@@ -93,7 +94,7 @@ const generateId = () => {
   return maxId + 1;
 };
 
-app.post("/api/persons", (request, response) => {
+app.post("/persons", (request, response) => {
   const body = request.body;
   console.log("bodybodybody", body);
   console.log("body.name", typeof body.name);
@@ -129,7 +130,7 @@ app.post("/api/persons", (request, response) => {
 //   console.log(`Server running on port ${PORT}`);
 // });
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
