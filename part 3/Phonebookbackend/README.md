@@ -1,2 +1,2 @@
-heroku app link :
+heroku app links :
 https://pbbackend-test.herokuapp.com/
