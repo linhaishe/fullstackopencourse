@@ -49,12 +49,14 @@ const person = new Person({
   name: name,
   number: number,
 });
-
+//node mongo.js yourpassword
+//node mongo.js yourpassword Anna 040-1234556
 if (process.argv.length === 3) {
   console.log("phonebook:");
   Person.find({}).then((result) => {
-    result.forEach((person) => console.log(`${person.name} ${person.number}`));
-    console.log("");
+    result.forEach((person) => {
+      console.log(`${person.name} ${person.number}`);
+    });
     mongoose.connection.close();
   });
 } else {
