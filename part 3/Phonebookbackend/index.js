@@ -90,16 +90,32 @@ app.get("/persons/:id", (request, response) => {
   // } else {
   //   response.status(404).end();
   // }
-  Person.findById(request.params.id).then((person) => {
-    response.json(person);
-  });
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
+
+  // .catch((error) => {
+  //   console.log(error);
+  //   response.status(400).send({ error: "malformatted id" });
+  // });
 });
 
 app.delete("/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((person) => person.id !== id);
+  // const id = Number(request.params.id);
+  // persons = persons.filter((person) => person.id !== id);
+  // response.status(204).end();
 
-  response.status(204).end();
+  Person.findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 //找出当前列表中最大的 id 号，并将其赋值给 maxId 变量+1
