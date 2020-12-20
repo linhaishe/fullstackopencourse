@@ -1,9 +1,14 @@
 //Node 的内置web server模块,Node 还不支持 ES6模块，es6 ver :import http from 'http'
 // const http = require('http')
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+const mongoose = require("mongoose");
 const cors = require("cors");
+
+const Person = require("./models/person");
 
 app.use(cors());
 app.use(express.json());
@@ -16,28 +21,28 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :POST")
 );
 
-let persons = [
-  {
-    name: "Arto Hellas",
-    number: "040-123456",
-    id: 1,
-  },
-  {
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-    id: 2,
-  },
-  {
-    name: "Dan Abramov",
-    number: "12-43-234345",
-    id: 3,
-  },
-  {
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-    id: 4,
-  },
-];
+// let persons = [
+//   {
+//     name: "Arto Hellas",
+//     number: "040-123456",
+//     id: 1,
+//   },
+//   {
+//     name: "Ada Lovelace",
+//     number: "39-44-5323523",
+//     id: 2,
+//   },
+//   {
+//     name: "Dan Abramov",
+//     number: "12-43-234345",
+//     id: 3,
+//   },
+//   {
+//     name: "Mary Poppendieck",
+//     number: "39-23-6423122",
+//     id: 4,
+//   },
+// ];
 
 //*Content-Type* 头中的 *application/json* 值通知接收方数据为 JSON 格式。 使用 *JSON.stringify(notes)* 方法将 *notes* 数组转换为 JSON
 
@@ -61,7 +66,10 @@ app.get("/info", (req, res) => {
 // /api/persons获取数据失败为什么？ /persons获取数据成功
 // 创建build之前，获取数据来源写的就是/persons ，副本未变，可查。即使改了source code 副本也不会改变。所以写api/person会取不到数据，因为没有改api,因为你自己没跟教程教的走！
 app.get("/persons", (req, res) => {
-  res.json(persons);
+  // res.json(persons);
+  Person.find({}).then((persons) => {
+    res.json(persons);
+  });
 });
 
 //将绑定的HTTP 服务器分配给 app 变量 ，并监听发送到端口3001的 HTTP 请求
@@ -75,7 +83,10 @@ app.get("/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   const person = persons.find((person) => person.id === id);
   if (person) {
-    response.json(person);
+    // response.json(person);
+    Person.find({}).then((persons) => {
+      response.json(persons);
+    });
   } else {
     response.status(404).end();
   }
@@ -130,7 +141,7 @@ app.post("/persons", (request, response) => {
 //   console.log(`Server running on port ${PORT}`);
 // });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
