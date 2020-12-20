@@ -80,16 +80,19 @@ app.get("/persons", (req, res) => {
 // Fetching a single resource
 
 app.get("/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((person) => person.id === id);
-  if (person) {
-    // response.json(person);
-    Person.find({}).then((persons) => {
-      response.json(persons);
-    });
-  } else {
-    response.status(404).end();
-  }
+  // const id = Number(request.params.id);
+  // const person = persons.find((person) => person.id === id);
+  // if (Person) {
+  //   // response.json(person);
+  //   Person.findById(request.params.id).then((person) => {
+  //     response.json(person);
+  //   });
+  // } else {
+  //   response.status(404).end();
+  // }
+  Person.findById(request.params.id).then((person) => {
+    response.json(person);
+  });
 });
 
 app.delete("/persons/:id", (request, response) => {
@@ -127,13 +130,22 @@ app.post("/persons", (request, response) => {
     });
   }
 
-  const person = {
+  // const person = {
+  //   name: body.name,
+  //   number: body.number,
+  //   id: generateId(),
+  // };
+  // persons = persons.concat(person);
+  // response.json(person);
+  const person = new Person({
     name: body.name,
     number: body.number,
     id: generateId(),
-  };
-  persons = persons.concat(person);
-  response.json(person);
+  });
+
+  person.save().then((savedPerson) => {
+    response.json(savedPerson);
+  });
 });
 
 // const PORT = 3001;
