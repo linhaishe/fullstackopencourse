@@ -106,7 +106,7 @@ app.get("/persons/:id", (request, response) => {
   // });
 });
 
-app.delete("/persons/:id", (request, response) => {
+app.delete("/persons/:id", (request, response, next) => {
   // const id = Number(request.params.id);
   // persons = persons.filter((person) => person.id !== id);
   // response.status(204).end();
@@ -125,25 +125,29 @@ const generateId = () => {
 };
 
 app.post("/persons", (request, response) => {
+  //未能进行判断，如何拿到person数据进行判断？
   const body = request.body;
-  console.log("bodybodybody", body);
-  console.log("body.name", typeof body.name);
-  const bodyName = body.name;
-  console.log("personspersons", persons);
-  const duplicateCheck = persons.find((person) => person.name === bodyName);
-  console.log("duplicateCheck.name", duplicateCheck);
+  // console.log("bodybodybody", body);
+  // console.log("body.name", typeof body.name);
+  // const bodyName = body.name;
+  // console.log("personspersons", persons);
+  // const duplicateCheck = persons.find((person) => person.name === bodyName);
+  // console.log("duplicateCheck.name", duplicateCheck);
   //如果名字或号码为空则报错
-  if (!body.name || !body.number) {
-    return response.status(400).json({
-      error: "name or phone number is  missing",
-    });
-  } else if (
-    duplicateCheck.name === body.name &&
-    typeof duplicateCheck !== "undefined"
-  ) {
-    return response.status(400).json({
-      error: "name must be unique",
-    });
+  // if (!body.name || !body.number) {
+  //   return response.status(400).json({
+  //     error: "name or phone number is  missing",
+  //   });
+  // } else if (
+  //   duplicateCheck.name === body.name &&
+  //   typeof duplicateCheck !== "undefined"
+  // ) {
+  //   return response.status(400).json({
+  //     error: "name must be unique",
+  //   });
+  // }
+  if (body.name === undefined) {
+    return response.status(400).json({ error: "name missing" });
   }
 
   // const person = {
@@ -156,11 +160,11 @@ app.post("/persons", (request, response) => {
   const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
+    // id: generateId(),
   });
 
   person.save().then((savedPerson) => {
-    response.json(savedPerson);
+    response.json(savedPerson.toJSON());
   });
 });
 
@@ -168,6 +172,24 @@ app.post("/persons", (request, response) => {
 // app.listen(PORT, () => {
 //   console.log(`Server running on port ${PORT}`);
 // });
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError" && error.kind == "ObjectId") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
