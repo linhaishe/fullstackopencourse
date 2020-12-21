@@ -60,10 +60,13 @@ app.get("/info", (req, res) => {
   // const infoContent = `phonebook has info for '${persons.length}' people`;
   // const time = new Date();
   // res.send(infoContent + "<br>" + "<br>" + time);
-  Person.find({})
-    .then(persons => {
-      res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
-    })
+  Person.find({}).then((persons) => {
+    res.send(
+      `<p>Phonebook has info for ${
+        persons.length
+      } people</p><p>${new Date()}</p>`
+    );
+  });
 });
 
 //open http://localhost:3001/api/persons
@@ -178,16 +181,16 @@ app.post("/persons", (request, response) => {
 // });
 
 //已存在是否更新
-app.put('/persons/:id', (request, response, next) => {
-  const body = request.body
+app.put("/persons/:id", (request, response, next) => {
+  const body = request.body;
   const person = {
     name: body.name,
     number: body.number,
-  }
+  };
   Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then(updatedPerson => response.json(updatedPerson.toJSON()))
-    .catch(error => next(error))
-})
+    .then((updatedPerson) => response.json(updatedPerson.toJSON()))
+    .catch((error) => next(error));
+});
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: "unknown endpoint" });
@@ -200,11 +203,12 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError" && error.kind == "ObjectId") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
 };
-
 app.use(errorHandler);
 
 const PORT = process.env.PORT;

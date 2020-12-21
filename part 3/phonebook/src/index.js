@@ -91,39 +91,41 @@ const App = () => {
       const duplicateCheck = persons.find((person) => person.name === newName);
       console.log(duplicateCheck);
       //名字相同，电话不同,则询问是否替换
+
       if (
         typeof duplicateCheck !== "undefined" &&
         duplicateCheck.number !== newNumber
       ) {
-        personService
-          .update(duplicateCheck.id, {
-            name: duplicateCheck.name,
-            number: newNumber,
-          })
-          .then((returnedPerson) => {
-            if (
-              window.confirm(
-                `${returnedPerson.name} is already added to phonebook,replace the old number with a new one?`
-              )
-            ) {
+        if (
+          window.confirm(
+            `${duplicateCheck.name} is already added to phonebook, replace the old number with a new one?`
+          )
+        ) {
+          personService
+            .update(duplicateCheck.id, {
+              name: duplicateCheck.name,
+              number: newNumber,
+            })
+            .then((returnedPerson) => {
               setPersons(
                 persons.map((person) =>
                   person.id !== duplicateCheck.id ? person : returnedPerson
                 )
               );
-            }
-            setNewName("");
-            setNewNumber("");
-          })
-          .catch((error) => {
-            console.log("fail");
-            setErrorMessage(
-              `Information of '${newName}' has already been removed from the server`
-            );
-            setTimeout(() => {
-              setErrorMessage(null);
-            }, 5000);
-          });
+              setNewName("");
+              setNewNumber("");
+            })
+            //后端的mogoose错误显示不出来，即连个字符的长度不够的错误不显示
+            .catch((error) => {
+              console.log("fail");
+              setErrorMessage(error.toString());
+              setTimeout(() => {
+                setErrorMessage(null);
+              }, 5000);
+            });
+        }
+        return;
+
         //为什么要加return?
         // return;
       } else if (typeof duplicateCheck !== "undefined") {
@@ -160,12 +162,10 @@ const App = () => {
   const handleDelete = (idProp) => {
     console.log(idProp);
     console.log("handleDelete", persons);
-    const personToBeRemoved = persons.find(person => person.id === idProp)
-    const id = personToBeRemoved.id
-    const name = personToBeRemoved.name
-    if (
-      window.confirm(`Do you really want to delete ${name}?`)
-    ) {
+    const personToBeRemoved = persons.find((person) => person.id === idProp);
+    const id = personToBeRemoved.id;
+    const name = personToBeRemoved.name;
+    if (window.confirm(`Do you really want to delete ${name}?`)) {
       personService
         .deleteperson(id)
         .then((response) => {
