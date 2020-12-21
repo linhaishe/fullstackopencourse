@@ -156,10 +156,14 @@ const App = () => {
   console.log("persons2222", persons);
   console.log("newFilterword2222", newFilterword);
 
-  const handleDelete = (id) => {
+  const handleDelete = (idProp) => {
+    console.log(idProp);
     console.log("handleDelete", persons);
+    const personToBeRemoved = persons.find(person => person.id === idProp)
+    const id = personToBeRemoved.id
+    const name = personToBeRemoved.name
     if (
-      window.confirm(`Do you really want to delete ${persons[id - 1].name}?`)
+      window.confirm(`Do you really want to delete ${name}?`)
     ) {
       personService
         .deleteperson(id)
@@ -171,9 +175,7 @@ const App = () => {
         .catch((err) => {
           console.log(err);
           setErrorMessage(
-            `Information of '${
-              persons[id - 1].name
-            }' has already been removed from the server`
+            `Information of '${name}' has already been removed from the server`
           );
           setTimeout(() => {
             setErrorMessage(null);
