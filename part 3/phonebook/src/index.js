@@ -89,6 +89,7 @@ const App = () => {
     } else {
       //存在则提醒,并询问是否替换内容
       const duplicateCheck = persons.find((person) => person.name === newName);
+      console.log(duplicateCheck);
       //名字相同，电话不同,则询问是否替换
       if (
         typeof duplicateCheck !== "undefined" &&

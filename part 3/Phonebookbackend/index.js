@@ -57,9 +57,13 @@ app.use(
 
 //open http://localhost:3001
 app.get("/info", (req, res) => {
-  const infoContent = `phonebook has info for '${persons.length}' people`;
-  const time = new Date();
-  res.send(infoContent + "<br>" + "<br>" + time);
+  // const infoContent = `phonebook has info for '${persons.length}' people`;
+  // const time = new Date();
+  // res.send(infoContent + "<br>" + "<br>" + time);
+  Person.find({})
+    .then(persons => {
+      res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+    })
 });
 
 //open http://localhost:3001/api/persons
@@ -129,26 +133,26 @@ app.post("/persons", (request, response) => {
   const body = request.body;
   // console.log("bodybodybody", body);
   // console.log("body.name", typeof body.name);
-  // const bodyName = body.name;
+  const bodyName = body.name;
   // console.log("personspersons", persons);
-  // const duplicateCheck = persons.find((person) => person.name === bodyName);
+  const duplicateCheck = persons.find((person) => person.name === bodyName);
   // console.log("duplicateCheck.name", duplicateCheck);
   //如果名字或号码为空则报错
-  // if (!body.name || !body.number) {
-  //   return response.status(400).json({
-  //     error: "name or phone number is  missing",
-  //   });
-  // } else if (
-  //   duplicateCheck.name === body.name &&
-  //   typeof duplicateCheck !== "undefined"
-  // ) {
-  //   return response.status(400).json({
-  //     error: "name must be unique",
-  //   });
-  // }
-  if (body.name === undefined) {
-    return response.status(400).json({ error: "name missing" });
+  if (!body.name || !body.number) {
+    return response.status(400).json({
+      error: "name or phone number is  missing",
+    });
+  } else if (
+    duplicateCheck.name === body.name &&
+    typeof duplicateCheck !== "undefined"
+  ) {
+    return response.status(400).json({
+      error: "name must be unique",
+    });
   }
+  // if (body.name === undefined) {
+  //   return response.status(400).json({ error: "name missing" });
+  // }
 
   // const person = {
   //   name: body.name,
@@ -172,6 +176,18 @@ app.post("/persons", (request, response) => {
 // app.listen(PORT, () => {
 //   console.log(`Server running on port ${PORT}`);
 // });
+
+//已存在是否更新
+app.put('/persons/:id', (request, response, next) => {
+  const body = request.body
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedPerson => response.json(updatedPerson.toJSON()))
+    .catch(error => next(error))
+})
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: "unknown endpoint" });
