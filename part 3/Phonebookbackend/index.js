@@ -133,26 +133,26 @@ app.post("/persons", (request, response) => {
   const body = request.body;
   // console.log("bodybodybody", body);
   // console.log("body.name", typeof body.name);
-  const bodyName = body.name;
+  // const bodyName = body.name;
   // console.log("personspersons", persons);
-  const duplicateCheck = persons.find((person) => person.name === bodyName);
+  // const duplicateCheck = persons.find((person) => person.name === bodyName);
   // console.log("duplicateCheck.name", duplicateCheck);
   //如果名字或号码为空则报错
-  if (!body.name || !body.number) {
-    return response.status(400).json({
-      error: "name or phone number is  missing",
-    });
-  } else if (
-    duplicateCheck.name === body.name &&
-    typeof duplicateCheck !== "undefined"
-  ) {
-    return response.status(400).json({
-      error: "name must be unique",
-    });
-  }
-  // if (body.name === undefined) {
-  //   return response.status(400).json({ error: "name missing" });
+  // if (!body.name || !body.number) {
+  //   return response.status(400).json({
+  //     error: "name or phone number is  missing",
+  //   });
+  // } else if (
+  //   duplicateCheck.name === body.name &&
+  //   typeof duplicateCheck !== "undefined"
+  // ) {
+  //   return response.status(400).json({
+  //     error: "name must be unique",
+  //   });
   // }
+  if (body.name === undefined) {
+    return response.status(400).json({ error: "name missing" });
+  }
 
   // const person = {
   //   name: body.name,
