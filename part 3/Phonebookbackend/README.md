@@ -1,5 +1,5 @@
 heroku app links :
-https://pbbackend-test.herokuapp.com/
+https://pbapp-1.herokuapp.com/
 
 the frontend still works locally
 
