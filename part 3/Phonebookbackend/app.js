@@ -30,9 +30,13 @@ mongoose.connect(config.MONGODB_URI, {
     logger.error('error connecting to MongoDB:', error.message)
   })
 
+//使用中间件并允许来自所有来源的请求
 app.use(cors())
+//在 Express 中提供静态文件,访问图像和级联样式表 (CSS) 等静态资源
 app.use(express.static('build'))
+//请求主体 (express.json()) 中的 JSON 对象
 app.use(express.json())
+//app.use(handler),For a custom handler
 app.use(middleware.requestLogger)
 
 app.use('/persons', personsRouter)
