@@ -5,6 +5,7 @@
 
 //如果请求的 URL 以 */api/notes*开头，则会使用之前定义的路由。 由于这个原因，notesRouter 对象必须只定义路由的相对部分，即空路径*/*或仅仅定义参数*/:id*。
 
+//书写顺序是否需要按照同类型进行排序书写更好？require middleware or local modules分别放一起
 const config = require('./utils/config')
 const express = require('express')
 const app = express()
