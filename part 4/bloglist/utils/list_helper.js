@@ -17,7 +17,12 @@ const totalLikes = (blogs)=>{
 const favoriteBlog = (blogs)=>{
     const likesNum = blogs.map((item)=>item.likes)
     const topLike = likesNum.indexOf(Math.max(...likesNum))
-    return blogs[topLike]
+    const topContent = {
+        title:blogs[topLike].title,
+        author:blogs[topLike].author,
+        likes:blogs[topLike].likes
+    }
+    return topContent
 
 }
   
