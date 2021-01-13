@@ -1,5 +1,5 @@
 
-require("dotenv").config();
+require('dotenv').config()
 
 const express = require('express')
 const cors = require('cors')
@@ -16,18 +16,18 @@ const mongoose = require('mongoose')
 logger.info('connecting to', config.MONGODB_URI)
 
 mongoose.connect(config.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-  useCreateIndex: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true
 }
 )
-  .then(() => {
-    logger.info('connected to MongoDB')
-  })
-  .catch((error) => {
-    logger.error('error connecting to MongoDB:', error.message)
-  })
+    .then(() => {
+        logger.info('connected to MongoDB')
+    })
+    .catch((error) => {
+        logger.error('error connecting to MongoDB:', error.message)
+    })
 
 //使用中间件并允许来自所有来源的请求
 app.use(cors())
@@ -37,7 +37,7 @@ app.use(express.static('build'))
 app.use(express.json())
 //app.use(handler),For a custom handler
 app.use(middleware.requestLogger)
-
+//open http://localhost:3001/api/blogs
 app.use('/api/blogs', bloglistsRouter)
 
 app.use(middleware.unknownEndpoint)
