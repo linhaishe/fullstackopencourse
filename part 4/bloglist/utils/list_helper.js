@@ -74,8 +74,42 @@ const mostBlogs =(blogs)=>{
 
 //countTimes([1,1,1,2,3,3,2])
 
-const mostLike=()=>{
-    
+const mostLike=(blogs)=>{
+    const authorLikesArr = blogs.map(function(item){
+        return {
+            author:item.author,
+            likes:item.likes
+        }
+    })
+
+    const newArr=[]
+    authorLikesArr.forEach(item=>{
+        const dataItem =item
+        if(newArr.length>0){
+            const filterValue = newArr.filter(v=>{
+                return v.author == dataItem.author
+            })
+            if(filterValue.length>0){
+                newArr.forEach(n=>{
+                    if( n.author ==filterValue[0].author){
+                        n.likes =  filterValue[0].likes +dataItem.likes
+                    } 
+                })
+            }else{
+                newArr.push(dataItem)
+            }
+        }else{
+            newArr.push(dataItem)
+        }
+        
+    })
+    const topLikesNum = newArr.map((item)=>item.likes)
+    const topLike = topLikesNum.indexOf(Math.max(...topLikesNum))
+    const topLikeAuthor = {
+        author:newArr[topLike].author,
+        likes:newArr[topLike].likes
+    }
+    return topLikeAuthor
 }
   
 module.exports = {
