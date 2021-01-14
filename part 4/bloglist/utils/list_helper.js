@@ -74,10 +74,14 @@ const mostBlogs =(blogs)=>{
 
 //countTimes([1,1,1,2,3,3,2])
 
+const mostLike=()=>{
+    
+}
   
 module.exports = {
     dummy,
     totalLikes,
     favoriteBlog,
-    mostBlogs
+    mostBlogs,
+    mostLike
 }
