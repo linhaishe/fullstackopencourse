@@ -57,3 +57,19 @@ sequenceDiagram
     Note right of browser: The browser executes the callback function that renders the notes 
 ```
 ![image.png](http://tva1.sinaimg.cn/large/005NUwygly1hblwtytvbmj30hj0egwgi.jpg)
+
+## 0.6: New note in Single page app diagram
+
+```mermaid
+sequenceDiagram
+    participant browser
+    participant server
+    Note right of browser: The browser starts executing the JavaScript code that redraws notes and sends data to server
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    Note right of browser: {content: "2222", date: "2023-03-02T14:53:21.213Z"}
+    activate server
+    server-->>browser: {message: "note created"}
+    deactivate server
+    Note right of browser: The browser logs the response message to console
+```
+![image.png](http://tva1.sinaimg.cn/large/005NUwygly1hblwue4xm1j30i90bzjsc.jpg)
