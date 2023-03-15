@@ -141,7 +141,7 @@ If you use IntelliJ WebStorm instead, you can use a similar procedure with its b
 VS Code REST client plugin
 You can also add multiple requests in the same file using ###separators:
 
-```
+```js
 GET http://localhost:3001/api/notes/
 
 ###
