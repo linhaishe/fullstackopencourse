@@ -25,13 +25,23 @@ let persons = [
 ];
 
 app.get("/api/persons", (request, response) => {
-  response.json(notes);
+  response.json(persons);
 });
 
 app.get("/api/info", (request, response) => {
   const infoContent = `phonebook has info for '${persons.length}' people`;
   const time = new Date();
   response.send(infoContent + "<br>" + "<br>" + time);
+});
+
+app.get("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const person = persons.find((x) => x.id === id);
+  if (person) {
+    response.json(person);
+  } else {
+    response.status(404).end();
+  }
 });
 
 const PORT = 3001;
