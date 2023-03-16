@@ -183,6 +183,22 @@ app.use(unknownEndpoint)
 
 `app.use(requestLogger)`
 
+### morgan
+
+https://github.com/expressjs/morgan
+
+morgan middleware to your application for logging.
+
+However, most documentation in the world falls under the same category, so it's good to learn to decipher and interpret cryptic documentation in any case.
+
+> SyntaxError: Cannot use import statement outside a module
+
+```json
+// package.json
+{
+  "type": "module"
+}
+```
 ## same origin policy and CORS
 
 ![image.png](http://tva1.sinaimg.cn/large/005NUwygly1hbzni2cxrij31me0fwtn6.jpg)

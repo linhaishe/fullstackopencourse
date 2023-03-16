@@ -1,6 +1,7 @@
 {
   "name": "phonebook-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "backend for the phonebook",
   "main": "index.js",
   "scripts": {
@@ -9,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
