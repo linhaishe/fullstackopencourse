@@ -199,6 +199,7 @@ However, most documentation in the world falls under the same category, so it's 
   "type": "module"
 }
 ```
+
 ## same origin policy and CORS
 
 ![image.png](http://tva1.sinaimg.cn/large/005NUwygly1hbzni2cxrij31me0fwtn6.jpg)
@@ -215,7 +216,6 @@ We can allow requests from other origins by using Node's cors middleware.
 // npm install cors
 
 const cors = require('cors')
-
 app.use(cors())
 ```
 
