@@ -304,9 +304,62 @@ Now the frontend is also fine, working with the server both in development- and 
 
 This makes creating an automated deployment pipeline more difficult. Deployment pipeline means an automated and controlled way to move the code from the computer of the developer through different tests and quality checks to the production environment.
 
+## connect to mongodb
+
+use the Mongoose library that offers a higher-level API.
+
+Mongoose could be described as an object document mapper (ODM), and saving JavaScript objects as Mongo documents is straightforward with this library.
+
+使用一下内容，在mongo.js中运行，可以测试与mongodb的连接性测试
+
+如果有问题，请查阅mongoose官网。
+
+```js
+// mock test
+// node mongo.js yourPassword will add data to mongodb
+import mongoose from "mongoose";
+
+if (process.argv.length < 3) {
+  console.log("give password as argument");
+  process.exit(1);
+}
+
+const password = process.argv[2];
+
+const url = `mongodb+srv://user1:${password}@phonebookdb-cluster.ugddh.mongodb.net/phonebookdb-cluster?retryWrites=true&w=majority`;
+
+mongoose.set("strictQuery", false);
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+  date: String,
+});
+
+const Note = mongoose.model("Note", noteSchema);
+
+const note = new Note({
+  content: "test date now3",
+  important: true,
+  date: new Date(),
+});
+
+note.save().then((result) => {
+  console.log("note saved!");
+  mongoose.connection.close();
+});
+
+Note.find({}).then((result) => {
+  result.forEach((note) => {
+    console.log(note);
+  });
+  mongoose.connection.close();
+});
+```
+
 ## refs
 
 1. The experiment above was done in the interactive [node-repl](https://nodejs.org/docs/latest-v8.x/api/documentation.html). You can start the interactive node-repl by typing in node in the command line.
 1.  There are multiple ways to achieve this (for example placing both backend and frontend code [in the same repository](https://github.com/mars/heroku-cra-node) ) but we will not go into those now.
 1. In some situations, it may be sensible to deploy the frontend code as its own application. With apps created with create-react-app it is [straightforward](https://github.com/mars/create-react-app-buildpack).
-1. 如果需要
