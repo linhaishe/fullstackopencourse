@@ -134,7 +134,7 @@ const App = () => {
       window.confirm(`Do you really want to delete ${persons[id - 1].name}?`)
     ) {
       personService
-        .deleteperson(id)
+        .deletePerson(id)
         .then((response) => {
           //为什么这里console出来空对象？因为server没有返回任何数据，所以response.data是空对象，但response是有值的
           // console.log("deletedeletedelete", response.data);

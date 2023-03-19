@@ -1,3 +1,7 @@
+### run project
+1. npm start - run frontend server
+2. npm run serve - run backend server
+
 ### json sever for mock backend functionality
 
 json-server was installed as a development dependency (--save-dev), since the program itself doesn't require it. It is used for assistance during software development.

@@ -191,6 +191,17 @@ morgan middleware to your application for logging.
 
 However, most documentation in the world falls under the same category, so it's good to learn to decipher and interpret cryptic documentation in any case.
 
+### express
+
+### cors
+
+cors用于处理同源政策，提供跨域访问。
+
+```js
+const cors = require('cors')
+app.use(cors())
+```
+
 > SyntaxError: Cannot use import statement outside a module
 
 ```json
@@ -219,6 +230,83 @@ const cors = require('cors')
 app.use(cors())
 ```
 
+## application to the Internet,deploy application
+
+use flyio, render, heroku, etc.这些项目有free的项目，可以部署简单的服务。
+
+### 部署的时候需要注意的内容：
+
+#### 1. 处理好环境接口响应
+
+应用程序代码通过环境变量 PORT 获取正确的端口
+
+The app code gets the right port through the environment variable PORT
+
+```js
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+```
+
+#### 2. 前端资源压缩打包
+
+When the application is deployed, we must create a [production build](https://reactjs.org/docs/optimizing-performance.html#use-the-production-build) or a version of the application which is optimized for production.
+
+前端资源需要build，文件中会有会有static文件，这个文件会存放静态文件，并不会被压缩。
+
+This creates a directory called *build* (which contains the only HTML file of our application, *index.html* ) which contains the directory *static*. [Minified](https://en.wikipedia.org/wiki/Minification_(programming)) version of our application's JavaScript code will be generated in the *static* directory. Even though the application code is in multiple files, all of the JavaScript will be minified into one file. All of the code from all of the application's dependencies will also be minified into this single file.
+
+To make express show *static content*, the page *index.html* and the JavaScript, etc., it fetches, we need a built-in middleware from express called [static](http://expressjs.com/en/starter/static-files.html).
+
+`app.use(express.static('build'));`
+
+前端工程跑 `npm run build` command
+
+#### 3. 相关接口进行改写
+
+里面对于接口的相关需要重新改写
+
+Because of our situation, both the frontend and the backend are at the same address, we can declare *baseUrl* as a [relative](https://www.w3.org/TR/WD-html40-970917/htmlweb.html#h-5.1.2) URL. This means we can leave out the part declaring the server.
+
+db.json作fake api 是不可以出现`/`作为key的，可以创建route.json去处理路有中带有`/`的情况。
+
+Solution: https://stackoverflow.com/questions/57005091/path-with-in-json-server-db-json
+
+```js
+const baseUrl = "http://localhost:3001/persons";
+const baseUrl = "/api/persons";
+```
+
+上面的这种方式可以使得生产环境上的url进行连接，但是在本地开发的时候，会导致接口无响应，因为请求到了错误的地址。
+
+Because in development mode the frontend is at the address localhost:3000, the requests to the backend go to the wrong address localhost:3000/api/notes. The backend is at localhost:3001.
+
+如果是通过`create-react-app`创建的应用，可以通过proxy，作地址代理。
+
+After a restart, the React development environment will work as a proxy. If the React code does an HTTP request to a server address at http://localhost:3000 not managed by the React application itself (i.e. when requests are not about fetching the CSS or JavaScript of the application), the request will be redirected to the server at http://localhost:3001.
+
+Now the frontend is also fine, working with the server both in development- and production mode.
+
+```json
+{
+  "dependencies": {
+    // ...
+  },
+  "scripts": {
+    // ...
+  },
+  "proxy": "http://localhost:3001"
+}
+```
+
+这一部分的部署开发需要前端不断的压缩打包并保存到后端的服务器中，是一件不好的事情。
+
+This makes creating an automated deployment pipeline more difficult. Deployment pipeline means an automated and controlled way to move the code from the computer of the developer through different tests and quality checks to the production environment.
+
 ## refs
 
 1. The experiment above was done in the interactive [node-repl](https://nodejs.org/docs/latest-v8.x/api/documentation.html). You can start the interactive node-repl by typing in node in the command line.
+1.  There are multiple ways to achieve this (for example placing both backend and frontend code [in the same repository](https://github.com/mars/heroku-cra-node) ) but we will not go into those now.
+1. In some situations, it may be sensible to deploy the frontend code as its own application. With apps created with create-react-app it is [straightforward](https://github.com/mars/create-react-app-buildpack).
+1. 如果需要
