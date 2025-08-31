@@ -51,7 +51,7 @@ app.get('/api/info', (request, response) => {
   response.send(infoContent + '<br>' + '<br>' + time);
 });
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/person/:id', (request, response) => {
   const id = Number(request.params.id);
   const person = persons.find((x) => x.id === id);
   if (person) {
@@ -61,7 +61,7 @@ app.get('/api/persons/:id', (request, response) => {
   }
 });
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/person/:id', (request, response) => {
   const id = Number(request.params.id);
   persons = persons.filter((note) => note.id !== id);
 
@@ -69,7 +69,7 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end();
 });
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/person', (request, response) => {
   const body = request.body;
   if (!body.name) {
     return response.status(400).json({
