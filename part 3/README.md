@@ -1,5 +1,24 @@
 # part3 notes
 
+## 如何使用：
+
+for index.js
+
+1. "start": "node index.js" 启动项目
+2. 打开 http://localhost:3001/
+
+for mongo.js
+
+是做mongodb链接的demo
+
+1. node mongo.js
+2. run `node mongo.js <your mongo atlas user password>`will show all content
+3. `node mongo.js yourpassword "Arto Vihavainen" 045-1232456` 添加
+
+--------------------
+
+
+
 build a backend server with node(build-in http) or express
 这块内容是纯后端的处理，前端的内容是从 part2 打包过来使用的。
 
@@ -365,6 +384,97 @@ Note.find({}).then((result) => {
   mongoose.connection.close();
 });
 ```
+
+## QA record
+
+1. [cause]: MongoNetworkError: Client network socket disconnected before secure TLS connection was established
+2. Error: MongooseServerSelectionError: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+3. connect error MongooseServerSelectionError: getaddrinfo ENOTFOUND ac-dx0g9yu-shard-00-01.d3o9b45.mongodb.net at \_handleConnectionErrors
+
+在重新跑 mongo.js 文件的时候，使用官方的链接方式和 monogoose 的链接方式，会出现以上报错。
+检查链接 URL 、链接的 api 、白名单列表都没有问题，报错出现在文件 27 行。可以判断是链接 DB 出现问题。检查是否是版本依赖问题，更换不同版本，排除依赖版本问题。
+
+最后定位是网络问题。
+
+确认「本地电脑 → Atlas 云端」之间的网络是不是真的能打通。其实就是要确认：
+
+1. 域名能解析（DNS 没问题）
+
+2. 端口能连上（27017/TLS 没被防火墙挡住）
+
+3. DNS 能解析吗？
+
+> cluster0.abcd1.mongodb.net 修改为是你自己的 Atlas 集群地址，只是示例
+
+在终端里（macOS/Linux：Terminal；Windows：PowerShell）运行：
+
+`nslookup cluster0.xxxxx.mongodb.net`
+
+或者
+
+`dig cluster0.xxxxx.mongodb.net`
+
+👉 如果能返回一堆 IP 地址，说明 DNS 没问题；
+
+👉 如果提示「找不到域名」，说明网络或 DNS 配置有问题。
+
+1. 能 ping 通吗？
+   `ping cluster0.xxxxx.mongodb.net`
+
+👉 如果能收到响应（time=xxx ms），说明至少网络可达；
+
+👉 如果提示「超时 / 不可达」，可能被防火墙或者运营商拦了（有些云服务会禁 ping，但 DNS 能解析就是好迹象）。
+
+3. 端口 27017 能不能连？
+
+Atlas 默认使用 TLS 的 27017 端口。你可以测试：
+`macOS / Linux
+nc -vz cluster0.xxxxx.mongodb.net 27017`
+
+`Windows (PowerShell)
+Test-NetConnection cluster0.xxxxx.mongodb.net -Port 27017`
+
+👉 如果显示 成功 (open)，说明本地能连上 Atlas；
+
+👉 如果显示 超时 / 拒绝，说明端口被防火墙或网络拦截。
+
+4. 直接用 Mongo Shell 测试
+
+如果你安装了 mongosh，可以直接用 Atlas 提供的连接字符串试一下：
+
+mongosh "mongodb+srv://cluster0.xxxxx.mongodb.net/myDatabase" --username <yourUser>
+
+👉 如果能连上，就说明问题在你 Node.js 代码里；
+
+👉 如果连不上，就说明网络 / 白名单有问题。
+
+```
+// 我现在用了我自己的集群地址走命令 nslookup cluster0.abcd1.mongodb.net 8.8.8.8 返回如下
+
+Server: 8.8.8.8 Address: 8.8.8.8#53 Non-authoritative answer: \*\*\* Can't find xxxx(集群名): No answer
+```
+
+```
+nslookup -type=SRV _mongodb._tcp.phonebookdb.d3o9b45.mongodb.net ;; Truncated, retrying in TCP mode. Server: 172.19.0.2 Address: 172.19.0.2#53 Non-authoritative answer: *** Can't find _mongodb._tcp.phonebookdb.d3o9b45.mongodb.net: No answer Authoritative answers can be found from: 出了以上结果
+```
+
+1️⃣ 问题根源
+
+172.19.0.2 看起来像是 Docker / 内网 / WSL 的 DNS 代理。
+
+它无法正确解析 Atlas SRV 记录，所以 Node.js 也可能解析失败。
+
+报错完全是 SRV DNS 无法解析导致 TLS 握手失败，不是 MongoDB 代码问题。
+
+2️⃣ 解决方案
+
+1. 确保 DNS 能解析 Atlas SRV 域名；或者使用 Atlas 提供的标准 mongodb:// URI（包含全部节点 host:port），绕过 SRV。
+
+2. vpn 切到集群的 ip 点并开全局模式。
+
+![Xnip2025-09-01_11-46-49](https://s2.loli.net/2025/09/01/tnQNJ6ahpkzdUm8.jpg)
+
+---
 
 ## refs
 
