@@ -9,15 +9,13 @@ for index.js
 
 for mongo.js
 
-是做mongodb链接的demo
+是做 mongodb 链接的 demo
 
 1. node mongo.js
-2. run `node mongo.js <your mongo atlas user password>`will show all content
-3. `node mongo.js yourpassword "Arto Vihavainen" 045-1232456` 添加
+2. run `node mongo.js`will show all content
+3. `node mongo.js "Arto Vihavainen" 045-1232456` 添加
 
---------------------
-
-
+---
 
 build a backend server with node(build-in http) or express
 这块内容是纯后端的处理，前端的内容是从 part2 打包过来使用的。
@@ -330,6 +328,18 @@ Now the frontend is also fine, working with the server both in development- and 
 这一部分的部署开发需要前端不断的压缩打包并保存到后端的服务器中，是一件不好的事情。
 
 This makes creating an automated deployment pipeline more difficult. Deployment pipeline means an automated and controlled way to move the code from the computer of the developer through different tests and quality checks to the production environment.
+
+## dotenv library
+
+`npm install dotenv --save`
+
+https://github.com/motdotla/dotenv?tab=readme-ov-file#how-do-i-use-dotenv-with-import
+
+A more sophisticated way to define environment variables is to use the [dotenv](https://github.com/motdotla/dotenv#readme) library.
+
+create a _.env_ file at the root of the project
+
+**The \*.env\* file should be gitignored right away since we do not want to publish any confidential information publicly online!**
 
 ## connect to mongodb
 

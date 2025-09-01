@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+console.error('process.env:', process.env);
 
 const app = express();
 
