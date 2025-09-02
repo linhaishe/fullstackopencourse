@@ -1,4 +1,4 @@
-const listHelper = require('../utils/list_helper');
+import { favoriteBlog } from '../utils/list_helper.js';
 
 const ans = {
   author: 'Edsger W. Dijkstra',
@@ -59,7 +59,7 @@ const blogs = [
 
 describe('favoriteBlog', () => {
   test('one of top favorite Blog', () => {
-    const result = listHelper.favoriteBlog(blogs);
+    const result = favoriteBlog(blogs);
     expect(result).toEqual(ans);
   });
 });
