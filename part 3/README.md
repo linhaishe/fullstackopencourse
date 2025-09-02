@@ -341,6 +341,12 @@ create a _.env_ file at the root of the project
 
 **The \*.env\* file should be gitignored right away since we do not want to publish any confidential information publicly online!**
 
+## The Visual Studio Code REST client / Postman
+
+When the backend gets expanded, it's a good idea to test the backend first with the browser, Postman or the [VS Code REST client.](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) 
+
+![image-20250901123918632](https://s2.loli.net/2025/09/01/KmAasotUwVOpuIB.png)
+
 ## connect to mongodb
 
 use the Mongoose library that offers a higher-level API.

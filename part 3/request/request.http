@@ -1,0 +1,16 @@
+// You can also add multiple requests in the same file using ### separators:
+GET http://localhost:3001/api/person
+
+###
+DELETE http://localhost:3001/api/person/2 HTTP/1.1
+content-type: application/json
+
+###
+POST http://localhost:3001/api/person HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Dan Abramov2222",
+  "number": 12345
+}
+
