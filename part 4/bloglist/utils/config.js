@@ -1,12 +1,13 @@
-require('dotenv').config()
+/* eslint-disable no-undef */
+import 'dotenv/config';
+import logger from './logger.js';
 
-let PORT = process.env.PORT
-let MONGODB_URI = process.env.MONGODB_URI
+let { PORT, MONGODB_URI, TEST_MONGODB_URI, NODE_ENV } = process.env;
 
-if (process.env.NODE_ENV === 'test') {  MONGODB_URI = process.env.TEST_MONGODB_URI}
+logger.info('MONGODB_URI', process.env.MONGODB_URI);
 
-
-module.exports = {
-    MONGODB_URI,
-    PORT
+if (NODE_ENV === 'test') {
+  MONGODB_URI = TEST_MONGODB_URI;
 }
+
+export default { MONGODB_URI, PORT };

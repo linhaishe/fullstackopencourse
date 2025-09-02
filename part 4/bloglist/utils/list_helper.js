@@ -1,121 +1,51 @@
-const dummy = (blogs) => {
-    if(blogs instanceof Array){
-        return 1
-    }
-}
+// 判断是否数组，返回 1（常用于测试）
+export const dummy = (blogs) => (Array.isArray(blogs) ? 1 : 0);
 
-const totalLikes = (blogs)=>{
-    const reducer = (sum, item) => {
-        return sum + item
-    }
-    const likesNum = blogs.map((item)=>item.likes)
+// 计算总点赞数
+export const totalLikes = (blogs) =>
+  blogs.reduce((sum, blog) => sum + blog.likes, 0);
 
-    return likesNum.reduce(reducer, 0)
+// 找到点赞最多的博客
+export const favoriteBlog = (blogs) => {
+  if (blogs.length === 0) return null;
+  const topBlog = blogs.reduce((max, blog) =>
+    blog.likes > max.likes ? blog : max
+  );
+  return {
+    title: topBlog.title,
+    author: topBlog.author,
+    likes: topBlog.likes,
+  };
+};
 
-}
+// 拥有最多博客的作者
+export const mostBlogs = (blogs) => {
+  if (blogs.length === 0) return null;
 
-const favoriteBlog = (blogs)=>{
-    const likesNum = blogs.map((item)=>item.likes)
-    const topLike = likesNum.indexOf(Math.max(...likesNum))
-    const topContent = {
-        title:blogs[topLike].title,
-        author:blogs[topLike].author,
-        likes:blogs[topLike].likes
-    }
-    return topContent
+  const count = blogs.reduce((acc, blog) => {
+    acc[blog.author] = (acc[blog.author] || 0) + 1;
+    return acc;
+  }, {});
 
-}
+  const [author, blogsCount] = Object.entries(count).reduce((max, entry) =>
+    entry[1] > max[1] ? entry : max
+  );
 
-const mostBlogs =(blogs)=>{
-    const authors = blogs.map((item)=>item.author)
-    let max=null//定义一个用来存储出现次数最多的元素
-    let num=1//定义一个用来存储最出现的次数
-    authors.reduce((p,k)=>{ 
-        //对该数组进行reduce遍历
-        p[k]?p[k]++:p[k]=1
-        if(p[k]>num){
-            num=p[k]
-            max=k
-        }
-        return p
-    },{})
-    return {author:max,blogs:num}
-}
+  return { author, blogs: blogsCount };
+};
 
-// const mostBlogs =(blogs)=>{
-//     const authors = blogs.map((item)=>item.author)
-//     const mostBlogsCount = {}
-//     let i = 0, len = authors .length
-//     for (; i < len; i++) {
-//         const author = authors [i]
-//         const counts = mostBlogsCount[author]
-   
-//         if (counts) {
-//             mostBlogsCount[author] += 1
-//         } else {
-//             mostBlogsCount[author] = 1
-//         }
-//     }
-//     const topAuthorIndex = Object.values(mostBlogsCount).indexOf(Math.max(...Object.values(mostBlogsCount)))
-//     return mostBlogsCount[topAuthorIndex]
-// }
+// 点赞总数最多的作者
+export const mostLike = (blogs) => {
+  if (blogs.length === 0) return null;
 
-// function countTimes(data) {
-//     var obj = {}
-//     return data.reduce(function(time, name) {
-//         if (name in time) {
-//             time[name]++
-//         } else {
-//             time[name] = 1
-//         }
-//         return time
-//     }, {})
-// }
+  const count = blogs.reduce((acc, blog) => {
+    acc[blog.author] = (acc[blog.author] || 0) + blog.likes;
+    return acc;
+  }, {});
 
-//countTimes([1,1,1,2,3,3,2])
+  const [author, likes] = Object.entries(count).reduce((max, entry) =>
+    entry[1] > max[1] ? entry : max
+  );
 
-const mostLike=(blogs)=>{
-    const authorLikesArr = blogs.map(function(item){
-        return {
-            author:item.author,
-            likes:item.likes
-        }
-    })
-
-    const newArr=[]
-    authorLikesArr.forEach(item=>{
-        const dataItem =item
-        if(newArr.length>0){
-            const filterValue = newArr.filter(v=>{
-                return v.author == dataItem.author
-            })
-            if(filterValue.length>0){
-                newArr.forEach(n=>{
-                    if( n.author ==filterValue[0].author){
-                        n.likes =  filterValue[0].likes +dataItem.likes
-                    } 
-                })
-            }else{
-                newArr.push(dataItem)
-            }
-        }else{
-            newArr.push(dataItem)
-        }
-        
-    })
-    const topLikesNum = newArr.map((item)=>item.likes)
-    const topLike = topLikesNum.indexOf(Math.max(...topLikesNum))
-    const topLikeAuthor = {
-        author:newArr[topLike].author,
-        likes:newArr[topLike].likes
-    }
-    return topLikeAuthor
-}
-  
-module.exports = {
-    dummy,
-    totalLikes,
-    favoriteBlog,
-    mostBlogs,
-    mostLike
-}
+  return { author, likes };
+};

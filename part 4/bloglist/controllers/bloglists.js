@@ -1,29 +1,24 @@
-const bloglistsRouter = require('express').Router()
-const { request, response } = require('express')
-// const mongoose = require('mongoose')
-const Bloglist = require('../models/bloglist.js')
+import express from 'express';
+import BlogList from '../models/bloglist.js';
+const blogListsRouter = express.Router();
 
-// bloglistsRouter.get('/', (request, response) => {
-//     Bloglist
-//         .find({})
-//         .then(blogs => {
-//             response.json(blogs)
-//         })
-// })
+// blogListsRouter.get('/', (request, response) => {
+//   BlogList.find({}).then((blogs) => {
+//     response.json(blogs);
+//   });
+// });
 
-bloglistsRouter.get('/',async(request,response)=>{
-    const blogs = await Bloglist.find({})
-    response.json(blogs)
-})
-  
-bloglistsRouter.post('/', (request, response) => {
-    const blog = new Bloglist(request.body)
-  
-    blog
-        .save()
-        .then(result => {
-            response.status(201).json(result)
-        })
-})
+blogListsRouter.get('/', async (request, response) => {
+  const blogs = await BlogList.find({});
+  response.json(blogs);
+});
 
-module.exports = bloglistsRouter
+blogListsRouter.post('/', (request, response) => {
+  const blog = new BlogList(request.body);
+
+  blog.save().then((result) => {
+    response.status(201).json(result);
+  });
+});
+
+export default blogListsRouter;

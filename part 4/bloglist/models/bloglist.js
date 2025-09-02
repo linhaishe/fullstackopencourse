@@ -1,22 +1,22 @@
-require('dotenv').config()
-const config = require('../utils/config')
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
+import config from '../utils/config.js';
+
 const blogSchema = new mongoose.Schema({
-    title: String,
-    author: String,
-    url: String,
-    likes: Number
-})
+  title: String,
+  author: String,
+  url: String,
+  likes: Number,
+});
 
-// const Blog = mongoose.model('Blog', blogSchema)
+const Blog = mongoose.model('Blog', blogSchema);
 
-// const mongoUrl = 'mongodb://localhost/bloglist'
+mongoose
+  .connect(config.MONGODB_URI)
+  .then(() => {
+    console.log('Connected to MongoDB success!');
+  })
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error.message);
+  });
 
-mongoose.connect(config.MONGODB_URI, { 
-    useNewUrlParser: true, 
-    useUnifiedTopology: true, 
-    useFindAndModify: false, 
-    useCreateIndex: true 
-})
-
-module.exports = mongoose.model('Blog', blogSchema)
+export default Blog;
