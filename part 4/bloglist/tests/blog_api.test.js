@@ -64,10 +64,27 @@ test('blog posts have id property instead of _id', async () => {
   });
 });
 
+test('if likes property is missing, it defaults to 0', async () => {
+  const newBlog = {
+    title: 'Blog without likes',
+    author: 'Someone',
+    url: 'http://example.com',
+    // 注意：没有 likes
+  };
+
+  const response = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+
+  expect(response.body.likes).toBe(0);
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
 
-afterAll(() => {
-  mongoose.connection.close();
-});
+// afterAll(() => {
+//   mongoose.connection.close();
+// });

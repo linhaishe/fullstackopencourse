@@ -5,7 +5,10 @@ const blogSchema = new mongoose.Schema({
   title: String,
   author: String,
   url: String,
-  likes: Number,
+  likes: {
+    type: Number,
+    default: 0,
+  },
 });
 
 // 处理mongodb _id _v的数据格式，统一内容
