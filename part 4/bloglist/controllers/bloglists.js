@@ -13,12 +13,16 @@ blogListsRouter.get('/', async (request, response) => {
   response.json(blogs);
 });
 
-blogListsRouter.post('/', (request, response) => {
-  const blog = new BlogList(request.body);
+blogListsRouter.post('/', async (request, response) => {
+  try {
+    const body = request.body;
 
-  blog.save().then((result) => {
-    response.status(201).json(result);
-  });
+    const blog = new BlogList(body);
+    const savedBlog = await blog.save();
+    response.status(201).json(savedBlog);
+  } catch (error) {
+    response.status(400).json({ error: error.message });
+  }
 });
 
 export default blogListsRouter;
