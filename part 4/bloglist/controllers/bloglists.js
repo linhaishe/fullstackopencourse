@@ -25,4 +25,45 @@ blogListsRouter.post('/', async (request, response) => {
   }
 });
 
+blogListsRouter.get('/:id', async (request, response) => {
+  try {
+    const blog = await BlogList.findById(request.params.id);
+    if (blog) {
+      response.json(blog);
+    } else {
+      response.status(404).end();
+    }
+  } catch (error) {
+    // 这里捕获无效的 ObjectId
+    response.status(400).send({ error: 'malformatted id' });
+  }
+});
+
+blogListsRouter.delete('/:id', (request, response, next) => {
+  BlogList.findByIdAndDelete(request.params.id)
+    .then(() => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
+});
+
+blogListsRouter.put('/:id', (request, response, next) => {
+  const { content, important } = request.body;
+
+  BlogList.findById(request.params.id)
+    .then((note) => {
+      if (!note) {
+        return response.status(404).end();
+      }
+
+      note.content = content;
+      note.important = important;
+
+      return note.save().then((updatedNote) => {
+        response.json(updatedNote);
+      });
+    })
+    .catch((error) => next(error));
+});
+
 export default blogListsRouter;

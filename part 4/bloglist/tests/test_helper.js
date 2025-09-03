@@ -24,15 +24,15 @@ const nonExistingId = async () => {
     likes: 33,
   });
   await blog.save();
-  await blog.remove();
+  await blog.deleteOne();
 
   return blog._id.toString();
 };
 
 //该函数可用于检查数据库中存储的便笺。 包含初始数据库状态的 initialBlogs 数组也在模块中
-const notesInDb = async () => {
+const blogsInDb = async () => {
   const blogs = await BlogList.find({});
   return blogs.map((blog) => blog.toJSON());
 };
 
-export { initialBlogs, nonExistingId, notesInDb };
+export { initialBlogs, nonExistingId, blogsInDb };
