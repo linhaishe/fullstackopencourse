@@ -4,7 +4,6 @@ import { initialBlogs } from './test_helper.js';
 import app from '../app.js';
 const api = supertest(app);
 import BlogList from '../models/bloglist.js';
-console.log('initialBlogs', initialBlogs);
 
 beforeEach(async () => {
   await BlogList.deleteMany({});
@@ -27,15 +26,14 @@ test('a valid note can be added', async () => {
   await api
     .post('/api/blogs')
     .send(newBlog)
-    .expect(200)
+    .expect(201)
     .expect('Content-Type', /application\/json/);
 
   const response = await api.get('/api/blogs');
-
-  const contents = response.body.map((r) => r.content);
+  const contents = response.body.map((r) => r.title);
 
   expect(response.body).toHaveLength(initialBlogs.length + 1);
-  expect(contents).toContain('async/await simplifies making async calls');
+  expect(contents).toContain('its new blog test');
 });
 
 test('notes are returned as json', async () => {
@@ -53,8 +51,6 @@ test('there are two notes', async () => {
 
 test('the first note is about HTTP methods', async () => {
   const response = await api.get('/api/blogs');
-  console.log('response', response);
-
   expect(response.body[0].title).toBe('HTML is easy');
 });
 

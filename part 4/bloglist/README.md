@@ -45,3 +45,10 @@ There is a slight issue in the way that we have specified the mode of the applic
 ```
 
 use the [supertest](https://github.com/visionmedia/supertest) package to help us write our tests for testing the API.
+
+```
+// 单独跑某一个文件且log
+
+node --experimental-vm-modules node_modules/.bin/jest --silent=false --verbose --runInBand tests/blog_api.test.js
+```
+
