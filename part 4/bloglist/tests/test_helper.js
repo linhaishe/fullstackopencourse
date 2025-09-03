@@ -1,38 +1,38 @@
 import BlogList from '../models/bloglist.js';
 
-const initialNotes = [
+const initialBlogs = [
   {
-    content: 'HTML is easy',
-    date: new Date(),
-    important: false,
+    title: 'HTML is easy',
+    author: 'david',
+    url: 'none',
+    likes: 22,
   },
   {
-    content: 'Browser can execute only Javascript',
-    date: new Date(),
-    important: true,
+    title: 'Browser can execute only Javascript',
+    author: 'chenruo',
+    url: 'none',
+    likes: 33,
   },
 ];
 
 //该函数可用于创建不属于数据库中任何便笺对象的数据库对象 ID
 const nonExistingId = async () => {
-  const note = new BlogList({
-    content: 'willremovethissoon',
-    date: new Date(),
+  const blog = new BlogList({
+    title: 'will remove this soon',
+    author: 'chenruo',
+    url: 'none',
+    likes: 33,
   });
-  await note.save();
-  await note.remove();
+  await blog.save();
+  await blog.remove();
 
-  return note._id.toString();
+  return blog._id.toString();
 };
 
-//该函数可用于检查数据库中存储的便笺。 包含初始数据库状态的 initialNotes 数组也在模块中
+//该函数可用于检查数据库中存储的便笺。 包含初始数据库状态的 initialBlogs 数组也在模块中
 const notesInDb = async () => {
-  const notes = await BlogList.find({});
-  return notes.map((note) => note.toJSON());
+  const blogs = await BlogList.find({});
+  return blogs.map((blog) => blog.toJSON());
 };
 
-export default {
-  initialNotes,
-  nonExistingId,
-  notesInDb,
-};
+export { initialBlogs, nonExistingId, notesInDb };

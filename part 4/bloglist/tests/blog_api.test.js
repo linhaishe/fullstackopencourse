@@ -1,57 +1,61 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
-import initialNotes from './test_helper.js';
+import { initialBlogs } from './test_helper.js';
 import app from '../app.js';
 const api = supertest(app);
 import BlogList from '../models/bloglist.js';
+console.log('initialBlogs', initialBlogs);
 
 beforeEach(async () => {
   await BlogList.deleteMany({});
 
-  let noteObject = new BlogList(initialNotes[0]);
-  await noteObject.save();
+  let blogObj = new BlogList(initialBlogs[0]);
+  await blogObj.save();
 
-  noteObject = new BlogList(initialNotes[1]);
-  await noteObject.save();
+  blogObj = new BlogList(initialBlogs[1]);
+  await blogObj.save();
 });
 
 test('a valid note can be added', async () => {
-  const newNote = {
-    content: 'async/await simplifies making async calls',
-    important: true,
+  const newBlog = {
+    title: 'its new blog test',
+    author: 'chenruo',
+    url: 'none',
+    likes: 11,
   };
 
   await api
-    .post('/api/notes')
-    .send(newNote)
+    .post('/api/blogs')
+    .send(newBlog)
     .expect(200)
     .expect('Content-Type', /application\/json/);
 
-  const response = await api.get('/api/notes');
+  const response = await api.get('/api/blogs');
 
   const contents = response.body.map((r) => r.content);
 
-  expect(response.body).toHaveLength(initialNotes.length + 1);
+  expect(response.body).toHaveLength(initialBlogs.length + 1);
   expect(contents).toContain('async/await simplifies making async calls');
 });
 
 test('notes are returned as json', async () => {
   await api
-    .get('/api/notes')
+    .get('/api/blogs')
     .expect(200)
     .expect('Content-Type', /application\/json/);
 });
 
 test('there are two notes', async () => {
-  const response = await api.get('/api/notes');
+  const response = await api.get('/api/blogs');
 
   expect(response.body).toHaveLength(2);
 });
 
 test('the first note is about HTTP methods', async () => {
-  const response = await api.get('/api/notes');
+  const response = await api.get('/api/blogs');
+  console.log('response', response);
 
-  expect(response.body[0].content).toBe('HTML is easy');
+  expect(response.body[0].title).toBe('HTML is easy');
 });
 
 afterAll(() => {
