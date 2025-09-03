@@ -48,7 +48,7 @@ blogListsRouter.delete('/:id', (request, response, next) => {
 });
 
 blogListsRouter.put('/:id', (request, response, next) => {
-  const { content, important } = request.body;
+  const { title, url } = request.body;
 
   BlogList.findById(request.params.id)
     .then((note) => {
@@ -56,8 +56,8 @@ blogListsRouter.put('/:id', (request, response, next) => {
         return response.status(404).end();
       }
 
-      note.content = content;
-      note.important = important;
+      note.title = title;
+      note.url = url;
 
       return note.save().then((updatedNote) => {
         response.json(updatedNote);

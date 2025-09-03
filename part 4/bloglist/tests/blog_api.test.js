@@ -130,7 +130,7 @@ describe('viewing a specific note', () => {
   });
 });
 
-describe('deletion of a note', () => {
+describe('deletion of a blog', () => {
   test('succeeds with status code 204 if id is valid', async () => {
     const notesAtStart = await blogsInDb();
     const noteToDelete = notesAtStart[0];
@@ -140,6 +140,34 @@ describe('deletion of a note', () => {
     const notesAtEnd = await blogsInDb();
     const contents = notesAtEnd.map((n) => n.title);
     expect(contents).not.toContain(noteToDelete.title);
+  });
+});
+
+// 204 不返回 JSON，所以不能用 .expect('Content-Type', ...)。
+// 更新断言应该检查 更新后的内容，而不是旧的内容。
+// 推荐返回 200 + JSON，这样可以直接在测试里拿到更新后的对象做验证。
+
+describe('updating of a blog', () => {
+  test('succeeds with status code 200 if id is valid', async () => {
+    const blogsAtStart = await blogsInDb();
+    const blogToUpdate = blogsAtStart[0];
+
+    const updatedData = {
+      ...blogToUpdate,
+      title: 'new title test',
+    };
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updatedData)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    expect(response.body.title).toBe('new title test');
+
+    const blogsAtEnd = await blogsInDb();
+    const updatedBlog = blogsAtEnd.find((b) => b.id === blogToUpdate.id);
+    expect(updatedBlog.title).toBe('new title test');
   });
 });
 
