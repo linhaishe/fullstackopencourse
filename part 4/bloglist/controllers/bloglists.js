@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import BlogList from '../models/bloglist.js';
 import User from '../models/user.js';
 const blogListsRouter = express.Router();
@@ -9,6 +10,21 @@ const blogListsRouter = express.Router();
 //   });
 // });
 
+// {
+// "title": "its new blog test-6",
+// "author": "chenruo",
+// "url": "none",
+// "userId": "68bac7a73c634050a65a35db"
+// }
+
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '');
+  }
+  return null;
+};
+
 blogListsRouter.get('/', async (request, response) => {
   const blogs = await BlogList.find({}).populate('user');
   response.json(blogs);
@@ -17,13 +33,25 @@ blogListsRouter.get('/', async (request, response) => {
 blogListsRouter.post('/', async (request, response) => {
   try {
     const body = request.body;
-    console.log('body', body);
-    const user = await User.findById(body.userId);
-    console.log('user', user);
+    console.log('getTokenFrom(request)', getTokenFrom(request));
+    console.log('process.env.SECRET', process.env.SECRET);
+
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' });
+    }
+
+    const user = await User.findById(decodedToken.id);
+
+    if (!user) {
+      return response
+        .status(400)
+        .json({ error: 'UserId missing or not valid' });
+    }
 
     const blog = new BlogList({ ...body, user: user._id });
     const savedBlog = await blog.save();
-    console.log('savedBlog', savedBlog);
 
     user.blogs = user.blogs.concat(savedBlog._id);
     await user.save();

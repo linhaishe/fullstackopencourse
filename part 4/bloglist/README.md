@@ -68,8 +68,18 @@ The fundamentals of [storing passwords](https://codahale.com/how-to-safely-store
 
 Let's first implement the functionality for logging in. Install the [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) library, which allows us to generate [JSON web tokens](https://jwt.io/).
 
+If the application has multiple interfaces requiring identification, JWT's validation should be separated into its own middleware. An existing library like [express-jwt](https://www.npmjs.com/package/express-jwt) could also be used.
+
 - **400 Bad Request**
   - 适合客户端传的参数不符合要求（比如缺少 `username` / `password`，或者长度不足 3 个字符）。
 - **409 Conflict**
   - 更适合用于资源冲突的情况，比如 `username` 已经存在。
   - 但很多教程/项目里也会直接用 **400** 来处理（保持一致）。
+
+There are several ways of sending the token from the browser to the server. We will use the [Authorization](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization) header. 
+
+Other ways?
+
+The header also tells which [authentication scheme](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Authentication_schemes) is used. This can be necessary if the server offers multiple ways to authenticate. Identifying the scheme tells the server how the attached credentials should be interpreted.
+
+The *Bearer* scheme is suitable for our needs.
