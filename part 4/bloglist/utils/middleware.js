@@ -37,4 +37,16 @@ const errorHandler = (error, request, response, next) => {
   next(error);
 };
 
-export default { requestLogger, unknownEndpoint, errorHandler };
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get('authorization');
+
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    logger.info('get authorization success');
+    request.token = authorization.substring(7); // 把 token 存到 request 对象上
+  } else {
+    request.token = null;
+  }
+  next();
+};
+
+export default { requestLogger, unknownEndpoint, errorHandler, tokenExtractor };

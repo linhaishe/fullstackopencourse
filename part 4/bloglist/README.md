@@ -83,3 +83,13 @@ Other ways?
 The header also tells which [authentication scheme](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Authentication_schemes) is used. This can be necessary if the server offers multiple ways to authenticate. Identifying the scheme tells the server how the attached credentials should be interpreted.
 
 The *Bearer* scheme is suitable for our needs.
+
+```
+curl -X GET http://localhost:3001/api/blogs
+```
+
+```
+curl -X GET http://localhost:3001/api/blogs \
+  -H "Authorization: Bearer Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx.yyy.zzz"
+```
+

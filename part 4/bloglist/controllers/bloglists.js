@@ -17,14 +17,6 @@ const blogListsRouter = express.Router();
 // "userId": "68bac7a73c634050a65a35db"
 // }
 
-const getTokenFrom = (request) => {
-  const authorization = request.get('authorization');
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '');
-  }
-  return null;
-};
-
 blogListsRouter.get('/', async (request, response) => {
   const blogs = await BlogList.find({}).populate('user');
   response.json(blogs);
@@ -33,10 +25,7 @@ blogListsRouter.get('/', async (request, response) => {
 blogListsRouter.post('/', async (request, response) => {
   try {
     const body = request.body;
-    console.log('getTokenFrom(request)', getTokenFrom(request));
-    console.log('process.env.SECRET', process.env.SECRET);
-
-    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+    const decodedToken = jwt.verify(request.token, process.env.SECRET);
 
     if (!decodedToken.id) {
       return response.status(401).json({ error: 'token invalid' });

@@ -30,6 +30,7 @@ app.use(express.static('build'));
 app.use(express.json());
 //app.use(handler),For a custom handler
 app.use(middleware.requestLogger);
+app.use(middleware.tokenExtractor);
 // router文件 里不要再写 /api/blogs 前缀，挂载到 app.js 的时候已经加了
 //open http://localhost:3001/api/blogs
 app.use('/api/blogs', blogListsRouter);
