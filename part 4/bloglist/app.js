@@ -15,7 +15,7 @@ logger.info('connecting to', config.MONGODB_URI);
 mongoose
   .connect(config.MONGODB_URI)
   .then(() => {
-    logger.info('connected to MongoDB');
+    logger.info('connected to MongoDB success!');
   })
   .catch((error) => {
     logger.error('error connection to MongoDB:', error.message);
@@ -33,6 +33,10 @@ app.use(middleware.requestLogger);
 //open http://localhost:3001/api/blogs
 app.use('/api/blogs', blogListsRouter);
 app.use('/api/users', usersRouter);
+
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);

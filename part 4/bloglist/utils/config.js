@@ -10,4 +10,4 @@ if (NODE_ENV === 'test') {
   MONGODB_URI = TEST_MONGODB_URI;
 }
 
-export default { MONGODB_URI, PORT };
+export default { MONGODB_URI, PORT: Number(PORT) || 3001 };
