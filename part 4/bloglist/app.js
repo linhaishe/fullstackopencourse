@@ -5,6 +5,7 @@ import config from './utils/config.js';
 import logger from './utils/logger.js';
 import middleware from './utils/middleware.js';
 import blogListsRouter from './controllers/blogLists.js';
+import usersRouter from './controllers/users.js';
 import mongoose from 'mongoose';
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(middleware.requestLogger);
 // router文件 里不要再写 /api/blogs 前缀，挂载到 app.js 的时候已经加了
 //open http://localhost:3001/api/blogs
 app.use('/api/blogs', blogListsRouter);
+app.use('/api/users', usersRouter);
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);

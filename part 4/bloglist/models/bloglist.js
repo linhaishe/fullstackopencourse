@@ -15,9 +15,13 @@ const blogSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
-// 处理mongodb _id _v的数据格式，统一内容
+// 处理mongodb _id _v的数据格式为id，统一内容
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();

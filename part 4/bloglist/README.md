@@ -1,12 +1,12 @@
 # part4
 
-# logger
+## logger
 
 The logger has two functions, info for printing normal log messages, and error for all error messages.
 
 Extracting logging into its own module is a good idea in several ways. If we wanted to start writing logs to a file or send them to an external logging service like graylog or papertrail we would only have to make changes in one place.
 
-# Test
+## Test
 
  [unit tests](https://en.wikipedia.org/wiki/Unit_testing)
 
@@ -51,4 +51,19 @@ use the [supertest](https://github.com/visionmedia/supertest) package to help us
 
 node --experimental-vm-modules node_modules/.bin/jest --silent=false --verbose --runInBand tests/blog_api.test.js
 ```
+## user administration
+### pwd hash
 
+The password hash is the output of a [one-way hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function) applied to the user's password. It is never wise to store unencrypted plain text passwords in the database!Let's install the [bcrypt](https://github.com/kelektiv/node.bcrypt.js) package for generating the password hashes.Some Windows users have had problems with *bcrypt*. If you run into problems, remove the library with command and install [bcryptjs](https://www.npmjs.com/package/bcryptjs) instead.
+
+```js
+const saltRounds = 10;
+// The password sent in the request is not stored in the database. We store the hash of the password that is generated with the bcrypt.hash function.
+const passwordHash = await bcrypt.hash(password, saltRounds);
+```
+
+The fundamentals of [storing passwords](https://codahale.com/how-to-safely-store-a-password/) are outside the scope of this course material. We will not discuss what the magic number 10 assigned to the [saltRounds](https://github.com/kelektiv/node.bcrypt.js/#a-note-on-rounds) variable means, but you can read more about it in the linked material.
+
+### jsonwebtoken
+
+Let's first implement the functionality for logging in. Install the [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) library, which allows us to generate [JSON web tokens](https://jwt.io/).
