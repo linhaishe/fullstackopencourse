@@ -67,3 +67,9 @@ The fundamentals of [storing passwords](https://codahale.com/how-to-safely-store
 ### jsonwebtoken
 
 Let's first implement the functionality for logging in. Install the [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) library, which allows us to generate [JSON web tokens](https://jwt.io/).
+
+- **400 Bad Request**
+  - 适合客户端传的参数不符合要求（比如缺少 `username` / `password`，或者长度不足 3 个字符）。
+- **409 Conflict**
+  - 更适合用于资源冲突的情况，比如 `username` 已经存在。
+  - 但很多教程/项目里也会直接用 **400** 来处理（保持一致）。

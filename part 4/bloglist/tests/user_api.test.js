@@ -66,6 +66,44 @@ describe('when there is initially one user in db', () => {
   });
 });
 
+describe('username or pwd is not given', () => {
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const newUser = {
+      username: '',
+      name: 'Superuser',
+      password: 'salainen',
+    };
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    expect(result.body.error).toContain('username and password are required');
+  });
+});
+
+describe('username or pwd less then 3 characters', () => {
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const newUser = {
+      username: '3w',
+      name: 'Superuser',
+      password: 'salainen',
+    };
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    expect(result.body.error).toContain(
+      'username and password must be at least 3 characters long'
+    );
+  });
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
