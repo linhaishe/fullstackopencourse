@@ -102,3 +102,4 @@ dist
 
 # TernJS port file
 .tern-port
+part 4/.DS_Store
