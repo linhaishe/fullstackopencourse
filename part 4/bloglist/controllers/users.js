@@ -4,7 +4,7 @@ import User from '../models/user.js';
 const usersRouter = express.Router();
 
 usersRouter.get('/', async (request, response) => {
-  const users = await User.find({});
+  const users = await User.find({}).populate('blogs');
   response.json(users);
 });
 
@@ -35,6 +35,7 @@ usersRouter.post('/', async (request, response) => {
     });
 
     const savedUser = await user.save();
+    user.blogs = user.blogs.concat(savedUser._id);
 
     response.status(201).json(savedUser);
   } catch (error) {

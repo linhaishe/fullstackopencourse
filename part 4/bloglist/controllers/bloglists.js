@@ -1,5 +1,6 @@
 import express from 'express';
 import BlogList from '../models/bloglist.js';
+import User from '../models/user.js';
 const blogListsRouter = express.Router();
 
 // blogListsRouter.get('/', (request, response) => {
@@ -9,16 +10,24 @@ const blogListsRouter = express.Router();
 // });
 
 blogListsRouter.get('/', async (request, response) => {
-  const blogs = await BlogList.find({});
+  const blogs = await BlogList.find({}).populate('user');
   response.json(blogs);
 });
 
 blogListsRouter.post('/', async (request, response) => {
   try {
     const body = request.body;
+    console.log('body', body);
+    const user = await User.findById(body.userId);
+    console.log('user', user);
 
-    const blog = new BlogList(body);
+    const blog = new BlogList({ ...body, user: user._id });
     const savedBlog = await blog.save();
+    console.log('savedBlog', savedBlog);
+
+    user.blogs = user.blogs.concat(savedBlog._id);
+    await user.save();
+
     response.status(201).json(savedBlog);
   } catch (error) {
     response.status(400).json({ error: error.message });
