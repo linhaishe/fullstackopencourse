@@ -1,9 +1,61 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import supertest from 'supertest';
 import { initialBlogs, blogsInDb, nonExistingId } from './test_helper.js';
 import app from '../app.js';
 const api = supertest(app);
 import BlogList from '../models/bloglist.js';
+import User from '../models/user.js';
+
+let firstUserToken;
+let secondUserToken;
+
+beforeEach(async () => {
+  await BlogList.deleteMany({});
+  await User.deleteMany({});
+  const passwordHash = await bcrypt.hash('salainen', 10);
+  const user = new User({ username: 'mluukkai', passwordHash });
+  const savedUser = await user.save();
+
+  const passwordHash2 = await bcrypt.hash('user2', 10);
+  const user2 = new User({ username: 'testuser2', passwordHash2 });
+  const savedUser2 = await user2.save();
+
+  const blogObjects = initialBlogs.map(
+    (blog) => new BlogList({ ...blog, user: savedUser._id })
+  );
+
+  // const promiseArray = blogObjects.map((blog) => blog.save());
+  // await Promise.all(promiseArray);
+
+  let blogObj = new BlogList(blogObjects[0]);
+  await blogObj.save();
+
+  blogObj = new BlogList(blogObjects[1]);
+  await blogObj.save();
+
+  blogObj = new BlogList(blogObjects[2]);
+  await blogObj.save();
+
+  const userForToken = {
+    username: savedUser.username,
+    id: savedUser._id,
+  };
+
+  const userForToken2 = {
+    username: savedUser2.username,
+    id: savedUser2._id,
+  };
+
+  firstUserToken = jwt.sign(userForToken, process.env.SECRET, {
+    expiresIn: 60 * 60,
+  });
+
+  secondUserToken = jwt.sign(userForToken2, process.env.SECRET, {
+    expiresIn: 60 * 60,
+  });
+});
 
 test('blog posts have id property instead of _id', async () => {
   const response = await api.get('/api/blogs');
@@ -16,16 +68,6 @@ test('blog posts have id property instead of _id', async () => {
 });
 
 describe('when there is initially some notes saved', () => {
-  beforeEach(async () => {
-    await BlogList.deleteMany({});
-
-    let blogObj = new BlogList(initialBlogs[0]);
-    await blogObj.save();
-
-    blogObj = new BlogList(initialBlogs[1]);
-    await blogObj.save();
-  });
-
   test('notes are returned as json', async () => {
     await api
       .get('/api/blogs')
@@ -33,10 +75,10 @@ describe('when there is initially some notes saved', () => {
       .expect('Content-Type', /application\/json/);
   });
 
-  test('there are two notes', async () => {
+  test('there are three notes', async () => {
     const response = await api.get('/api/blogs');
 
-    expect(response.body).toHaveLength(2);
+    expect(response.body).toHaveLength(3);
   });
 
   test('the first note is about HTTP methods', async () => {
@@ -52,10 +94,12 @@ describe('addition of a new note', () => {
       author: 'chenruo',
       url: 'none',
       likes: 11,
+      userId: '68bac7a73c634050a65a35db',
     };
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${firstUserToken}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -74,7 +118,11 @@ describe('addition of a new note', () => {
       likes: 5,
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${firstUserToken}`)
+      .send(newBlog)
+      .expect(400);
   });
 
   test('blog without url is not added and returns 400', async () => {
@@ -84,7 +132,11 @@ describe('addition of a new note', () => {
       likes: 3,
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${firstUserToken}`)
+      .send(newBlog)
+      .expect(400);
   });
 
   test('if likes property is missing, it defaults to 0', async () => {
@@ -92,11 +144,11 @@ describe('addition of a new note', () => {
       title: 'Blog without likes',
       author: 'Someone',
       url: 'http://example.com',
-      // 注意：没有 likes
     };
 
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${firstUserToken}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -114,7 +166,10 @@ describe('viewing a specific note', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/);
 
-    expect(resultNote.body).toStrictEqual(noteToView);
+    expect(resultNote.body).toStrictEqual({
+      ...noteToView,
+      user: noteToView.user.toString(),
+    });
   });
 
   test('fails with statuscode 404 if note does not exist', async () => {
@@ -131,15 +186,32 @@ describe('viewing a specific note', () => {
 });
 
 describe('deletion of a blog', () => {
-  test('succeeds with status code 204 if id is valid', async () => {
+  test('succeeds with status code 204 if id and user verify is valid', async () => {
     const notesAtStart = await blogsInDb();
     const noteToDelete = notesAtStart[0];
-
-    await api.delete(`/api/blogs/${noteToDelete.id}`).expect(204);
+    await api
+      .delete(`/api/blogs/${noteToDelete.id}`)
+      .set('Authorization', `Bearer ${firstUserToken}`)
+      .expect(204);
 
     const notesAtEnd = await blogsInDb();
     const contents = notesAtEnd.map((n) => n.title);
     expect(contents).not.toContain(noteToDelete.title);
+  });
+
+  test('a blog can be deleted only by the user who added it', async () => {
+    const allBlogs = await blogsInDb();
+    const blogToDelete = allBlogs[0];
+    console.log('blogToDelete', blogToDelete);
+    const result = await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${secondUserToken}`)
+      .expect(403)
+      .expect('Content-Type', /application\/json/);
+
+    expect(result.body.error).toContain(
+      'only the creator can delete this blog'
+    );
   });
 });
 
@@ -154,27 +226,24 @@ describe('updating of a blog', () => {
 
     const updatedData = {
       ...blogToUpdate,
-      title: 'new title test',
+      title: 'new update title test',
     };
 
     const response = await api
       .put(`/api/blogs/${blogToUpdate.id}`)
+      .set('Authorization', `Bearer ${firstUserToken}`)
       .send(updatedData)
       .expect(200)
       .expect('Content-Type', /application\/json/);
 
-    expect(response.body.title).toBe('new title test');
+    expect(response.body.title).toBe('new update title test');
 
     const blogsAtEnd = await blogsInDb();
     const updatedBlog = blogsAtEnd.find((b) => b.id === blogToUpdate.id);
-    expect(updatedBlog.title).toBe('new title test');
+    expect(updatedBlog.title).toBe('new update title test');
   });
 });
 
 afterAll(async () => {
   await mongoose.connection.close();
 });
-
-// afterAll(() => {
-//   mongoose.connection.close();
-// });

@@ -67,7 +67,7 @@ describe('when there is initially one user in db', () => {
 });
 
 describe('username or pwd is not given', () => {
-  test('creation fails with proper statuscode and message if username already taken', async () => {
+  test('creation fails with proper statuscode and message if username missing', async () => {
     const newUser = {
       username: '',
       name: 'Superuser',
@@ -85,7 +85,7 @@ describe('username or pwd is not given', () => {
 });
 
 describe('username or pwd less then 3 characters', () => {
-  test('creation fails with proper statuscode and message if username already taken', async () => {
+  test('creation fails with proper statuscode and message if words short', async () => {
     const newUser = {
       username: '3w',
       name: 'Superuser',

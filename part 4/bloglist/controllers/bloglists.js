@@ -65,7 +65,26 @@ blogListsRouter.get('/:id', async (request, response) => {
   }
 });
 
-blogListsRouter.delete('/:id', (request, response, next) => {
+blogListsRouter.delete('/:id', async (request, response, next) => {
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' });
+  }
+
+  const blog = await BlogList.findById(request.params.id);
+
+  if (!blog) {
+    return response.status(404).json({ error: 'blog not found' });
+  }
+
+  // 注意：blog.user是 ObjectId，要转成字符串
+  if (blog.user.toString() !== decodedToken.id.toString()) {
+    return response
+      .status(403)
+      .json({ error: 'only the creator can delete this blog' });
+  }
+
   BlogList.findByIdAndDelete(request.params.id)
     .then(() => {
       response.status(204).end();

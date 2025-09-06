@@ -14,6 +14,23 @@ const initialBlogs = [
     url: 'none',
     likes: 33,
   },
+  {
+    title: 'test note 2',
+    author: 'chenruo',
+    url: 'none',
+    likes: 0,
+    user: {
+      username: 'root',
+      name: 'who has not access to delete',
+      blogs: [
+        '68bad0660118b861a93147e4',
+        '68bad0a2098f6bae5b59f994',
+        '68badeb6ca65eaa64bacfcee',
+        '68badf5e5a27f50f9bfdd9d7',
+      ],
+      id: '68bac7a73c634050a65a35d8',
+    },
+  },
 ];
 
 //该函数可用于创建不属于数据库中任何便笺对象的数据库对象 ID

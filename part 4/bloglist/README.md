@@ -93,3 +93,51 @@ curl -X GET http://localhost:3001/api/blogs \
   -H "Authorization: Bearer Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx.yyy.zzz"
 ```
 
+```js
+401 Unauthorized → token 缺失或无效
+403 Forbidden → 用户认证了，但没有权限删
+404 Not Found → blog 不存在
+```
+
+```js
+  // 用户只能删除自己的post，通过请求token 和 用户自己的token 做对比
+  const reqToken = request.token;
+  const blog = await BlogList.findById(request.params.id);
+  const userToken = jwt.sign(
+    { username: blog.user.username, id: blog.user.id },
+    process.env.SECRET,
+    {
+      expiresIn: 60 * 60,
+    }
+  );
+```
+
+Therefore, deleting a blog is possible only if the token sent with the request is the same as that of the blog's creator.
+
+其实不需要在删除时再重新生成一个 `userToken` 来和 `reqToken` 比较。
+ JWT 是 **一次签发，多次验证** 的，后端只需要：
+
+1. **解码客户端传过来的 `reqToken`**（就是用户登录时签发的 token）。
+2. **对比 token 里的用户 ID 和 blog 的创建者 ID**。
+
+```js
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' });
+  }
+
+  const blog = await BlogList.findById(request.params.id);
+
+  if (!blog) {
+    return response.status(404).json({ error: 'blog not found' });
+  }
+
+  // 注意：blog.user是 ObjectId，要转成字符串
+  if (blog.user.toString() !== decodedToken.id.toString()) {
+    return response
+      .status(403)
+      .json({ error: 'only the creator can delete this blog' });
+  }
+```
+
