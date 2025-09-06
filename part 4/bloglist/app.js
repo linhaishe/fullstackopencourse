@@ -33,6 +33,13 @@ app.use(middleware.requestLogger);
 app.use(middleware.tokenExtractor);
 // router文件 里不要再写 /api/blogs 前缀，挂载到 app.js 的时候已经加了
 //open http://localhost:3001/api/blogs
+
+// use the middleware only in /api/blogs routes
+// app.use('/api/blogs', middleware.userExtractor, blogsRouter)
+
+// use the middleware in all routes
+app.use(middleware.userExtractor);
+
 app.use('/api/blogs', blogListsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter);

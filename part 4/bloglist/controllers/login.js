@@ -5,8 +5,8 @@ import User from '../models/user.js';
 const loginRouter = express.Router();
 
 // {
-//   "username": "mluukkai",
-//   "password": "salainen"
+//   "username": "chenruotest",
+//   "password": "chenruotestpwd"
 // }
 
 loginRouter.post('/', async (request, response) => {

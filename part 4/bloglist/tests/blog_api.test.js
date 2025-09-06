@@ -14,8 +14,8 @@ let secondUserToken;
 beforeEach(async () => {
   await BlogList.deleteMany({});
   await User.deleteMany({});
-  const passwordHash = await bcrypt.hash('salainen', 10);
-  const user = new User({ username: 'mluukkai', passwordHash });
+  const passwordHash = await bcrypt.hash('chenruotestpwd', 10);
+  const user = new User({ username: 'chenruotest', passwordHash });
   const savedUser = await user.save();
 
   const passwordHash2 = await bcrypt.hash('user2', 10);

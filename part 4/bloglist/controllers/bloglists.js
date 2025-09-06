@@ -1,7 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import BlogList from '../models/bloglist.js';
-import User from '../models/user.js';
 const blogListsRouter = express.Router();
 
 // blogListsRouter.get('/', (request, response) => {
@@ -31,7 +30,7 @@ blogListsRouter.post('/', async (request, response) => {
       return response.status(401).json({ error: 'token invalid' });
     }
 
-    const user = await User.findById(decodedToken.id);
+    const user = request.user;
 
     if (!user) {
       return response

@@ -1,4 +1,6 @@
+import jwt from 'jsonwebtoken';
 import logger from './logger.js';
+import User from '../models/user.js';
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method);
@@ -49,4 +51,32 @@ const tokenExtractor = (request, response, next) => {
   next();
 };
 
-export default { requestLogger, unknownEndpoint, errorHandler, tokenExtractor };
+// 假设你已经有 tokenExtractor 中间件了，它把 token 放在 request.token
+const userExtractor = async (request, response, next) => {
+  const token = request.token;
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET);
+    // username unique?
+    const user = await User.findOne({ username: decodedToken.username });
+
+    request.user = user;
+    next();
+    logger.info('userExtractor success');
+    logger.info('----');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default {
+  requestLogger,
+  unknownEndpoint,
+  errorHandler,
+  tokenExtractor,
+  userExtractor,
+};
