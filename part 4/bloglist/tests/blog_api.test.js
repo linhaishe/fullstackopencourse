@@ -155,6 +155,22 @@ describe('addition of a new note', () => {
 
     expect(response.body.likes).toBe(0);
   });
+
+  test('cant post without token/userid', async () => {
+    const newBlog = {
+      title: 'Blog without token test',
+      author: 'someone',
+      url: 'http://example.com',
+    };
+
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/);
+
+    expect(response.body.error).toContain('token missing');
+  });
 });
 
 describe('viewing a specific note', () => {
@@ -202,7 +218,6 @@ describe('deletion of a blog', () => {
   test('a blog can be deleted only by the user who added it', async () => {
     const allBlogs = await blogsInDb();
     const blogToDelete = allBlogs[0];
-    console.log('blogToDelete', blogToDelete);
     const result = await api
       .delete(`/api/blogs/${blogToDelete.id}`)
       .set('Authorization', `Bearer ${secondUserToken}`)

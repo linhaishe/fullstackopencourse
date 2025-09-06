@@ -8,7 +8,7 @@ const blogListsRouter = express.Router();
 //     response.json(blogs);
 //   });
 // });
-
+//
 // {
 // "title": "its new blog test-6",
 // "author": "chenruo",
@@ -24,14 +24,24 @@ blogListsRouter.get('/', async (request, response) => {
 blogListsRouter.post('/', async (request, response) => {
   try {
     const body = request.body;
-    const decodedToken = jwt.verify(request.token, process.env.SECRET);
+    const token = request.token;
+
+    if (!token) {
+      return response.status(401).json({ error: 'token missing' });
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.SECRET);
+    } catch (err) {
+      return response.status(401).json({ error: 'token invalid' });
+    }
 
     if (!decodedToken.id) {
       return response.status(401).json({ error: 'token invalid' });
     }
 
     const user = request.user;
-
     if (!user) {
       return response
         .status(400)
