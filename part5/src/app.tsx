@@ -1,43 +1,55 @@
-import { useState } from 'preact/hooks'
-import preactLogo from './assets/preact.svg'
-import viteLogo from '/vite.svg'
-import './app.css'
+import { useState } from 'react';
+import reactLogo from './assets/react.svg';
+import viteLogo from '/vite.svg';
+import './App.css';
 
-export function App() {
-  const [count, setCount] = useState(0)
+/**
+ * ---task1---
+  1. login  form 
+  2.  The token returned with a successful login is saved to the application's state user.
+  3. If a user is not logged in, only the login form is visible.
+  4. If the user is logged-in, the name of the user and a list of blogs is shown.
+
+---task2---
+  1. Make the login 'permanent' by using the local storage. 
+  2. Ensure the browser does not remember the details of the user after logging out.
+
+---task3---
+  1. Expand your application to allow a logged-in user to add new blogs
+
+---task4---
+  1. Implement notifications that inform the user about successful and unsuccessful operations at the top of the page.
+  2. The notifications must be visible for a few seconds. It is not compulsory to add colors.
+ * 
+ */
+
+function App() {
+  const [count, setCount] = useState(0);
 
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
+        <a href='https://vite.dev' target='_blank'>
+          <img src={viteLogo} className='logo' alt='Vite logo' />
         </a>
-        <a href="https://preactjs.com" target="_blank">
-          <img src={preactLogo} class="logo preact" alt="Preact logo" />
+        <a href='https://react.dev' target='_blank'>
+          <img src={reactLogo} className='logo react' alt='React logo' />
         </a>
       </div>
-      <h1>Vite + Preact</h1>
-      <div class="card">
+      <h1>Vite + React</h1>
+      <div className='card'>
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
         <p>
-          Edit <code>src/app.tsx</code> and save to test HMR
+          Edit <code>src/App.tsx</code> and save to test HMR
         </p>
       </div>
-      <p>
-        Check out{' '}
-        <a
-          href="https://preactjs.com/guide/v10/getting-started#create-a-vite-powered-preact-app"
-          target="_blank"
-        >
-          create-preact
-        </a>
-        , the official Preact + Vite starter
-      </p>
-      <p class="read-the-docs">
-        Click on the Vite and Preact logos to learn more
+      <p className='read-the-docs'>
+        Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
+
+export default App;
