@@ -1,0 +1,20 @@
+input {
+  margin-left: 5px;
+}
+
+.logoutWrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logoutBtn {
+  width: max-content;
+  height: max-content;
+  border: 1px solid #000;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 900;
+}

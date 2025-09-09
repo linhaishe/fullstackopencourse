@@ -1,7 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import './App.css';
+import { useEffect, useState } from 'react';
+import './app.css';
 import Login from './components/Login/Login';
+import Blogs from './components/Blogs/Blogs';
 import loginService from './services/login';
+import blogsService from './services/blogs';
+import Logout from './components/Logout/Logout';
 
 /**
  * ---task1---
@@ -23,27 +26,59 @@ import loginService from './services/login';
  * 
  */
 
+interface IUser {
+  token: '';
+  username: string;
+  name: string;
+}
+
 function App() {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [user, setUser] = useState(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
+  const [newBlog, setNewBlog] = useState('');
+  const [showAll, setShowAll] = useState(true);
 
-  function handleLogin(): void {
-    // throw new Error('Function not implemented.');
-    console.log('event', username, password);
-  }
+  const handleLogin = async () => {
+    try {
+      const user: IUser = await loginService({ username, password });
+      window.localStorage.setItem('loggedUser', JSON.stringify(user));
+      blogsService.setToken(user.token);
+      setUser(user);
+      setUsername('');
+      setPassword('');
+    } catch (error) {
+      setErrorMsg('wrong credentials');
+      setTimeout(() => {
+        setErrorMsg(null);
+      }, 5000);
+    }
+  };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedUser');
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON);
+      setUser(user);
+      blogsService.setToken(user.token);
+    }
+  }, []);
 
   return (
     <>
-      <Login
-        handleLogin={handleLogin}
-        setUsername={setUsername}
-        setPassword={setPassword}
-        username={username}
-        password={password}
-      />
+      {user?.username ? (
+        <Logout user={user} setUser={setUser} />
+      ) : (
+        <Login
+          handleLogin={handleLogin}
+          setUsername={setUsername}
+          setPassword={setPassword}
+          username={username}
+          password={password}
+        />
+      )}
+      <Blogs />
     </>
   );
 }
