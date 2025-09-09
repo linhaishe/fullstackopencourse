@@ -19,16 +19,27 @@ export default function Blog(props: any) {
       blogsService.getAll().then((initialNotes) => {
         setBlogs(initialNotes);
       });
+      props.setMessage({
+        type: 'succeed',
+        msgContent: 'add succeed',
+      });
       setNewBlog({
         title: '',
         author: '',
         url: '',
       });
     } catch (error) {
-      //   setErrorMsg('wrong credentials');
-      //   setTimeout(() => {
-      //     setErrorMsg(null);
-      //   }, 5000);
+      props.setMessage({
+        type: 'fail',
+        msgContent: 'wrong credentials',
+      });
+
+      props.setTimeout(() => {
+        props.setErrorMsg({
+          type: null,
+          msgContent: null,
+        });
+      }, 5000);
     }
   };
 

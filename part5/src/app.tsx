@@ -5,6 +5,7 @@ import loginService from './services/login';
 import blogsService from './services/blogs';
 import Logout from './components/Logout/Logout';
 import Blog from './components/Blog/Blog';
+import Msg from './components/Msg/Msg';
 
 /**
  * ---task1---
@@ -32,24 +33,42 @@ interface IUser {
   name: string;
 }
 
+interface IMsg {
+  type: 'succeed' | 'fail' | null;
+  msgContent: string | null;
+}
+
 function App() {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [message, setMessage] = useState<IMsg>({
+    type: null,
+    msgContent: null,
+  });
   const [user, setUser] = useState<IUser | null>(null);
 
   const handleLogin = async () => {
     try {
       const user: IUser = await loginService({ username, password });
+      setMessage({
+        type: 'succeed',
+        msgContent: 'login succeed',
+      });
       window.localStorage.setItem('loggedUser', JSON.stringify(user));
       blogsService.setToken(user.token);
       setUser(user);
       setUsername('');
       setPassword('');
-    } catch (error) {
-      setErrorMsg('wrong credentials');
+    } catch (error: any) {
+      setMessage({
+        type: 'fail',
+        msgContent: error.response.data.error || '未知错误',
+      });
       setTimeout(() => {
-        setErrorMsg(null);
+        setMessage({
+          type: null,
+          msgContent: null,
+        });
       }, 5000);
     }
   };
@@ -65,6 +84,7 @@ function App() {
 
   return (
     <>
+      <Msg message={message} setMessage={setMessage} />
       {user?.username ? (
         <Logout user={user} setUser={setUser} />
       ) : (
@@ -76,7 +96,7 @@ function App() {
           password={password}
         />
       )}
-      {user?.username && <Blog />}
+      {user?.username && <Blog setMessage={setMessage} />}
     </>
   );
 }
