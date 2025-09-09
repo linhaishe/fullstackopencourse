@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import './app.css';
 import Login from './components/Login/Login';
-import Blogs from './components/Blogs/Blogs';
 import loginService from './services/login';
 import blogsService from './services/blogs';
 import Logout from './components/Logout/Logout';
+import Blog from './components/Blog/Blog';
 
 /**
  * ---task1---
   1. login  form 
-  2.  The token returned with a successful login is saved to the application's state user.
+  2. The token returned with a successful login is saved to the application's state user.
   3. If a user is not logged in, only the login form is visible.
   4. If the user is logged-in, the name of the user and a list of blogs is shown.
 
@@ -37,8 +37,6 @@ function App() {
   const [password, setPassword] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [user, setUser] = useState<IUser | null>(null);
-  const [newBlog, setNewBlog] = useState('');
-  const [showAll, setShowAll] = useState(true);
 
   const handleLogin = async () => {
     try {
@@ -78,7 +76,7 @@ function App() {
           password={password}
         />
       )}
-      <Blogs />
+      {user?.username && <Blog />}
     </>
   );
 }

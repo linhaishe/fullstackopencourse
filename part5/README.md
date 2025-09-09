@@ -1,74 +1,6 @@
-# React + TypeScript + Vite
+# QA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
-
-前端本地的端口是 5171，服务端的端口是 3001，前端请求的时候默认走了 5171 的端口，怎么请求才能走 3001 呢
+## 1. 前端本地的端口是 5171，服务端的端口是 3001，前端请求的时候默认走了 5171 的端口，怎么请求才能走 3001 呢
 
 1. 写全 URL
 
@@ -147,3 +79,89 @@ fetch(`${API_BASE}/api/login`, {
 如果只是临时测试 → 用 写全 URL。
 
 如果是长期开发 → 用 proxy 配置 或 环境变量。
+
+## 2. setState 里 更新对象属性里的某个值，概述和处理
+
+------
+
+### 1. 概述
+
+在 React 中，`useState` 管理对象时，**不要直接修改原对象**，而是要用 **不可变更新** 的方式。
+ 也就是说：用展开运算符（`...`）或者函数式更新来生成一个新对象，再传给 `setState`。
+
+------
+
+### 2. 常见场景与写法
+
+#### ✅ 场景 1：简单对象更新
+
+```
+const [user, setUser] = useState({ name: 'Tom', age: 20 });
+
+// 更新 age
+setUser({ ...user, age: 21 });
+```
+
+####  ✅ 场景 2：函数式更新（推荐）
+
+当新的值依赖旧的 state 时，建议用函数式更新：
+
+```
+setUser(prev => ({ ...prev, age: prev.age + 1 }));
+```
+
+------
+
+#### ✅ 场景 3：嵌套对象更新
+
+如果对象里有嵌套结构，需要层层展开：
+
+```
+const [form, setForm] = useState({
+  user: { name: 'Tom', age: 20 },
+  settings: { darkMode: false }
+});
+
+// 更新 user.name
+setForm(prev => ({
+  ...prev,
+  user: { ...prev.user, name: 'Jerry' }
+}));
+```
+
+------
+
+#### ✅ 场景 4：动态 key 更新
+
+当要更新的属性名是变量时：
+
+```
+const updateField = (key: string, value: any) => {
+  setUser(prev => ({ ...prev, [key]: value }));
+};
+```
+
+------
+
+### 3. 注意事项
+
+1. **不要直接修改原对象**，比如：
+
+   ```
+   user.age = 21;
+   setUser(user); // ❌ React 可能不会触发更新
+   ```
+
+2. 对于复杂嵌套对象，更新会比较繁琐，可以考虑：
+
+   - `useReducer`
+   - `immer` 库（允许写“可变”的写法，底层自动生成不可变对象）
+
+------
+
+👉 总结：
+
+- **浅层对象** → 用 `...` 展开
+- **依赖旧值** → 用函数式更新
+- **嵌套对象** → 层层展开或用 `immer`
+- **动态 key** → `setUser(prev => ({ ...prev, [key]: value }))`
