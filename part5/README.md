@@ -82,14 +82,14 @@ fetch(`${API_BASE}/api/login`, {
 
 ## 2. setState 里 更新对象属性里的某个值，概述和处理
 
-------
+---
 
 ### 1. 概述
 
 在 React 中，`useState` 管理对象时，**不要直接修改原对象**，而是要用 **不可变更新** 的方式。
- 也就是说：用展开运算符（`...`）或者函数式更新来生成一个新对象，再传给 `setState`。
+也就是说：用展开运算符（`...`）或者函数式更新来生成一个新对象，再传给 `setState`。
 
-------
+---
 
 ### 2. 常见场景与写法
 
@@ -102,7 +102,7 @@ const [user, setUser] = useState({ name: 'Tom', age: 20 });
 setUser({ ...user, age: 21 });
 ```
 
-####  ✅ 场景 2：函数式更新（推荐）
+#### ✅ 场景 2：函数式更新（推荐）
 
 当新的值依赖旧的 state 时，建议用函数式更新：
 
@@ -110,7 +110,7 @@ setUser({ ...user, age: 21 });
 setUser(prev => ({ ...prev, age: prev.age + 1 }));
 ```
 
-------
+---
 
 #### ✅ 场景 3：嵌套对象更新
 
@@ -129,7 +129,7 @@ setForm(prev => ({
 }));
 ```
 
-------
+---
 
 #### ✅ 场景 4：动态 key 更新
 
@@ -141,7 +141,7 @@ const updateField = (key: string, value: any) => {
 };
 ```
 
-------
+---
 
 ### 3. 注意事项
 
@@ -157,7 +157,7 @@ const updateField = (key: string, value: any) => {
    - `useReducer`
    - `immer` 库（允许写“可变”的写法，底层自动生成不可变对象）
 
-------
+---
 
 👉 总结：
 
@@ -165,3 +165,10 @@ const updateField = (key: string, value: any) => {
 - **依赖旧值** → 用函数式更新
 - **嵌套对象** → 层层展开或用 `immer`
 - **动态 key** → `setUser(prev => ({ ...prev, [key]: value }))`
+
+---
+
+待解决问题
+
+1. msg 连续两次错误则不会在展示
+2. ts

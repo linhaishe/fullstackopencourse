@@ -1,4 +1,4 @@
-import './Login.css';
+import './Login.css'
 
 interface ILoginProps {
   handleLogin: (username: string, password: string) => void;
@@ -14,8 +14,8 @@ export default function Login(props: ILoginProps) {
       <h2>Login</h2>
       <form
         onSubmit={(event) => {
-          event.preventDefault();
-          props.handleLogin(props.username, props.password);
+          event.preventDefault()
+          props.handleLogin(props.username, props.password)
         }}
       >
         <div>
@@ -43,5 +43,5 @@ export default function Login(props: ILoginProps) {
         <button type='submit'>login</button>
       </form>
     </div>
-  );
+  )
 }

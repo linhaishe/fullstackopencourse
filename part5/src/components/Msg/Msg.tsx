@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import './Msg.css';
+import { useEffect, useState } from 'react'
+import './Msg.css'
 
 type TMessage = {
   type: 'succeed' | 'fail' | null;
@@ -12,24 +12,24 @@ interface IMsgProps {
 }
 
 export default function Msg(props: IMsgProps) {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false)
 
   // 当 text 变化时，如果有内容则展示并启动计时器
   useEffect(() => {
     if (props?.message?.msgContent) {
-      setVisible(true);
+      setVisible(true)
       const timer = setTimeout(() => {
-        setVisible(false);
-      }, 8000);
+        setVisible(false)
+      }, 8000)
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer)
     } else {
-      setVisible(false);
+      setVisible(false)
     }
-  }, [props?.message?.msgContent]);
+  }, [props?.message?.msgContent])
 
   if (!props?.message?.type || !visible) {
-    return null;
+    return null
   }
 
   return (
@@ -40,5 +40,5 @@ export default function Msg(props: IMsgProps) {
     >
       <span>{props?.message?.msgContent}</span>
     </div>
-  );
+  )
 }

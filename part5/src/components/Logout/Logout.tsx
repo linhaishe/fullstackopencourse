@@ -1,4 +1,4 @@
-import './Logout.css';
+import './Logout.css'
 
 export default function Logout(props: any) {
   return (
@@ -7,12 +7,12 @@ export default function Logout(props: any) {
       <div
         className='logoutBtn'
         onClick={() => {
-          window.localStorage.removeItem('loggedUser');
-          props.setUser(null);
+          window.localStorage.removeItem('loggedUser')
+          props.setUser(null)
         }}
       >
         logout
       </div>
     </div>
-  );
+  )
 }
