@@ -63,6 +63,18 @@ The expectation of the test uses [toHaveLength](https://vitest.dev/api/expect.ht
 
 [Mock objects and functions](https://en.wikipedia.org/wiki/Mock_object) are commonly used [stub](https://en.wikipedia.org/wiki/Method_stub) components in testing that are used for replacing dependencies of the components being tested. 
 
+We can easily find out the [coverage](https://vitest.dev/guide/coverage.html#coverage) of our tests by running them with the command.
+
+```js
+npm test -- --coverage
+```
+
+A HTML report will be generated to the *coverage* directory. The report will tell us the lines of untested code in each component:
+
+
+
+
+
 # QA
 
 ## 1. 前端本地的端口是 5171，服务端的端口是 3001，前端请求的时候默认走了 5171 的端口，怎么请求才能走 3001 呢
