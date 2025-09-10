@@ -32,6 +32,37 @@ The other convention is to store the test files "normally" in a separate *test* 
 
 I do not like this way of storing tests and application code in the same directory. However, we will follow this approach for now, as it is the most common practice in small projects.
 
+### Debugging tests
+
+```jsx
+import { render, screen } from '@testing-library/react'
+import Note from './Note'
+
+test('renders content', () => {
+  const note = {
+    content: 'Component testing is done with react-testing-library',
+    important: true
+  }
+
+  render(<Note note={note} />)
+  const element = screen.getByText('Component testing is done with react-testing-library')
+  // screen.debug()
+  // screen.debug(element)
+  // ...
+
+})
+```
+
+### Clicking buttons in tests
+
+Let us install a library [user-event](https://testing-library.com/docs/user-event/intro) that makes simulating user input a bit easier:
+
+Check docs
+
+The expectation of the test uses [toHaveLength](https://vitest.dev/api/expect.html#tohavelength) to verify that the *mock function* has been called exactly once:
+
+[Mock objects and functions](https://en.wikipedia.org/wiki/Mock_object) are commonly used [stub](https://en.wikipedia.org/wiki/Method_stub) components in testing that are used for replacing dependencies of the components being tested. 
+
 # QA
 
 ## 1. 前端本地的端口是 5171，服务端的端口是 3001，前端请求的时候默认走了 5171 的端口，怎么请求才能走 3001 呢
