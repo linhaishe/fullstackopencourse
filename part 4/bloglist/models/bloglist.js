@@ -18,6 +18,9 @@ const blogSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  showRemoveBtn: {
+    type: Boolean,
+  },
 });
 
 // 处理mongodb _id _v的数据格式为id，统一内容

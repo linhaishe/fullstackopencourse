@@ -5,4 +5,6 @@ export interface IBlog {
   user?: string;
   id: string;
   likes?: number;
+  showRemoveBtn: boolean;
+  _id: string;
 }

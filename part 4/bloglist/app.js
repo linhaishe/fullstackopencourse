@@ -4,7 +4,7 @@ import cors from 'cors';
 import config from './utils/config.js';
 import logger from './utils/logger.js';
 import middleware from './utils/middleware.js';
-import blogListsRouter from './controllers/blogLists.js';
+import blogListsRouter from './controllers/bloglists.js';
 import usersRouter from './controllers/users.js';
 import loginRouter from './controllers/login.js';
 import mongoose from 'mongoose';

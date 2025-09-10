@@ -17,8 +17,22 @@ const blogListsRouter = express.Router();
 // }
 
 blogListsRouter.get('/', async (request, response) => {
-  const blogs = await BlogList.find({}).populate('user');
-  response.json(blogs);
+  try {
+    const blogs = await BlogList.find({}).populate('user').lean();
+    const result = blogs.map((blogItem) => ({
+      ...blogItem,
+      showRemoveBtn: request.user
+        ? blogItem?.user?._id?.toString() === request?.user?.id?.toString()
+        : false,
+    }));
+    response.json(result);
+  } catch (err) {
+    console.error('Error in GET /blogs:', err.message);
+
+    return response.status(401).json({
+      error: 'invalid or missing token',
+    });
+  }
 });
 
 blogListsRouter.post('/', async (request, response) => {
