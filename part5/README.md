@@ -24,6 +24,14 @@ import { defineConfig } from 'vite'
 
 等于是 **在原本的 Vite config 基础上扩展了 Vitest 的配置**。
 
+### Test file location
+
+In React there are (at least) [two different conventions](https://medium.com/@JeffLombardJr/organizing-tests-in-jest-17fc431ff850) for the test file's location. We created our test files according to the current standard by placing them in the same directory as the component being tested.
+
+The other convention is to store the test files "normally" in a separate *test* directory. Whichever convention we choose, it is almost guaranteed to be wrong according to someone's opinion.
+
+I do not like this way of storing tests and application code in the same directory. However, we will follow this approach for now, as it is the most common practice in small projects.
+
 # QA
 
 ## 1. 前端本地的端口是 5171，服务端的端口是 3001，前端请求的时候默认走了 5171 的端口，怎么请求才能走 3001 呢
@@ -264,3 +272,4 @@ const a = b + c;
 - `semi: ['error', 'never']` 只是代码风格选择，强制团队统一。
 - JS 本身仍然依赖 ASI 来分割语句。
 - 现代大部分无分号风格的项目（例如 AirBnB 有些分支、StandardJS）都是 **无分号 + 特殊情况手动加分号**。
+

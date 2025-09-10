@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import BlogItem from '../components/BlogItem/index';
+import BlogItem from './index';
 
 test('renders content', () => {
   const blog = {
