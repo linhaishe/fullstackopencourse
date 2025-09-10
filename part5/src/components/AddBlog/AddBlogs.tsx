@@ -1,7 +1,7 @@
 export default function AddBlogs(props: any) {
   return (
     <div>
-      <h2>Create New Blog</h2>
+      <h3>Create New Blog</h3>
       <form
         onSubmit={(event) => {
           event.preventDefault();

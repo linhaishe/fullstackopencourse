@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './app.css';
 import Login from './components/Login/Login';
 import loginService from './services/login';
@@ -6,6 +6,7 @@ import blogsService from './services/blogs';
 import Logout from './components/Logout/Logout';
 import Blog from './components/Blog/Blog';
 import Msg from './components/Msg/Msg';
+import Togglable from './components/Togglable';
 
 /**
  * ---task1---
@@ -46,6 +47,7 @@ function App() {
     msgContent: null,
   });
   const [user, setUser] = useState<IUser | null>(null);
+  const blogFormRef = useRef('');
 
   const handleLogin = async () => {
     try {
@@ -96,7 +98,11 @@ function App() {
           password={password}
         />
       )}
-      {user?.username && <Blog setMessage={setMessage} />}
+      {user?.username && (
+        <Togglable buttonLabel='new blog' ref={blogFormRef}>
+          <Blog setMessage={setMessage} />
+        </Togglable>
+      )}
     </>
   );
 }
