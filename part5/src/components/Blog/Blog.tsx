@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AddBlogs from '../AddBlog/AddBlogs';
 import BlogLists from '../BlogLists/BlogLists';
 import type { IBlog } from '../types';
 import blogsService from '../../services/blogs';
+import Togglable from '../Togglable';
 
 export default function Blog(props: any) {
   const [blogs, setBlogs] = useState<IBlog[]>([]);
@@ -11,6 +12,7 @@ export default function Blog(props: any) {
     author: '',
     url: '',
   });
+  const blogFormRef = useRef('');
 
   const handleAddBlog = async (newBlogContent: any) => {
     try {
@@ -52,11 +54,13 @@ export default function Blog(props: any) {
   return (
     <div>
       <BlogLists blogs={blogs} />
-      <AddBlogs
-        handleAddBlog={handleAddBlog}
-        setNewBlog={setNewBlog}
-        newBlog={newBlog}
-      />
+      <Togglable buttonLabel='add new blog' ref={blogFormRef}>
+        <AddBlogs
+          handleAddBlog={handleAddBlog}
+          setNewBlog={setNewBlog}
+          newBlog={newBlog}
+        />
+      </Togglable>
     </div>
   );
 }
