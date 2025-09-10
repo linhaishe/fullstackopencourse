@@ -1,14 +1,41 @@
 import { useState } from 'react';
 import type { IBlog } from '../types';
 import './BlogLists.css';
+import blogsService from '../../services/blogs';
 
-export default function BlogLists(porps: any) {
+export default function BlogLists(props: any) {
   const [showIndex, setShowIndex] = useState<number[]>([]);
+
+  const handleLike = async (id: string, newBlogContent: any) => {
+    try {
+      console.log('newBlogContent', newBlogContent);
+      await blogsService.update(id, newBlogContent);
+      blogsService.getAll().then((initialNotes) => {
+        props.setBlogs(initialNotes);
+      });
+      props.setMessage({
+        type: 'succeed',
+        msgContent: 'likes succeed',
+      });
+    } catch (error) {
+      props.setMessage({
+        type: 'fail',
+        msgContent: 'wrong credentials',
+      });
+
+      props.setTimeout(() => {
+        props.setErrorMsg({
+          type: null,
+          msgContent: null,
+        });
+      }, 5000);
+    }
+  };
 
   return (
     <div className='blogListWrap'>
       <h2>blogs</h2>
-      {porps?.blogs?.map((blog: IBlog, index: number) => (
+      {props?.blogs?.map((blog: IBlog, index: number) => (
         <div key={index} className='blogListItemWrap'>
           {/* <div>{`${index + 1}. `}</div> */}
           <div>
@@ -39,7 +66,18 @@ export default function BlogLists(porps: any) {
             <div>
               {'likes: '}
               {blog.likes}
-              <span className='likesBtn'>like</span>
+              <span
+                className='likesBtn'
+                onClick={() => {
+                  const updateLikesBlog = {
+                    ...blog,
+                    likes: (blog?.likes || 0) + 1,
+                  };
+                  handleLike(blog?.id, updateLikesBlog);
+                }}
+              >
+                like
+              </span>
             </div>
             <div>
               {'author: '}

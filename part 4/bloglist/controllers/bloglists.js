@@ -112,6 +112,7 @@ blogListsRouter.put('/:id', (request, response, next) => {
 
       note.title = title;
       note.url = url;
+      note.likes++;
 
       return note.save().then((updatedNote) => {
         response.json(updatedNote);

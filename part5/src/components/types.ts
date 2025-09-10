@@ -3,5 +3,6 @@ export interface IBlog {
   author: string;
   url: string;
   user?: string;
+  id: string;
   likes?: number;
 }

@@ -25,11 +25,6 @@ export default function Blog(props: any) {
         type: 'succeed',
         msgContent: 'add succeed',
       });
-      setNewBlog({
-        title: '',
-        author: '',
-        url: '',
-      });
     } catch (error) {
       props.setMessage({
         type: 'fail',
@@ -37,11 +32,17 @@ export default function Blog(props: any) {
       });
 
       props.setTimeout(() => {
-        props.setErrorMsg({
+        props.setMessage({
           type: null,
           msgContent: null,
         });
       }, 5000);
+    } finally {
+      setNewBlog({
+        title: '',
+        author: '',
+        url: '',
+      });
     }
   };
 
@@ -53,7 +54,12 @@ export default function Blog(props: any) {
 
   return (
     <div>
-      <BlogLists blogs={blogs} />
+      <BlogLists
+        blogs={blogs}
+        setNewBlog={setNewBlog}
+        setMessage={props.setMessage}
+        setBlogs={setBlogs}
+      />
       <Togglable buttonLabel='add new blog' ref={blogFormRef}>
         <AddBlogs
           handleAddBlog={handleAddBlog}
