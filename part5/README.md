@@ -1,3 +1,29 @@
+# Test
+
+The course previously used the [Jest](http://jestjs.io/) library developed by Facebook to test React components. We are now using the new generation of testing tools from Vite developers called [Vitest](https://vitest.dev/). Apart from the configurations, the libraries provide the same programming interface, so there is virtually no difference in the test code.
+
+Let's start by installing Vitest and the [jsdom](https://github.com/jsdom/jsdom) library simulating a web browser:
+
+```js
+npm install --save-dev vitest jsdom
+```
+
+In addition to Vitest, we also need another testing library that will help us render components for testing purposes. The current best option for this is [react-testing-library](https://github.com/testing-library/react-testing-library) which has seen rapid growth in popularity in recent times. It is also worth extending the expressive power of the tests with the library [jest-dom](https://github.com/testing-library/jest-dom).
+
+```
+import { defineConfig } from 'vitest/config';
+
+import { defineConfig } from 'vite'
+```
+
+**`vitest/config`** 内部其实就是 re-export 了 Vite 的 `defineConfig`，只是多加了对 `test` 字段的类型支持。
+
+所以你引入 `defineConfig` 从 `vitest/config`，它依旧是 Vite 的配置函数，不会影响你原来写的 `plugins`、`server` 等 Vite 配置。
+
+额外的好处是：`test` 字段在类型提示里就不会报错。
+
+等于是 **在原本的 Vite config 基础上扩展了 Vitest 的配置**。
+
 # QA
 
 ## 1. 前端本地的端口是 5171，服务端的端口是 3001，前端请求的时候默认走了 5171 的端口，怎么请求才能走 3001 呢
@@ -172,3 +198,6 @@ const updateField = (key: string, value: any) => {
 
 1. msg 连续两次错误则不会在展示
 2. ts
+3. 修正 node 的笔记，服务端的 test 应该有更适合的 test lib
+
+---
