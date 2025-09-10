@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import type { IBlog } from '../types';
 import './BlogLists.css';
 import blogsService from '../../services/blogs';
@@ -6,7 +6,7 @@ import type { TMessage } from '../Msg/Msg';
 import BlogItem from '../BlogItem';
 
 interface IBlogListsProps {
-  setBlogs: (blog: IBlog) => void;
+  setBlogs: Dispatch<SetStateAction<IBlog[]>>;
   setMessage: (msg: TMessage) => void;
   blogs: IBlog[];
 }

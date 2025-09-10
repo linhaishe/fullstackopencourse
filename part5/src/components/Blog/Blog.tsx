@@ -56,7 +56,6 @@ export default function Blog(props: any) {
     <div>
       <BlogLists
         blogs={blogs}
-        setNewBlog={setNewBlog}
         setMessage={props.setMessage}
         setBlogs={setBlogs}
       />
