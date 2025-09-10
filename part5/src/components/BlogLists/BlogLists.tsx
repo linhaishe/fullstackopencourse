@@ -8,7 +8,6 @@ export default function BlogLists(props: any) {
 
   const handleLike = async (id: string, newBlogContent: any) => {
     try {
-      console.log('newBlogContent', newBlogContent);
       await blogsService.update(id, newBlogContent);
       blogsService.getAll().then((initialNotes) => {
         props.setBlogs(initialNotes);
@@ -35,57 +34,61 @@ export default function BlogLists(props: any) {
   return (
     <div className='blogListWrap'>
       <h2>blogs</h2>
-      {props?.blogs?.map((blog: IBlog, index: number) => (
-        <div key={index} className='blogListItemWrap'>
-          {/* <div>{`${index + 1}. `}</div> */}
-          <div>
-            <span>title: </span>
-            <span>{blog.title}</span>
-            <span
-              className='showAllBtn'
-              onClick={() => {
-                if (showIndex?.includes(index)) {
-                  setShowIndex((prev) => prev.filter((item) => item !== index));
-                } else {
-                  setShowIndex((prev) => [...prev, index]);
-                }
-              }}
-            >
-              {showIndex?.includes(index) ? 'hide' : 'view'}
-            </span>
-          </div>
-          <div
-            style={{
-              display: showIndex?.includes(index) ? 'block' : 'none',
-            }}
-          >
+      {props?.blogs
+        ?.sort((a: IBlog, b: IBlog) => (b.likes ?? 0) - (a.likes ?? 0))
+        .map((blog: IBlog, index: number) => (
+          <div key={index} className='blogListItemWrap'>
+            {/* <div>{`${index + 1}. `}</div> */}
             <div>
-              {'url: '}
-              {blog.url}
-            </div>
-            <div>
-              {'likes: '}
-              {blog.likes}
+              <span>title: </span>
+              <span>{blog.title}</span>
               <span
-                className='likesBtn'
+                className='showAllBtn'
                 onClick={() => {
-                  const updateLikesBlog = {
-                    ...blog,
-                    likes: (blog?.likes || 0) + 1,
-                  };
-                  handleLike(blog?.id, updateLikesBlog);
+                  if (showIndex?.includes(index)) {
+                    setShowIndex((prev) =>
+                      prev.filter((item) => item !== index)
+                    );
+                  } else {
+                    setShowIndex((prev) => [...prev, index]);
+                  }
                 }}
               >
-                like
+                {showIndex?.includes(index) ? 'hide' : 'view'}
               </span>
             </div>
-            <div>
-              {'author: '}
-              {blog.author}
+            <div
+              style={{
+                display: showIndex?.includes(index) ? 'block' : 'none',
+              }}
+            >
+              <div>
+                {'url: '}
+                {blog.url}
+              </div>
+              <div>
+                {'likes: '}
+                {blog.likes}
+                <span
+                  className='likesBtn'
+                  onClick={() => {
+                    const updateLikesBlog = {
+                      ...blog,
+                      likes: (blog?.likes || 0) + 1,
+                    };
+                    handleLike(blog?.id, updateLikesBlog);
+                  }}
+                >
+                  like
+                </span>
+              </div>
+              <div>
+                {'author: '}
+                {blog.author}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 }
