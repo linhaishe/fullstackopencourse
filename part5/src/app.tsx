@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
-import './app.css'
-import Login from './components/Login/Login'
-import loginService from './services/login'
-import blogsService from './services/blogs'
-import Logout from './components/Logout/Logout'
-import Blog from './components/Blog/Blog'
-import Msg from './components/Msg/Msg'
+import { useEffect, useState } from 'react';
+import './app.css';
+import Login from './components/Login/Login';
+import loginService from './services/login';
+import blogsService from './services/blogs';
+import Logout from './components/Logout/Logout';
+import Blog from './components/Blog/Blog';
+import Msg from './components/Msg/Msg';
 
 /**
  * ---task1---
@@ -39,48 +39,48 @@ interface IMsg {
 }
 
 function App() {
-  const [username, setUsername] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [message, setMessage] = useState<IMsg>({
     type: null,
     msgContent: null,
-  })
-  const [user, setUser] = useState<IUser | null>(null)
+  });
+  const [user, setUser] = useState<IUser | null>(null);
 
   const handleLogin = async () => {
     try {
-      const user: IUser = await loginService({ username, password })
+      const user: IUser = await loginService({ username, password });
       setMessage({
         type: 'succeed',
         msgContent: 'login succeed',
-      })
-      window.localStorage.setItem('loggedUser', JSON.stringify(user))
-      blogsService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
+      });
+      window.localStorage.setItem('loggedUser', JSON.stringify(user));
+      blogsService.setToken(user.token);
+      setUser(user);
+      setUsername('');
+      setPassword('');
     } catch (error: any) {
       setMessage({
         type: 'fail',
         msgContent: error.response.data.error || '未知错误',
-      })
+      });
       setTimeout(() => {
         setMessage({
           type: null,
           msgContent: null,
-        })
-      }, 5000)
+        });
+      }, 5000);
     }
-  }
+  };
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedUser')
+    const loggedUserJSON = window.localStorage.getItem('loggedUser');
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogsService.setToken(user.token)
+      const user = JSON.parse(loggedUserJSON);
+      setUser(user);
+      blogsService.setToken(user.token);
     }
-  }, [])
+  }, []);
 
   return (
     <>
@@ -98,7 +98,7 @@ function App() {
       )}
       {user?.username && <Blog setMessage={setMessage} />}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

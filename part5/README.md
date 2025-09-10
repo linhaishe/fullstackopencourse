@@ -201,3 +201,66 @@ const updateField = (key: string, value: any) => {
 3. 修正 node 的笔记，服务端的 test 应该有更适合的 test lib
 
 ---
+
+`semi: ['error', 'never']` 这个 ESLint 规则的意思是：**禁止在语句末尾写分号**。
+ （即使你写了，ESLint 也会报错，让你去掉。）
+
+------
+
+### 那为什么很多项目能不用分号？
+
+这是因为 **JavaScript 有自动分号插入机制 (ASI, Automatic Semicolon Insertion)**。
+
+JS 引擎在解析代码时，如果遇到语法不完整的情况，会自动在需要的地方补分号。
+ 比如：
+
+```
+const a = 1
+const b = 2
+```
+
+在执行时其实会被解析成：
+
+```
+const a = 1;
+const b = 2;
+```
+
+所以大多数情况下不写分号也没问题。
+
+------
+
+### 但是 ASI 并不是完美的
+
+有些特殊情况下，如果不写分号，可能会导致解析错误或行为和预期不同。比如：
+
+```
+const a = b + c
+[1, 2, 3].forEach(console.log)
+```
+
+JS 引擎会把它解析成：
+
+```
+const a = b + c[1, 2, 3].forEach(console.log)
+```
+
+而不是预期的：
+
+```
+const a = b + c;
+[1, 2, 3].forEach(console.log);
+```
+
+解决方法就是：
+
+- 要么老老实实写分号。
+- 要么遵循 “无分号派” 的规范，但在可能出错的地方手动加上分号（比如数组/模板字面量/函数立即执行前）。
+
+------
+
+### 总结
+
+- `semi: ['error', 'never']` 只是代码风格选择，强制团队统一。
+- JS 本身仍然依赖 ASI 来分割语句。
+- 现代大部分无分号风格的项目（例如 AirBnB 有些分支、StandardJS）都是 **无分号 + 特殊情况手动加分号**。

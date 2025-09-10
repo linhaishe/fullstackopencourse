@@ -1,12 +1,14 @@
 import { render, screen } from '@testing-library/react';
+import BlogItem from '../components/BlogItem/index';
 
 test('renders content', () => {
-  const note = {
-    content: 'Component testing is done with react-testing-library',
-    important: true,
+  const blog = {
+    url: 'urlTest',
+    title: 'Component testing is done with react-testing-library',
+    author: 'CR',
   };
 
-  render(<Note note={note} />);
+  render(<BlogItem blog={blog} />);
 
   const element = screen.getByText(
     'Component testing is done with react-testing-library'

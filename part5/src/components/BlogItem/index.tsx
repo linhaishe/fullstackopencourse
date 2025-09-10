@@ -1,4 +1,5 @@
 import type { IBlog } from '../types';
+import React from 'react';
 
 interface IBlogItem {
   blog: IBlog;

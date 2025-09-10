@@ -4,8 +4,8 @@ export default function AddBlogs(props: any) {
       <h3>Create New Blog</h3>
       <form
         onSubmit={(event) => {
-          event.preventDefault()
-          props.handleAddBlog(props.newBlog)
+          event.preventDefault();
+          props.handleAddBlog(props.newBlog);
         }}
       >
         <div>
@@ -59,5 +59,5 @@ export default function AddBlogs(props: any) {
         <button type='submit'>Create</button>
       </form>
     </div>
-  )
+  );
 }
