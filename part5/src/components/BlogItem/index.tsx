@@ -41,7 +41,7 @@ export default function BlogItem(props: IBlogItem) {
         }}
       >
         <div>
-          {'url: '}
+          {'url:'}
           {props?.blog?.url}
         </div>
         <div>
