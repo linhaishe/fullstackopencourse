@@ -62,7 +62,8 @@ function App() {
     } catch (error: any) {
       setMessage({
         type: 'fail',
-        msgContent: error.response.data.error || '未知错误',
+        // msgContent: error.response.data.error || '未知错误',
+        msgContent: 'login fail',
       });
       setTimeout(() => {
         setMessage({

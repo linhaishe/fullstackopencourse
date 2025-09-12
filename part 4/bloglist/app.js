@@ -7,6 +7,7 @@ import middleware from './utils/middleware.js';
 import blogListsRouter from './controllers/bloglists.js';
 import usersRouter from './controllers/users.js';
 import loginRouter from './controllers/login.js';
+import testingRouter from './controllers/testing.js';
 import mongoose from 'mongoose';
 
 const app = express();
@@ -43,6 +44,10 @@ app.use(middleware.userExtractor);
 app.use('/api/blogs', blogListsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter);
+
+if (process.env.NODE_ENV === 'test') {
+  app.use('/api/testing', testingRouter);
+}
 
 app.get('/ping', (req, res) => {
   res.send('pong');

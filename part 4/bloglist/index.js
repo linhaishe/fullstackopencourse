@@ -6,6 +6,8 @@ const PORT = Number(config.PORT) || 3003;
 
 console.log('PORT in config =', config.PORT, typeof config.PORT);
 console.log('process.env.PORT =', process.env.PORT);
+console.log('process.env.NODE_ENV =', process.env.NODE_ENV);
+console.log('process.env.TEST_MONGODB_URI =', process.env.TEST_MONGODB_URI);
 
 app.listen(PORT, '0.0.0.0', () => {
   logger.info(`Server running on port ${PORT}`);

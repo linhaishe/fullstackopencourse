@@ -164,7 +164,40 @@ Visit https://playwright.dev/docs/intro for more information. ✨
 Happy hacking! 🎭
 ```
 
+![image-20250912102638684](https://s2.loli.net/2025/09/12/nskD3it8pqH2UXo.png)
 
+```
+npm run start:test
+
+// 服务端这个命令没有能跑起来
+```
+
+```js
+npm test -- --project chromium
+
+//  the testing takes place with all three commonly used browser engines, but this is slow, and when developing the tests it is probably best to carry them out mainly with only one browser. You can define the browser engine to be used with the command line parameter:
+
+npm test -- --ui
+When developing tests, you could use Playwright's UI mode, i.e. the user interface version. Let's start the tests in UI mode as follows:
+```
+
+```
+  // this is the only test executed!
+  test.only('login fails with wrong password', async ({ page }) => {
+    // ...
+  })
+  
+  // or
+  npm test -- -g "login fails with wrong password"
+```
+
+As with unit and integration tests, with E2E tests it is best to empty the database and possibly format it before the tests are run. The challenge with E2E tests is that they do not have access to the database.
+
+The solution is to create API endpoints for the backend tests. We can empty the database using these endpoints. Let's create a new router for the tests inside the *controllers* folder, in the *testing.js* file
+
+### Test development and debugging
+
+https://fullstackopen.com/en/part5/end_to_end_testing_playwright#test-development-and-debugging
 
 # QA
 
@@ -407,3 +440,61 @@ const a = b + c;
 - JS 本身仍然依赖 ASI 来分割语句。
 - 现代大部分无分号风格的项目（例如 AirBnB 有些分支、StandardJS）都是 **无分号 + 特殊情况手动加分号**。
 
+   
+
+##  3. "start:test": "cross-env NODE_ENV=test node --watch index.js"     "dev": "cross-env NODE_ENV=development nodemon index.js", --watch 和nodemon 有啥区别？
+
+
+
+这两个其实作用相似，都是 **代码改动时自动重启服务**，但原理和特性不同：
+
+------
+
+### 🔹 `node --watch`
+
+- Node.js v18+ 内置的功能。
+- 启动时加 `--watch` 参数，Node 会监控当前目录下的文件改动，自动重启进程。
+- 比较轻量，不需要额外依赖。
+- 配置项有限，比如不能像 nodemon 那样排除/包含某些目录。
+- 默认监控所有文件，有时会导致不必要的重启。
+
+示例：
+
+```
+node --watch index.js
+```
+
+------
+
+### 🔹 `nodemon`
+
+- 独立的第三方工具（需要安装：`npm install --save-dev nodemon`）。
+- 功能更强大，可以配置哪些文件/目录需要 watch，哪些要忽略。
+- 可以配置脚本（比如 `.nodemon.json`），灵活控制重启行为。
+- 适合开发环境，社区使用率高。
+
+示例：
+
+```
+nodemon index.js
+```
+
+------
+
+### 🚀 区别总结
+
+| 特性         | `node --watch`      | `nodemon`                  |
+| ------------ | ------------------- | -------------------------- |
+| 是否内置     | ✅ Node.js 内置      | ❌ 需安装                   |
+| 可配置性     | ❌ 基本没有          | ✅ 很强大                   |
+| 社区使用情况 | 较少用              | 很普遍                     |
+| 适用场景     | 轻量开发 / 简单项目 | 开发环境常用，适合复杂需求 |
+
+------
+
+👉 建议：
+
+- 如果你只是测试用（`start:test`），`node --watch` 足够。
+- 如果是日常开发（`dev`），用 `nodemon` 更合适，因为你能灵活排除 `node_modules`、`.env` 等目录，避免无意义的重启。
+
+要不要我帮你写一个 **`.nodemon.json` 示例**，这样你 `dev` 命令更好控制？
