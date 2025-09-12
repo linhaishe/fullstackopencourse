@@ -60,4 +60,31 @@ test.describe('Blog app', () => {
       await expect(page.getByText('title-test')).toBeVisible();
     });
   });
+
+  test.describe('when after logged in', () => {
+    test('a new note can be created', async ({ page }) => {
+      await loginWith(page, 'miamiamia', 'miamiamia');
+      createBlog(page, {
+        title: 'title-test',
+        author: 'author-test',
+        url: 'url-test',
+      });
+      await expect(page.getByText('add succeed')).toBeVisible();
+      await expect(page.getByText('title-test')).toBeVisible();
+    });
+
+    test('a new note can be liked', async ({ page }) => {
+      await loginWith(page, 'miamiamia', 'miamiamia');
+      createBlog(page, {
+        title: 'liked-title-test',
+        author: 'author-test',
+        url: 'url-test',
+      });
+
+      await page.locator('.showAllBtn').click();
+      await page.locator('.likesBtn').click();
+
+      await expect(page.getByText('likes succeed')).toBeVisible();
+    });
+  });
 });
