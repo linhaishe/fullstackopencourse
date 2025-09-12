@@ -6,7 +6,7 @@ const loginWith = async (page, username, password) => {
 };
 
 const createBlog = async (page, content) => {
-  await page.getByRole('button', { name: 'add new blog' }).click();
+  await page.locator('.toggleBtn').click();
   const textboxes = await page.getByRole('textbox').all();
   await textboxes[0].fill(content.title);
   await textboxes[1].fill(content.author);

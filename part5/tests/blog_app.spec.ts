@@ -16,6 +16,13 @@ test.describe('Blog app', () => {
         password: 'miamiamia',
       },
     });
+    await request.post('/api/users', {
+      data: {
+        name: 'user2',
+        username: 'user2',
+        password: 'user2',
+      },
+    });
 
     await page.goto('/');
   });
@@ -51,7 +58,7 @@ test.describe('Blog app', () => {
   test.describe('when logged in', () => {
     test('a new note can be created', async ({ page }) => {
       await loginWith(page, 'miamiamia', 'miamiamia');
-      createBlog(page, {
+      await createBlog(page, {
         title: 'title-test',
         author: 'author-test',
         url: 'url-test',
@@ -64,7 +71,7 @@ test.describe('Blog app', () => {
   test.describe('when after logged in', () => {
     test('a new note can be created', async ({ page }) => {
       await loginWith(page, 'miamiamia', 'miamiamia');
-      createBlog(page, {
+      await createBlog(page, {
         title: 'title-test',
         author: 'author-test',
         url: 'url-test',
@@ -75,7 +82,7 @@ test.describe('Blog app', () => {
 
     test('a new note can be liked', async ({ page }) => {
       await loginWith(page, 'miamiamia', 'miamiamia');
-      createBlog(page, {
+      await createBlog(page, {
         title: 'liked-title-test',
         author: 'author-test',
         url: 'url-test',
@@ -85,6 +92,51 @@ test.describe('Blog app', () => {
       await page.locator('.likesBtn').click();
 
       await expect(page.getByText('likes succeed')).toBeVisible();
+    });
+
+    test('only the user who added the blog sees the delete button', async ({
+      page,
+    }) => {
+      await loginWith(page, 'miamiamia', 'miamiamia');
+      await expect(page.locator('.toggleBtn')).toBeVisible();
+      await createBlog(page, {
+        title: 'removed-title-test-1',
+        author: 'author-test',
+        url: 'url-test',
+      });
+      await page.locator('.logoutBtn').click();
+      await loginWith(page, 'user2', 'user2');
+      await page.locator('.showAllBtn').click();
+      await expect(page.locator('.removeBtn')).not.toBeVisible();
+    });
+
+    test('the user who added the blog can delete the blog', async ({
+      page,
+    }) => {
+      await loginWith(page, 'miamiamia', 'miamiamia');
+      await expect(page.locator('.toggleBtn')).toBeVisible();
+      await createBlog(page, {
+        title: 'removetest',
+        author: 'author-test',
+        url: 'url-test',
+      });
+      await expect(
+        page.locator('.blogTitle', { hasText: 'removetest' })
+      ).toBeVisible();
+      const blogItem = page.locator('.blogItemWrap');
+      await blogItem.locator('.showAllBtn').click();
+      await expect(blogItem.locator('.removeBtn')).toBeVisible();
+
+      // 先监听弹窗
+      page.on('dialog', async (dialog) => {
+        console.log(`Dialog message: ${dialog.message()}`);
+        await dialog.accept(); // 点 "确定"
+      });
+
+      // 然后再点击删除按钮
+      await page.locator('.removeBtn').click();
+      await expect(blogItem).toHaveCount(0, { timeout: 5000 });
+      await expect(page.getByText('delete succeed')).toBeVisible();
     });
   });
 });

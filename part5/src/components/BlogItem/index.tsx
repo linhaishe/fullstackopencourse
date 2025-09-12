@@ -11,10 +11,10 @@ interface IBlogItem {
 
 export default function BlogItem(props: IBlogItem) {
   return (
-    <div>
+    <div className='blogItemWrap'>
       <div>
         <span>title: </span>
-        <span>{props?.blog?.title}</span>
+        <span className='blogTitle'>{props?.blog?.title}</span>
         <span
           className='showAllBtn'
           onClick={() => {

@@ -66,7 +66,7 @@ const userExtractor = async (request, response, next) => {
 
     request.user = user;
     next();
-    logger.info('userExtractor success');
+    logger.info(`userExtractor success:${user}`);
     logger.info('----');
   } catch (error) {
     next(error);
