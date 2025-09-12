@@ -57,6 +57,7 @@ test.describe('Blog app', () => {
         url: 'url-test',
       });
       await expect(page.getByText('add succeed')).toBeVisible();
+      await expect(page.getByText('title-test')).toBeVisible();
     });
   });
 });
