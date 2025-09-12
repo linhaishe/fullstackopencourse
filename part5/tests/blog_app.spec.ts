@@ -138,5 +138,54 @@ test.describe('Blog app', () => {
       await expect(blogItem).toHaveCount(0, { timeout: 5000 });
       await expect(page.getByText('delete succeed')).toBeVisible();
     });
+
+    test.only('blogs are arranged in the order according to the likes', async ({
+      page,
+    }) => {
+      await loginWith(page, 'miamiamia', 'miamiamia');
+      await createBlog(page, {
+        title: 'Blog 1',
+        author: 'Author A',
+        url: 'url1',
+      });
+      await createBlog(page, {
+        title: 'Blog 2',
+        author: 'Author B',
+        url: 'url2',
+      });
+      await createBlog(page, {
+        title: 'Blog 3',
+        author: 'Author C',
+        url: 'url3',
+      });
+      await expect(page.getByText('Blog 1')).toBeVisible();
+      await expect(page.getByText('Blog 2')).toBeVisible();
+      await expect(page.getByText('Blog 3')).toBeVisible();
+
+      const blogItems = await page.locator('.blogItemWrap').all();
+
+      await blogItems[0].locator('.showAllBtn').click();
+      await blogItems[0].locator('.likesBtn').click();
+      await blogItems[0].locator('.likesBtn').click();
+
+      // Like Blog 2 five times
+      await blogItems[1].locator('.showAllBtn').click();
+      for (let i = 0; i < 5; i++) {
+        await blogItems[1].locator('.likesBtn').click();
+      }
+
+      // Blog 3 no likes
+
+      const blogsAfterLikes = await page.locator('.blogItem').all();
+
+      const likesArray = [];
+      for (const blog of blogsAfterLikes) {
+        const likesText = await blog.locator('.likesCount').innerText();
+        likesArray.push(Number(likesText));
+      }
+
+      const sortedLikes = [...likesArray].sort((a, b) => b - a);
+      expect(likesArray).toEqual(sortedLikes);
+    });
   });
 });

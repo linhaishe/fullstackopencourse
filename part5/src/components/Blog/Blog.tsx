@@ -12,11 +12,10 @@ export default function Blog(props: any) {
     author: '',
     url: '',
   });
-  const blogFormRef = useRef('');
+  const togglableRef = useRef<any>(null);
 
   const handleAddBlog = async (newBlogContent: any) => {
     try {
-      console.log('newBlogContent', newBlogContent);
       await blogsService.create(newBlogContent);
       blogsService.getAll().then((initialNotes) => {
         setBlogs(initialNotes);
@@ -25,6 +24,7 @@ export default function Blog(props: any) {
         type: 'succeed',
         msgContent: 'add succeed',
       });
+      togglableRef.current.toggleVisibility();
     } catch (error) {
       props.setMessage({
         type: 'fail',
@@ -59,7 +59,7 @@ export default function Blog(props: any) {
         setMessage={props.setMessage}
         setBlogs={setBlogs}
       />
-      <Togglable buttonLabel='add new blog' ref={blogFormRef}>
+      <Togglable buttonLabel='add new blog' ref={togglableRef}>
         <AddBlogs
           handleAddBlog={handleAddBlog}
           setNewBlog={setNewBlog}

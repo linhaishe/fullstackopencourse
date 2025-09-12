@@ -46,7 +46,7 @@ export default function BlogItem(props: IBlogItem) {
         </div>
         <div>
           {'likes: '}
-          {props?.blog?.likes}
+          <span className='likesCount'>{props?.blog?.likes}</span>
           <span
             className='likesBtn'
             onClick={() => {
