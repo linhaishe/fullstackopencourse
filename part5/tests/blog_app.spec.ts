@@ -48,14 +48,15 @@ test.describe('Blog app', () => {
     });
   });
 
-  // test.describe('when logged in', () => {
-  //   test('a new note can be created', async ({ page }) => {
-  //     createBlog(page, {
-  //       title: 'title-test',
-  //       author: 'author-test',
-  //       url: 'url-test',
-  //     });
-  //     await expect(page.getByText('add succeed')).toBeVisible();
-  //   });
-  // });
+  test.describe('when logged in', () => {
+    test('a new note can be created', async ({ page }) => {
+      await loginWith(page, 'miamiamia', 'miamiamia');
+      createBlog(page, {
+        title: 'title-test',
+        author: 'author-test',
+        url: 'url-test',
+      });
+      await expect(page.getByText('add succeed')).toBeVisible();
+    });
+  });
 });
