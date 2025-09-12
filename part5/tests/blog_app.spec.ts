@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { createBlog, loginWith } from './helper';
 
-// test.beforeEach('for test', async ({ page }) => {
-//   await page.goto('http://localhost:5173');
-// });
+test.beforeEach('for test', async ({ page }) => {
+  await page.goto('/');
+});
 
 test.describe('Blog app', () => {
   test.beforeEach(async ({ page, request }) => {
@@ -16,15 +16,16 @@ test.describe('Blog app', () => {
       },
     });
 
-    await page.goto('http://localhost:5173');
+    await page.goto('/');
   });
-  test('front page can be opened', async ({ page }) => {
-    // await page.goto('http://localhost:5173');
+
+  test.only('Login form is shown', async ({ page }) => {
     await page.goto('/');
 
     const locator = page.getByText('Login').first();
     await expect(locator).toBeVisible();
     await expect(page.getByText('username')).toBeVisible();
+    await expect(page.getByText('password')).toBeVisible();
   });
 
   test('user can log in', async ({ page }) => {
