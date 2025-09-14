@@ -19,19 +19,24 @@ const asObject = (anecdote) => {
 
 const initialState = anecdotesAtStart.map(asObject);
 
+const actionType = {
+  VOTE: 'VOTE',
+  ADD: 'ADD',
+};
+
 const counterReducer = (state = initialState, action) => {
-  console.log('state now: ', state);
-  console.log('action', action);
   switch (action.type) {
-    case 'INCREMENT':
+    case actionType.VOTE:
       return state.map((item) =>
         item.id === action.payload.id
           ? { ...item, votes: (item?.votes || 0) + 1 }
           : item
       );
+    case actionType.ADD:
+      return [...state, asObject(action.payload.newNote)];
     default:
       return state;
   }
 };
 
-export { counterReducer, initialState };
+export { counterReducer, initialState, actionType };

@@ -1,12 +1,12 @@
 /* eslint-disable no-undef */
-import { counterReducer, initialState } from './anecdoteReducer.js';
+import { counterReducer, initialState, actionType } from './anecdoteReducer.js';
 import deepFreeze from 'deep-freeze';
 
 describe('counterReducer', () => {
   test('returns new state with action NEW_NOTE', () => {
     const state = initialState;
     const action = {
-      type: 'INCREMENT',
+      type: actionType.VOTE,
       payload: {
         id: initialState?.[0]?.id,
       },

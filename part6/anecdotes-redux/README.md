@@ -17,3 +17,9 @@ We added a new note to the state with the method state.push(action.payload) whic
 A reducer state must be composed of immutable objects. If there is a change in the state, the old object is not changed, but it is replaced with a new, changed, object. This is exactly what we did with the new reducer: the old array is replaced with the new one.
 
 We'll also add the library deep-freeze, which can be used to ensure that the reducer has been correctly defined as an immutable function.
+
+`useSelector` receives a function as a parameter. The function either searches for or selects data from the Redux store. Here we need all of the notes, so our selector function returns the whole state:
+
+```js
+const anecdotes = useSelector((state) => state);
+```

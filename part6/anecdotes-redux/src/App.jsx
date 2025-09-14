@@ -1,10 +1,19 @@
 import { useSelector, useDispatch } from 'react-redux';
 import './App.css';
+import { useState } from 'react';
+import { actionType } from './reducers/anecdoteReducer';
 
 const App = () => {
   const anecdotes = useSelector((state) => state);
   const dispatch = useDispatch();
+  const [note, setNote] = useState('');
 
+  const addNote = () => {
+    dispatch({
+      type: actionType.ADD,
+      payload: { newNote: note },
+    });
+  };
   return (
     <div>
       <h2>Anecdotes</h2>
@@ -15,7 +24,10 @@ const App = () => {
             has {anecdote.votes}
             <button
               onClick={() =>
-                dispatch({ type: 'INCREMENT', payload: { id: anecdote.id } })
+                dispatch({
+                  type: actionType.VOTE,
+                  payload: { id: anecdote.id },
+                })
               }
             >
               vote
@@ -24,12 +36,16 @@ const App = () => {
         </div>
       ))}
       <h2>create new</h2>
-      <form>
-        <div>
-          <input />
-        </div>
-        <button>create</button>
-      </form>
+      <div>
+        <input
+          value={note}
+          onChange={(e) => {
+            e.preventDefault();
+            setNote(e.target.value);
+          }}
+        />
+      </div>
+      <button onClick={addNote}>create</button>
     </div>
   );
 };
