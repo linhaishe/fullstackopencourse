@@ -27,11 +27,13 @@ const actionType = {
 const counterReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionType.VOTE:
-      return state.map((item) =>
-        item.id === action.payload.id
-          ? { ...item, votes: (item?.votes || 0) + 1 }
-          : item
-      );
+      return state
+        .map((item) =>
+          item.id === action.payload.id
+            ? { ...item, votes: (item?.votes || 0) + 1 }
+            : item
+        )
+        .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
     case actionType.ADD:
       return [...state, asObject(action.payload.newNote)];
     default:
