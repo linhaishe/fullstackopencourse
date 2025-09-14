@@ -1,27 +1,30 @@
 import { useDispatch } from 'react-redux';
-import { voteNote } from '../reducers/anecdoteReducer';
+import { createNote } from '../reducers/anecdoteReducer';
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 
-export default function AnecdoteForm(props) {
+export default function AnecdoteFrom() {
   const dispatch = useDispatch();
-
+  const [note, setNote] = useState('');
+  const addNote = () => {
+    dispatch(createNote(note));
+  };
   return (
     <div>
-      {props?.anecdotes?.map((anecdote) => (
-        <div key={anecdote.id}>
-          <div>{anecdote.content}</div>
-          <div>
-            has {anecdote.votes}
-            <button onClick={() => dispatch(voteNote(anecdote.id))}>
-              vote
-            </button>
-          </div>
-        </div>
-      ))}
+      <div>
+        <input
+          value={note}
+          onChange={(e) => {
+            e.preventDefault();
+            setNote(e.target.value);
+          }}
+        />
+      </div>
+      <button onClick={addNote}>create</button>
     </div>
   );
 }
 
-AnecdoteForm.propTypes = {
+AnecdoteFrom.propTypes = {
   anecdotes: PropTypes.array.isRequired,
 };
