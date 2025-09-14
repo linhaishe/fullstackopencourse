@@ -1,18 +1,30 @@
+# part5
+
+## about project
+
+处理了针对blog的前端展示、增加前端的unit test和app整体的e2e test.
+
+需要和part4服务端启动后一起使用。
+
+前后端本地运行`npm run dev`即可启动。
+
+服务端需要看是否成功链接mongodb，需要在新加坡节点切全局模式，因为服务器选择开在了新加坡节点下。
+
 # Frontend unit Test
 
 The course previously used the [Jest](http://jestjs.io/) library developed by Facebook to test React components. We are now using the new generation of testing tools from Vite developers called [Vitest](https://vitest.dev/). Apart from the configurations, the libraries provide the same programming interface, so there is virtually no difference in the test code.
 
 Let's start by installing Vitest and the [jsdom](https://github.com/jsdom/jsdom) library simulating a web browser:
 
-```js
+```bash
 npm install --save-dev vitest jsdom
 ```
 
 In addition to Vitest, we also need another testing library that will help us render components for testing purposes. The current best option for this is [react-testing-library](https://github.com/testing-library/react-testing-library) which has seen rapid growth in popularity in recent times. It is also worth extending the expressive power of the tests with the library [jest-dom](https://github.com/testing-library/jest-dom).
 
-```
+```js
 import { defineConfig } from 'vitest/config';
-
+// to
 import { defineConfig } from 'vite'
 ```
 
@@ -57,15 +69,15 @@ test('renders content', () => {
 
 Let us install a library [user-event](https://testing-library.com/docs/user-event/intro) that makes simulating user input a bit easier:
 
-Check docs
-
 The expectation of the test uses [toHaveLength](https://vitest.dev/api/expect.html#tohavelength) to verify that the *mock function* has been called exactly once:
 
 [Mock objects and functions](https://en.wikipedia.org/wiki/Mock_object) are commonly used [stub](https://en.wikipedia.org/wiki/Method_stub) components in testing that are used for replacing dependencies of the components being tested. 
 
 We can easily find out the [coverage](https://vitest.dev/guide/coverage.html#coverage) of our tests by running them with the command.
 
-```js
+Check docs
+
+```bash
 npm test -- --coverage
 ```
 
@@ -73,11 +85,11 @@ A HTML report will be generated to the *coverage* directory. The report will tel
 
 ### Frontend integration tests
 
-In the previous part of the course material, we wrote integration tests for the backend that tested its logic and connected the database through the API provided by the backend. When writing these tests, we made the conscious decision not to write unit tests, as the code for that backend is fairly simple, and it is likely that bugs in our application occur in more complicated scenarios than unit tests are well suited for.
+In the previous part of the course material, we wrote integration tests for the backend that tested its logic and connected the database through the API provided by the backend. When writing these tests, ==we made the conscious decision not to write unit tests==, as the code for that backend is fairly simple, and it is likely that bugs in our application occur in more complicated scenarios than unit tests are well suited for.
 
-So far all of our tests for the frontend have been unit tests that have validated the correct functioning of individual components. Unit testing is useful at times, but even a comprehensive suite of unit tests is not enough to validate that the application works as a whole.
+So far all of our tests for the frontend have been unit tests that have validated the correct functioning of individual components. ==Unit testing is useful at times, but even a comprehensive suite of unit tests is not enough to validate that the application works as a whole.==
 
-We could also make integration tests for the frontend. Integration testing tests the collaboration of multiple components. It is considerably more difficult than unit testing, as we would have to for example mock data from the server. We chose to concentrate on making end-to-end tests to test the whole application. We will work on the end-to-end tests in the last chapter of this part.
+==We could also make integration tests for the frontend.== Integration testing tests the collaboration of multiple components. It is considerably more difficult than unit testing, as we would have to for example mock data from the server. We chose to concentrate on making end-to-end tests to test the whole application. We will work on the end-to-end tests in the last chapter of this part.
 
 ### Snapshot testing
 
@@ -95,7 +107,7 @@ Next, we will look into one way to test the [system as a whole](https://en.wikip
 
 We can do E2E testing of a web application using a browser and a testing library. There are multiple libraries available. One example is [Selenium](http://www.seleniumhq.org/), which can be used with almost any browser. Another browser option is so-called [headless browsers](https://en.wikipedia.org/wiki/Headless_browser), which are browsers with no graphical user interface. For example, Chrome can be used in headless mode.
 
-They do have some drawbacks too. Configuring E2E tests is more challenging than unit or integration tests. They also tend to be quite slow, and with a large system, their execution time can be minutes or even hours. This is bad for development because during coding it is beneficial to be able to run tests as often as possible in case of code [regressions](https://en.wikipedia.org/wiki/Regression_testing).
+They do have some drawbacks too. ==Configuring E2E tests is more challenging than unit or integration tests.== They also tend to be quite slow, and with a large system, their execution time can be minutes or even hours. This is bad for development because during coding it is beneficial to be able to run tests as often as possible in case of code [regressions](https://en.wikipedia.org/wiki/Regression_testing).
 
 E2E tests can also be [flaky](https://hackernoon.com/flaky-tests-a-war-that-never-ends-9aa32fdef359). Some tests might pass one time and fail another, even if the code does not change at all.
 
@@ -105,8 +117,8 @@ Many blogs have been written about library comparisons, e.g. [this](https://www.
 
 可能会遇到无法适配palywright安装的浏览器，则可以用命令指定对应的浏览器环境下测试.or remove the entry for any problematic browsers from your *playwright.config.js* file:
 
-```
-"test": "playwright test --project=chromium --project=firefox",
+```json
+"test": "playwright test --project=chromium --project=firefox", // 走对应的浏览器测试
 
   projects: [
     // ...
@@ -120,16 +132,11 @@ Many blogs have been written about library comparisons, e.g. [this](https://www.
 
 The tests pass. A more detailed test report can be opened either with the command suggested by the output, or with the npm script we just defined:
 
-```text
+```bash
 npm run test:report
 ```
 
-
-
-NODE_ENV=test是怎么个东西？
-
 ```bash
-
 Inside that directory, you can run several commands:
 
   npx playwright test
@@ -166,13 +173,7 @@ Happy hacking! 🎭
 
 ![image-20250912102638684](https://s2.loli.net/2025/09/12/nskD3it8pqH2UXo.png)
 
-```
-npm run start:test
-
-// 服务端这个命令没有能跑起来
-```
-
-```js
+```bash
 npm test -- --project chromium
 
 //  the testing takes place with all three commonly used browser engines, but this is slow, and when developing the tests it is probably best to carry them out mainly with only one browser. You can define the browser engine to be used with the command line parameter:
@@ -181,7 +182,7 @@ npm test -- --ui
 When developing tests, you could use Playwright's UI mode, i.e. the user interface version. Let's start the tests in UI mode as follows:
 ```
 
-```
+```js
   // this is the only test executed!
   test.only('login fails with wrong password', async ({ page }) => {
     // ...
@@ -369,20 +370,12 @@ const updateField = (key: string, value: any) => {
 
 ---
 
-待解决问题
-
-1. msg 连续两次错误则不会在展示
-2. ts
-3. 修正 node 的笔记，服务端的 test 应该有更适合的 test lib
-
----
-
 `semi: ['error', 'never']` 这个 ESLint 规则的意思是：**禁止在语句末尾写分号**。
  （即使你写了，ESLint 也会报错，让你去掉。）
 
 ------
 
-### 那为什么很多项目能不用分号？
+## 3. 那为什么很多项目能不用分号？
 
 这是因为 **JavaScript 有自动分号插入机制 (ASI, Automatic Semicolon Insertion)**。
 
@@ -445,7 +438,6 @@ const a = b + c;
 ##  3. "start:test": "cross-env NODE_ENV=test node --watch index.js"     "dev": "cross-env NODE_ENV=development nodemon index.js", --watch 和nodemon 有啥区别？
 
 
-
 这两个其实作用相似，都是 **代码改动时自动重启服务**，但原理和特性不同：
 
 ------
@@ -496,5 +488,3 @@ nodemon index.js
 
 - 如果你只是测试用（`start:test`），`node --watch` 足够。
 - 如果是日常开发（`dev`），用 `nodemon` 更合适，因为你能灵活排除 `node_modules`、`.env` 等目录，避免无意义的重启。
-
-要不要我帮你写一个 **`.nodemon.json` 示例**，这样你 `dev` 命令更好控制？
