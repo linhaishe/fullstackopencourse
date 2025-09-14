@@ -1,7 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux';
 import './App.css';
 import { useState } from 'react';
-import { createNote, voteNote } from './reducers/anecdoteReducer';
+import { createNote } from './reducers/anecdoteReducer';
+import AnecdoteForm from './components/AnecdoteForm.jsx';
 
 const App = () => {
   const anecdotes = useSelector((state) => state);
@@ -14,17 +15,7 @@ const App = () => {
   return (
     <div>
       <h2>Anecdotes</h2>
-      {anecdotes?.map((anecdote) => (
-        <div key={anecdote.id}>
-          <div>{anecdote.content}</div>
-          <div>
-            has {anecdote.votes}
-            <button onClick={() => dispatch(voteNote(anecdote.id))}>
-              vote
-            </button>
-          </div>
-        </div>
-      ))}
+      <AnecdoteForm anecdotes={anecdotes} />
       <h2>create new</h2>
       <div>
         <input
