@@ -24,6 +24,24 @@ const actionType = {
   ADD: 'ADD',
 };
 
+const createNote = (newNote) => {
+  return {
+    type: actionType.ADD,
+    payload: {
+      newNote,
+    },
+  };
+};
+
+const voteNote = (id) => {
+  return {
+    type: actionType.VOTE,
+    payload: {
+      id,
+    },
+  };
+};
+
 const counterReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionType.VOTE:
@@ -41,4 +59,4 @@ const counterReducer = (state = initialState, action) => {
   }
 };
 
-export { counterReducer, initialState, actionType };
+export { counterReducer, initialState, actionType, createNote, voteNote };

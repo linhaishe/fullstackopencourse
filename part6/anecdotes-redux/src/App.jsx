@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import './App.css';
 import { useState } from 'react';
-import { actionType } from './reducers/anecdoteReducer';
+import { createNote, voteNote } from './reducers/anecdoteReducer';
 
 const App = () => {
   const anecdotes = useSelector((state) => state);
@@ -9,10 +9,7 @@ const App = () => {
   const [note, setNote] = useState('');
 
   const addNote = () => {
-    dispatch({
-      type: actionType.ADD,
-      payload: { newNote: note },
-    });
+    dispatch(createNote(note));
   };
   return (
     <div>
@@ -22,14 +19,7 @@ const App = () => {
           <div>{anecdote.content}</div>
           <div>
             has {anecdote.votes}
-            <button
-              onClick={() =>
-                dispatch({
-                  type: actionType.VOTE,
-                  payload: { id: anecdote.id },
-                })
-              }
-            >
+            <button onClick={() => dispatch(voteNote(anecdote.id))}>
               vote
             </button>
           </div>
