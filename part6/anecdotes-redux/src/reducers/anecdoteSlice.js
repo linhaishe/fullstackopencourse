@@ -6,19 +6,16 @@ const noteSlice = createSlice({
   initialState: [],
   reducers: {
     voteNote(state, action) {
-      return [...state]
-        .map((item) =>
-          item.id === action.payload.id
-            ? { ...item, votes: (item?.votes || 0) + 1 }
-            : item
-        )
-        .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
+      return [
+        ...state.filter((note) => note.id !== action.payload.id),
+        action.payload,
+      ].sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
     },
     appendNote(state, action) {
       return [...state, action.payload];
     },
     setNotes(state, action) {
-      return action.payload;
+      return action.payload.sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
     },
   },
 });
@@ -36,6 +33,15 @@ export const createNote = (content) => {
   return async (dispatch) => {
     const newNote = await noteService.createNew(content);
     dispatch(appendNote(newNote));
+  };
+};
+
+export const voteAnecdote = (id) => {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const note = state?.notes?.find((n) => n.id === id);
+    const updated = await noteService.voteNote(id, (note.votes || 0) + 1);
+    dispatch(voteNote(updated));
   };
 };
 

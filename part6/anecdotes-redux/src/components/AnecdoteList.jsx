@@ -4,6 +4,7 @@ import {
   setNotification,
   clearNotification,
 } from '../reducers/notificationSlice';
+import { voteAnecdote } from '../reducers/anecdoteSlice';
 export default function AnecdoteList(props) {
   const dispatch = useDispatch();
   const notify = (message) => {
@@ -22,12 +23,7 @@ export default function AnecdoteList(props) {
             has {anecdote.votes}
             <button
               onClick={() => {
-                dispatch({
-                  type: 'notes/voteNote',
-                  payload: {
-                    id: anecdote.id,
-                  },
-                });
+                dispatch(voteAnecdote(anecdote.id));
                 notify(`You voted for: "${anecdote.content}"`);
               }}
             >
