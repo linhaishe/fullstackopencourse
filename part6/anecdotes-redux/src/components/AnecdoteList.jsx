@@ -1,8 +1,15 @@
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-
+import {
+  setNotification,
+  clearNotification,
+} from '../reducers/notificationSlice';
 export default function AnecdoteList(props) {
   const dispatch = useDispatch();
+  const notify = (message) => {
+    dispatch(setNotification(message));
+    setTimeout(() => dispatch(clearNotification()), 5000);
+  };
 
   return (
     <div>
@@ -12,14 +19,15 @@ export default function AnecdoteList(props) {
           <div>
             has {anecdote.votes}
             <button
-              onClick={() =>
+              onClick={() => {
                 dispatch({
                   type: 'notes/voteNote',
                   payload: {
                     id: anecdote.id,
                   },
-                })
-              }
+                });
+                notify(`You voted for: "${anecdote.content}"`);
+              }}
             >
               vote
             </button>
