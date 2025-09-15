@@ -9,7 +9,7 @@ const noteSlice = createSlice({
       return [...state, asObject(action.payload.newNote)];
     },
     voteNote(state, action) {
-      return state
+      return [...state]
         .map((item) =>
           item.id === action.payload.id
             ? { ...item, votes: (item?.votes || 0) + 1 }
