@@ -1,12 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { initialState, asObject } from '../const';
 
 const noteSlice = createSlice({
   name: 'notes',
-  initialState,
+  initialState: [],
   reducers: {
     createNote(state, action) {
-      return [...state, asObject(action.payload.newNote)];
+      return [...state, action.payload.newNote];
     },
     voteNote(state, action) {
       return [...state]
@@ -17,8 +16,15 @@ const noteSlice = createSlice({
         )
         .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
     },
+    appendNote(state, action) {
+      state.push(action.payload);
+    },
+    setNotes(state, action) {
+      console.log(888, action.payload);
+      return action.payload;
+    },
   },
 });
 
-export const { createNote, voteNote } = noteSlice.actions;
+export const { createNote, voteNote, appendNote, setNotes } = noteSlice.actions;
 export default noteSlice.reducer;

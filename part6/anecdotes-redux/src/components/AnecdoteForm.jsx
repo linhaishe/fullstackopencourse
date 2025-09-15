@@ -1,12 +1,14 @@
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-
+import noteService from '../services/notes';
 export default function AnecdoteFrom() {
   const dispatch = useDispatch();
   const [note, setNote] = useState('');
-  const addNote = () => {
-    dispatch({ type: 'notes/createNote', payload: { newNote: note } });
+  const addNote = async () => {
+    const newNote = await noteService.createNew(note);
+    dispatch({ type: 'notes/createNote', payload: { newNote } });
+    setNote('');
   };
 
   return (

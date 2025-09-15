@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { counterReducer, initialState, actionType } from './anecdoteReducer.js';
+import { counterReducer, initialState, actionType } from './anecdoteSlice.js';
 import deepFreeze from 'deep-freeze';
 
 describe('counterReducer', () => {

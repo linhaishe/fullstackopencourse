@@ -23,3 +23,15 @@ We'll also add the library deep-freeze, which can be used to ensure that the red
 ```js
 const anecdotes = useSelector((state) => state);
 ```
+
+Install *json-server* as a development dependency (only used during development) by executing the command:
+
+```js
+npm install json-server --save-dev
+
+"scripts": {
+  "server": "json-server -p3001 --watch db.json",
+  // ...
+}
+```
+

@@ -1,12 +1,15 @@
 import { useSelector, useDispatch } from 'react-redux';
-import './App.css';
+import { useEffect, useState } from 'react';
 import AnecdoteForm from './components/AnecdoteForm.jsx';
 import AnecdoteList from './components/AnecdoteList.jsx';
 import AnecdoteFilter from './components/AnecdoteFilter.jsx';
 import Notification from './components/Notification.jsx';
-import { useState } from 'react';
+import { setNotes } from './reducers/anecdoteSlice.js';
+import noteService from './services/notes';
+import './App.css';
 
 const App = () => {
+  const dispatch = useDispatch();
   const anecdotes = useSelector((state) => state);
   const [filterText, seFilterText] = useState('');
   const filteredNotes = anecdotes.notes.filter((note) =>
@@ -14,6 +17,10 @@ const App = () => {
       ? true
       : note.content.toLowerCase().includes(filterText.toLowerCase())
   );
+
+  useEffect(() => {
+    noteService.getAll().then((notes) => dispatch(setNotes(notes)));
+  }, []);
 
   return (
     <div>

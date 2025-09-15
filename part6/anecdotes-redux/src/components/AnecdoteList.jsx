@@ -11,6 +11,8 @@ export default function AnecdoteList(props) {
     setTimeout(() => dispatch(clearNotification()), 5000);
   };
 
+  // debugger;
+
   return (
     <div>
       {props?.anecdotes?.map((anecdote) => (

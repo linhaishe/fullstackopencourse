@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom/client';
 // import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import App from './App';
-import noteReducer from './reducers/anecdoteReducer';
+import noteReducer from './reducers/anecdoteSlice';
 import notificationReducer from './reducers/notificationSlice';
 import { configureStore } from '@reduxjs/toolkit';
 
