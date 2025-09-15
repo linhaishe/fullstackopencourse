@@ -6,3 +6,9 @@ export const getNotes = () => axios.get(baseUrl).then((res) => res.data);
 
 export const createNote = (newNote) =>
   axios.post(baseUrl, newNote).then((res) => res.data);
+
+export const updateNote = (params) => {
+  axios
+    .patch(`${baseUrl}/${params.id}`, { votes: params.votes })
+    .then((res) => res.data);
+};
