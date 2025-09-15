@@ -23,7 +23,7 @@ const App = () => {
     refetchOnWindowFocus: false,
     retry: false,
   });
-  console.log(111, JSON.parse(JSON.stringify(result)).data);
+  console.log(JSON.parse(JSON.stringify(result)).data);
 
   if (result.isLoading) {
     return <div>loading data...</div>;
@@ -34,16 +34,19 @@ const App = () => {
   }
 
   const notes = result.data;
-  console.log('notes', notes);
 
   return (
     <div>
       <h3>Anecdote app</h3>
       <Notification />
       <AnecdoteForm />
-      {notes?.map((anecdote) => (
+      {notes?.map((anecdote, idx) => (
         <div key={anecdote.id}>
-          <div>{anecdote.content}</div>
+          <div>
+            {idx}
+            {'. '}
+            {anecdote.content}
+          </div>
           <div>
             has {anecdote.votes}
             <button onClick={() => handleVote(anecdote)}>vote</button>
