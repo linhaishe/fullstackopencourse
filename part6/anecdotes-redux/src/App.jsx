@@ -3,6 +3,7 @@ import './App.css';
 import AnecdoteForm from './components/AnecdoteForm.jsx';
 import AnecdoteList from './components/AnecdoteList.jsx';
 import AnecdoteFilter from './components/AnecdoteFilter.jsx';
+import Notification from './components/Notification.jsx';
 import { useState } from 'react';
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
   return (
     <div>
       <h2>Anecdotes</h2>
+      <Notification />
       <AnecdoteFilter seFilterText={seFilterText} />
       <AnecdoteList anecdotes={filteredNotes} />
       <h2>create new</h2>
