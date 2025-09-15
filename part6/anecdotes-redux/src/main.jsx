@@ -1,18 +1,7 @@
 import ReactDOM from 'react-dom/client';
-// import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import App from './App';
-import noteReducer from './reducers/anecdoteSlice';
-import notificationReducer from './reducers/notificationSlice';
-import { configureStore } from '@reduxjs/toolkit';
-
-// const store = createStore(counterReducer);
-const store = configureStore({
-  reducer: {
-    notes: noteReducer,
-    notification: notificationReducer,
-  },
-});
+import store from './store';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
