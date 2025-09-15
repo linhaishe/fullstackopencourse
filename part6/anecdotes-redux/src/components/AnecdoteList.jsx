@@ -1,18 +1,14 @@
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import {
-  setNotification,
-  clearNotification,
-} from '../reducers/notificationSlice';
+import { showNotification } from '../reducers/notificationSlice';
 import { voteAnecdote } from '../reducers/anecdoteSlice';
 export default function AnecdoteList(props) {
   const dispatch = useDispatch();
   const notify = (message) => {
-    dispatch(setNotification(message));
-    setTimeout(() => dispatch(clearNotification()), 5000);
+    // dispatch(setNotification(message));
+    // setTimeout(() => dispatch(clearNotification()), 5000);
+    dispatch(showNotification(message, 5));
   };
-
-  // debugger;
 
   return (
     <div>
