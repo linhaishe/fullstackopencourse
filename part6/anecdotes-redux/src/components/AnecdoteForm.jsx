@@ -1,13 +1,13 @@
 import { useDispatch } from 'react-redux';
-import PropTypes from 'prop-types';
 import { useState } from 'react';
-import noteService from '../services/notes';
+import { createNote } from '../reducers/anecdoteSlice';
 export default function AnecdoteFrom() {
   const dispatch = useDispatch();
   const [note, setNote] = useState('');
   const addNote = async () => {
-    const newNote = await noteService.createNew(note);
-    dispatch({ type: 'notes/createNote', payload: { newNote } });
+    // const newNote = await noteService.createNew(note);
+    // dispatch({ type: 'notes/createNote', payload: { newNote } });
+    dispatch(createNote(note));
     setNote('');
   };
 
@@ -26,7 +26,3 @@ export default function AnecdoteFrom() {
     </div>
   );
 }
-
-AnecdoteFrom.propTypes = {
-  anecdotes: PropTypes.array.isRequired,
-};

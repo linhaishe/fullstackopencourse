@@ -1,16 +1,16 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
 import AnecdoteForm from './components/AnecdoteForm.jsx';
 import AnecdoteList from './components/AnecdoteList.jsx';
 import AnecdoteFilter from './components/AnecdoteFilter.jsx';
 import Notification from './components/Notification.jsx';
-import { setNotes } from './reducers/anecdoteSlice.js';
-import noteService from './services/notes';
+import { initializeNotes } from './reducers/anecdoteSlice.js';
 import './App.css';
 
 const App = () => {
-  const dispatch = useDispatch();
   const anecdotes = useSelector((state) => state);
+  const dispatch = useDispatch();
   const [filterText, seFilterText] = useState('');
   const filteredNotes = anecdotes.notes.filter((note) =>
     filterText.trim() === ''
@@ -19,7 +19,7 @@ const App = () => {
   );
 
   useEffect(() => {
-    noteService.getAll().then((notes) => dispatch(setNotes(notes)));
+    dispatch(initializeNotes());
   }, []);
 
   return (

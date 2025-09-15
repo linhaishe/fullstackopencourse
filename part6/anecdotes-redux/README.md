@@ -35,3 +35,4 @@ npm install json-server --save-dev
 }
 ```
 
+With Redux Thunk it is possible to implement *action creators* which return a function instead of an object. The function receives Redux store's *dispatch* and *getState* methods as parameters. 
