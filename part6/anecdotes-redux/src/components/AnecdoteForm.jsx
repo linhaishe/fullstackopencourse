@@ -1,9 +1,11 @@
 import { useDispatch } from 'react-redux';
 import { useState } from 'react';
 import { createNote } from '../reducers/anecdoteSlice';
+
 export default function AnecdoteFrom() {
   const dispatch = useDispatch();
   const [note, setNote] = useState('');
+
   const addNote = async () => {
     // const newNote = await noteService.createNew(note);
     // dispatch({ type: 'notes/createNote', payload: { newNote } });

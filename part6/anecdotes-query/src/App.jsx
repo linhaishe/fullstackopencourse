@@ -2,6 +2,8 @@ import AnecdoteForm from './components/AnecdoteForm';
 import Notification from './components/Notification';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getNotes, updateNote } from './requests';
+import { useNotification } from './NotificationContext';
+
 import './App.css';
 
 const App = () => {
@@ -12,6 +14,7 @@ const App = () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
+  const { showNotification } = useNotification();
 
   const result = useQuery({
     queryKey: ['notes'],
@@ -31,8 +34,12 @@ const App = () => {
 
   const notes = result.data;
 
-  const handleVote = (id, votes) => {
-    updateNoteMutation.mutate({ id, votes });
+  const handleVote = (item) => {
+    updateNoteMutation.mutate({
+      id: item.id,
+      votes: (item.votes || 0) + 1,
+    });
+    showNotification(item.content);
   };
 
   return (
@@ -49,11 +56,7 @@ const App = () => {
           </div>
           <div>
             has {anecdote.votes}
-            <button
-              onClick={() => handleVote(anecdote.id, (anecdote.votes || 0) + 1)}
-            >
-              vote
-            </button>
+            <button onClick={() => handleVote(anecdote)}>vote</button>
           </div>
         </div>
       ))}
