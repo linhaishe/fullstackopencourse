@@ -11,11 +11,15 @@ const App = () => {
   const { showNotification } = useNotification();
   const updateNoteMutation = useMutation({
     mutationFn: updateNote,
+    // vote会有一个问题，前端是先patch再请求了/anecdotes，但是服务端的响应log,看到的是先请求了/anecdotes，再patch，然后导致前端的数据没有及时更新votes
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      queryClient.invalidateQueries({ queryKey: ['notes'], exact: true });
     },
     onError: (err) => {
       showNotification(err?.response?.data?.error || err.code);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'], exact: true });
     },
   });
 
@@ -53,7 +57,7 @@ const App = () => {
       {notes?.map((anecdote, idx) => (
         <div key={anecdote.id}>
           <div>
-            {idx}
+            {anecdote.id}
             {'. '}
             {anecdote.content}
           </div>

@@ -21,6 +21,7 @@ const AnecdoteForm = () => {
     const content = event.target.anecdote.value;
     newNoteMutation.mutate({
       content,
+      votes: 0,
     });
     showNotification(`you add ${event.target.anecdote.value}`);
     event.target.anecdote.value = '';
