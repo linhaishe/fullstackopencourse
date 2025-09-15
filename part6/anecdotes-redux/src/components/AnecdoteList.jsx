@@ -1,5 +1,4 @@
 import { useDispatch } from 'react-redux';
-import { voteNote } from '../reducers/anecdoteReducer';
 import PropTypes from 'prop-types';
 
 export default function AnecdoteList(props) {
@@ -12,7 +11,16 @@ export default function AnecdoteList(props) {
           <div>{anecdote.content}</div>
           <div>
             has {anecdote.votes}
-            <button onClick={() => dispatch(voteNote(anecdote.id))}>
+            <button
+              onClick={() =>
+                dispatch({
+                  type: 'notes/voteNote',
+                  payload: {
+                    id: anecdote.id,
+                  },
+                })
+              }
+            >
               vote
             </button>
           </div>

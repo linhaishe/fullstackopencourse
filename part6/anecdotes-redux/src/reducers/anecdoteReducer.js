@@ -1,50 +1,14 @@
-const anecdotesAtStart = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
-];
+import { createSlice } from '@reduxjs/toolkit';
+import { initialState, asObject } from '../const';
 
-const getId = () => (100000 * Math.random()).toFixed(0);
-
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0,
-  };
-};
-
-const initialState = anecdotesAtStart.map(asObject);
-
-const actionType = {
-  VOTE: 'VOTE',
-  ADD: 'ADD',
-};
-
-const createNote = (newNote) => {
-  return {
-    type: actionType.ADD,
-    payload: {
-      newNote,
+const noteSlice = createSlice({
+  name: 'notes',
+  initialState,
+  reducers: {
+    createNote(state, action) {
+      return [...state, asObject(action.payload.newNote)];
     },
-  };
-};
-
-const voteNote = (id) => {
-  return {
-    type: actionType.VOTE,
-    payload: {
-      id,
-    },
-  };
-};
-
-const counterReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case actionType.VOTE:
+    voteNote(state, action) {
       return state
         .map((item) =>
           item.id === action.payload.id
@@ -52,11 +16,9 @@ const counterReducer = (state = initialState, action) => {
             : item
         )
         .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
-    case actionType.ADD:
-      return [...state, asObject(action.payload.newNote)];
-    default:
-      return state;
-  }
-};
+    },
+  },
+});
 
-export { counterReducer, initialState, actionType, createNote, voteNote };
+export const { createNote, voteNote } = noteSlice.actions;
+export default noteSlice.reducer;

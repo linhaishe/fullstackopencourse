@@ -1,5 +1,4 @@
 import { useDispatch } from 'react-redux';
-import { createNote } from '../reducers/anecdoteReducer';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 
@@ -7,8 +6,9 @@ export default function AnecdoteFrom() {
   const dispatch = useDispatch();
   const [note, setNote] = useState('');
   const addNote = () => {
-    dispatch(createNote(note));
+    dispatch({ type: 'notes/createNote', payload: { newNote: note } });
   };
+
   return (
     <div>
       <div>
