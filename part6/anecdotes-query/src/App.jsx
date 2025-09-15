@@ -8,13 +8,16 @@ import './App.css';
 
 const App = () => {
   const queryClient = useQueryClient();
+  const { showNotification } = useNotification();
   const updateNoteMutation = useMutation({
     mutationFn: updateNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
+    onError: (err) => {
+      showNotification(err?.response?.data?.error || err.code);
+    },
   });
-  const { showNotification } = useNotification();
 
   const result = useQuery({
     queryKey: ['notes'],

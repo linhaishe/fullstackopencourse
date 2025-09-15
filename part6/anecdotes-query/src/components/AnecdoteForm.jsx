@@ -4,19 +4,21 @@ import { useNotification } from '../NotificationContext';
 
 const AnecdoteForm = () => {
   const queryClient = useQueryClient();
+  const { showNotification } = useNotification();
   const newNoteMutation = useMutation({
     mutationFn: createNote,
     // This in turn causes React Query to automatically update a query with the key notes, i.e. fetch the notes from the server.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
+    onError: (err) => {
+      showNotification(err.response.data.error);
+    },
   });
-  const { showNotification } = useNotification();
 
   const onCreate = (event) => {
     event.preventDefault();
     const content = event.target.anecdote.value;
-    console.log('new anecdote');
     newNoteMutation.mutate({
       content,
     });
