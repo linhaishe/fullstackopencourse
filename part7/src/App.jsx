@@ -1,36 +1,59 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useParams,
+  useMatch,
+} from 'react-router-dom';
 import './App.css';
+
 const Menu = () => {
   const padding = {
     paddingRight: 5,
   };
   return (
     <div>
-      <a href='#' style={padding}>
+      <Link style={padding} to='/'>
         anecdotes
-      </a>
-      <a href='#' style={padding}>
+      </Link>
+      <Link style={padding} to='/create'>
         create new
-      </a>
-      <a href='#' style={padding}>
+      </Link>
+      <Link style={padding} to='/about'>
         about
-      </a>
+      </Link>
     </div>
   );
 };
 
-const AnecdoteList = ({ anecdotes }) => (
-  <div>
-    <h2>Anecdotes</h2>
-    <ul>
-      {anecdotes.map((anecdote) => (
-        <li key={anecdote.id}>{anecdote.content}</li>
-      ))}
-    </ul>
-  </div>
-);
+const AnecdoteList = ({ anecdotes }) => {
+  const id = useParams().id;
+  const match = useMatch('/anecdotes/:id');
+  const filterAnecdotes = match
+    ? anecdotes.find((note) => note.id === Number(match.params.id))
+    : null;
+  return (
+    <div>
+      {id ? '' : <h2>Anecdotes</h2>}
+      <ul>
+        {id ? (
+          <h2 key={filterAnecdotes?.id}>{filterAnecdotes?.content}</h2>
+        ) : (
+          anecdotes?.map((anecdote) => (
+            <div key={anecdote.id}>
+              <Link to={`/anecdotes/${anecdote.id}`}>
+                <li key={anecdote?.id}>{anecdote?.content}</li>
+              </Link>
+            </div>
+          ))
+        )}
+      </ul>
+    </div>
+  );
+};
 
 const About = () => (
   <div>
@@ -159,6 +182,10 @@ const App = () => {
         <Menu />
         <Routes>
           <Route path='/' element={<AnecdoteList anecdotes={anecdotes} />} />
+          <Route
+            path='/anecdotes/:id'
+            element={<AnecdoteList anecdotes={anecdotes} />}
+          />
           <Route path='/create' element={<CreateNew addNew={addNew} />} />
           <Route path='/about' element={<About />} />
         </Routes>
