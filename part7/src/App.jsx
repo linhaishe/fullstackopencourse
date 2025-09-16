@@ -125,6 +125,16 @@ const CreateNew = (props) => {
           <input {...info} />
         </div>
         <button>create</button>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            content.clear();
+            author.clear();
+            info.clear();
+          }}
+        >
+          reset
+        </button>
       </form>
     </div>
   );
