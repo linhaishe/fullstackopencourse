@@ -1,0 +1,21 @@
+.msgWrap {
+  width: max-content;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
+  padding: 0 10px;
+  font-size: 30px;
+  font-weight: 900;
+  border-radius: 5px;
+  background-color: lightgray;
+}
+
+.succeededMsg {
+  color: green;
+  border: 3px solid green;
+}
+
+.errorMsg {
+  color: rgb(255, 0, 0);
+  border: 3px solid rgb(255, 0, 0);
+}

@@ -1,3 +1,5 @@
+这个 app 是使用 react redux 实现的
+
 ```jsx
 const noteReducer = (state = [], action) => {
   if (action.type === 'NEW_NOTE') {
@@ -24,7 +26,7 @@ We'll also add the library deep-freeze, which can be used to ensure that the red
 const anecdotes = useSelector((state) => state);
 ```
 
-Install *json-server* as a development dependency (only used during development) by executing the command:
+Install _json-server_ as a development dependency (only used during development) by executing the command:
 
 ```js
 npm install json-server --save-dev
@@ -35,7 +37,7 @@ npm install json-server --save-dev
 }
 ```
 
-With Redux Thunk it is possible to implement *action creators* which return a function instead of an object. The function receives Redux store's *dispatch* and *getState* methods as parameters. 
+With Redux Thunk it is possible to implement _action creators_ which return a function instead of an object. The function receives Redux store's _dispatch_ and _getState_ methods as parameters.
 
 ### Managing data on the server with the React Query library
 
@@ -49,9 +51,9 @@ npm install @tanstack/react-query
 
 React Query is a versatile library that, based on what we have already seen, simplifies the application. Does React Query make more complex state management solutions such as Redux unnecessary? No. React Query can partially replace the state of the application in some cases, but as the [documentation](https://tanstack.com/query/latest/docs/react/guides/does-this-replace-client-state) states
 
-- React Query is a *server-state library*, responsible for managing asynchronous operations between your server and client
-- Redux, etc. are *client-state libraries* that can be used to store asynchronous data, albeit inefficiently when compared to a tool like React Query
+- React Query is a _server-state library_, responsible for managing asynchronous operations between your server and client
+- Redux, etc. are _client-state libraries_ that can be used to store asynchronous data, albeit inefficiently when compared to a tool like React Query
 
-So React Query is a library that maintains the *server state* in the frontend, i.e. acts as a cache for what is stored on the server. React Query simplifies the processing of data on the server, and can in some cases eliminate the need for data on the server to be saved in the frontend state.
+So React Query is a library that maintains the _server state_ in the frontend, i.e. acts as a cache for what is stored on the server. React Query simplifies the processing of data on the server, and can in some cases eliminate the need for data on the server to be saved in the frontend state.
 
 Most React applications need not only a way to temporarily store the served data, but also some solution for how the rest of the frontend state (e.g. the state of forms or notifications) is handled.
