@@ -7,6 +7,7 @@ import Logout from './components/Logout/Logout';
 import Blog from './components/Blog/Blog';
 import Msg from './components/Msg/Msg';
 import { useMsg } from './MsgContext';
+import { useQuery } from '@tanstack/react-query';
 
 /**
  * ---task1---
@@ -32,11 +33,6 @@ interface IUser {
   token: '';
   username: string;
   name: string;
-}
-
-interface IMsg {
-  type: 'succeed' | 'fail' | null;
-  msgContent: string | null;
 }
 
 function App() {
@@ -65,6 +61,13 @@ function App() {
     }
   };
 
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: () => blogsService.getAll(),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser');
     if (loggedUserJSON) {
@@ -73,6 +76,16 @@ function App() {
       blogsService.setToken(user.token);
     }
   }, []);
+
+  if (result.isLoading) {
+    return <div>loading data...</div>;
+  }
+
+  if (result.isError) {
+    return <div>server break~</div>;
+  }
+
+  const blogsList = result.data;
 
   return (
     <>
@@ -88,7 +101,7 @@ function App() {
           password={password}
         />
       )}
-      {user?.username && <Blog />}
+      {user?.username && <Blog blogsList={blogsList} />}
     </>
   );
 }
