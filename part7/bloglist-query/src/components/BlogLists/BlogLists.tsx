@@ -4,26 +4,49 @@ import './BlogLists.css';
 import blogsService from '../../services/blogs';
 import BlogItem from '../BlogItem';
 import { useMsg } from '../../MsgContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface IBlogListsProps {
-  setBlogs: Dispatch<SetStateAction<IBlog[]>>;
   blogs: IBlog[];
 }
 
 export default function BlogLists(props: IBlogListsProps) {
   const [showIndex, setShowIndex] = useState<string[]>([]);
   const { showMsg } = useMsg();
+  const queryClient = useQueryClient();
 
-  const handleLike = async (id: string, newBlogContent: any) => {
-    try {
-      await blogsService.update(id, newBlogContent);
-      blogsService.getAll().then((initialNotes) => {
-        props.setBlogs(initialNotes);
-      });
+  const likeMutation = useMutation({
+    mutationFn: ({ id, newObject }: { id: string; newObject: IBlog }) =>
+      blogsService.update(id, newObject),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
       showMsg({
         msgContent: 'likes succeed',
         isError: false,
       });
+    },
+    onError: (err: any) => {
+      showMsg(err?.response?.data?.error);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ id }: { id: string }) => blogsService.deleteBlog(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
+      showMsg({
+        msgContent: 'delete succeed',
+        isError: false,
+      });
+    },
+    onError: (err: any) => {
+      showMsg(err?.response?.data?.error);
+    },
+  });
+
+  const handleLike = async (id: string, newBlogContent: any) => {
+    try {
+      likeMutation.mutate({ id, newObject: newBlogContent });
     } catch (error) {
       showMsg({
         msgContent: 'wrong credentials',
@@ -35,14 +58,7 @@ export default function BlogLists(props: IBlogListsProps) {
   const handleDelete = async (id: string) => {
     try {
       if (window.confirm('Do you want to remove it?')) {
-        await blogsService.deleteBlog(id);
-        blogsService.getAll().then((initialNotes) => {
-          props.setBlogs(initialNotes);
-        });
-        showMsg({
-          msgContent: 'delete succeed',
-          isError: false,
-        });
+        deleteMutation.mutate({ id });
       }
     } catch (error) {
       showMsg({

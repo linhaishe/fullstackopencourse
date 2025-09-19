@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import AddBlogs from '../AddBlog/AddBlogs';
 import BlogLists from '../BlogLists/BlogLists';
 import type { IBlog } from '../types';
@@ -8,12 +8,11 @@ interface IBlogProps {
 }
 
 export default function Blog(props: IBlogProps) {
-  const [blogs, setBlogs] = useState<IBlog[]>([]);
   const togglableRef = useRef<any>(null);
 
   return (
     <div>
-      <BlogLists blogs={props?.blogsList || []} setBlogs={setBlogs} />
+      <BlogLists blogs={props?.blogsList || []} />
       <Togglable buttonLabel='add new blog' ref={togglableRef}>
         <AddBlogs togglableRef={togglableRef} />
       </Togglable>
