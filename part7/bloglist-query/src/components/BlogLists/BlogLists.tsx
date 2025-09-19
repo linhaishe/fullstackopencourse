@@ -1,9 +1,9 @@
-import { useState, type Dispatch, type SetStateAction } from 'react';
+import { useState } from 'react';
 import type { IBlog } from '../types';
 import './BlogLists.css';
 import blogsService from '../../services/blogs';
 import BlogItem from '../BlogItem';
-import { useMsg } from '../../MsgContext';
+import { useMsg } from '../../context/MsgContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface IBlogListsProps {
@@ -26,7 +26,10 @@ export default function BlogLists(props: IBlogListsProps) {
       });
     },
     onError: (err: any) => {
-      showMsg(err?.response?.data?.error);
+      showMsg({
+        msgContent: err?.response?.data?.error,
+        isError: true,
+      });
     },
   });
 
@@ -40,7 +43,10 @@ export default function BlogLists(props: IBlogListsProps) {
       });
     },
     onError: (err: any) => {
-      showMsg(err?.response?.data?.error);
+      showMsg({
+        msgContent: err?.response?.data?.error,
+        isError: true,
+      });
     },
   });
 

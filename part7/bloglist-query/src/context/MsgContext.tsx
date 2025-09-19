@@ -51,7 +51,6 @@ export const MsgProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    // Provider 向子组件提供 msg 和 showNotification。
     <MsgContext.Provider value={{ msg: state, showMsg }}>
       {children}
     </MsgContext.Provider>

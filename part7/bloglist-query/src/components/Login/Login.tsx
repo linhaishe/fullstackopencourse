@@ -1,42 +1,69 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMsg } from '../../context/MsgContext';
+import { useField } from '../../hooks';
+import loginService from '../../services/login';
+import blogsService from '../../services/blogs';
+import { useUser } from '../../context/UserContext';
 import './Login.css';
 
-interface ILoginProps {
-  handleLogin: (username: string, password: string) => void;
-  setUsername: (name: string) => void;
-  setPassword: (name: string) => void;
-  username: string;
-  password: string;
-}
+export default function Login() {
+  const { reset: titleReset, ...usernameInput } = useField('text');
+  const { reset: authorReset, ...passwordInput } = useField('password');
+  const { showMsg } = useMsg();
+  const queryClient = useQueryClient();
+  const { setUser } = useUser();
 
-export default function Login(props: ILoginProps) {
+  const loginMutation = useMutation({
+    mutationFn: loginService,
+    onSuccess: (user) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
+      setUser(user);
+      window.localStorage.setItem('loggedUser', JSON.stringify(user));
+      blogsService.setToken(user.token);
+      showMsg({
+        msgContent: 'login succeed',
+        isError: false,
+      });
+    },
+    onError: (err: any) => {
+      showMsg({
+        msgContent: err?.response?.data?.error,
+        isError: true,
+      });
+    },
+  });
+
+  const handleLogin = async (username: any, password: any) => {
+    try {
+      loginMutation.mutate({ username, password });
+    } catch (error: any) {
+      showMsg({
+        msgContent: 'login fail',
+        isError: true,
+      });
+    }
+  };
+
   return (
     <div>
       <h2>Login</h2>
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          props.handleLogin(props.username, props.password);
+          handleLogin(usernameInput.value, passwordInput.value);
         }}
       >
         <div>
           <label>
             username:
-            <input
-              type='text'
-              value={props.username}
-              onChange={({ target }) => props.setUsername(target.value)}
-            />
+            <input {...usernameInput} />
           </label>
         </div>
         <br />
         <div>
           <label>
             password:
-            <input
-              type='password'
-              value={props.password}
-              onChange={({ target }) => props.setPassword(target.value)}
-            />
+            <input {...passwordInput} />
           </label>
         </div>
         <br />

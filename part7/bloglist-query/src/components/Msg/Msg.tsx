@@ -1,5 +1,5 @@
 import './Msg.css';
-import { useMsg } from '../../MsgContext';
+import { useMsg } from '../../context/MsgContext';
 
 export default function Msg() {
   const { msg } = useMsg();

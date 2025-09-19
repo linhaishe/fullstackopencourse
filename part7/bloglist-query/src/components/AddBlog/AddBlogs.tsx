@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useField } from '../../hooks';
 import blogsService from '../../services/blogs';
-import { useMsg } from '../../MsgContext';
+import { useMsg } from '../../context/MsgContext';
 
 interface IAddBlogs {
   togglableRef: any;
@@ -16,7 +16,7 @@ export default function AddBlogs(props: IAddBlogs) {
 
   const newBlogMutation = useMutation({
     mutationFn: blogsService.create,
-    // This in turn causes React Query to automatically update a query with the key notes, i.e. fetch the notes from the server.
+    // This in turn causes React Query o automatically update a query with the key notes, i.e. fetch the notes from the server.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] });
       showMsg({
@@ -25,7 +25,10 @@ export default function AddBlogs(props: IAddBlogs) {
       });
     },
     onError: (err: any) => {
-      showMsg(err?.response?.data?.error);
+      showMsg({
+        msgContent: err?.response?.data?.error,
+        isError: true,
+      });
     },
   });
 

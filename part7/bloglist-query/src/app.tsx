@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import './app.css';
 import Login from './components/Login/Login';
-import loginService from './services/login';
 import blogsService from './services/blogs';
 import Logout from './components/Logout/Logout';
 import Blog from './components/Blog/Blog';
 import Msg from './components/Msg/Msg';
-import { useMsg } from './MsgContext';
 import { useQuery } from '@tanstack/react-query';
+import { useUser } from './context/UserContext';
 
 /**
  * ---task1---
@@ -29,37 +28,8 @@ import { useQuery } from '@tanstack/react-query';
  *
  */
 
-interface IUser {
-  token: '';
-  username: string;
-  name: string;
-}
-
 function App() {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [user, setUser] = useState<IUser | null>(null);
-  const { showMsg } = useMsg();
-
-  const handleLogin = async () => {
-    try {
-      const user: IUser = await loginService({ username, password });
-      showMsg({
-        msgContent: 'login succeed',
-        isError: false,
-      });
-      window.localStorage.setItem('loggedUser', JSON.stringify(user));
-      blogsService.setToken(user.token);
-      setUser(user);
-      setUsername('');
-      setPassword('');
-    } catch (error: any) {
-      showMsg({
-        msgContent: 'login fail',
-        isError: true,
-      });
-    }
-  };
+  const { user, setUser } = useUser();
 
   const result = useQuery({
     queryKey: ['blogs'],
@@ -90,18 +60,8 @@ function App() {
   return (
     <>
       <Msg />
-      {user?.username ? (
-        <Logout user={user} setUser={setUser} />
-      ) : (
-        <Login
-          handleLogin={handleLogin}
-          setUsername={setUsername}
-          setPassword={setPassword}
-          username={username}
-          password={password}
-        />
-      )}
-      {user?.username && <Blog blogsList={blogsList} />}
+      {user?.name ? <Logout user={user} setUser={setUser} /> : <Login />}
+      {user?.name && <Blog blogsList={blogsList} />}
     </>
   );
 }

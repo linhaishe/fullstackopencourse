@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MsgProvider } from './MsgContext.tsx';
+import { MsgProvider } from './context/MsgContext.tsx';
+import { UserProvider } from './context/UserContext.tsx';
 import './index.css';
 import App from './app.tsx';
 
@@ -8,8 +9,10 @@ const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <MsgProvider>
-      <App />
-    </MsgProvider>
+    <UserProvider>
+      <MsgProvider>
+        <App />
+      </MsgProvider>
+    </UserProvider>
   </QueryClientProvider>
 );
