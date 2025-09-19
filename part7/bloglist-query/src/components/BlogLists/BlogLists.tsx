@@ -2,17 +2,17 @@ import { useState, type Dispatch, type SetStateAction } from 'react';
 import type { IBlog } from '../types';
 import './BlogLists.css';
 import blogsService from '../../services/blogs';
-import type { TMessage } from '../Msg/Msg';
 import BlogItem from '../BlogItem';
+import { useMsg } from '../../MsgContext';
 
 interface IBlogListsProps {
   setBlogs: Dispatch<SetStateAction<IBlog[]>>;
-  setMessage: (msg: TMessage) => void;
   blogs: IBlog[];
 }
 
 export default function BlogLists(props: IBlogListsProps) {
   const [showIndex, setShowIndex] = useState<string[]>([]);
+  const { showMsg } = useMsg();
 
   const handleLike = async (id: string, newBlogContent: any) => {
     try {
@@ -20,22 +20,15 @@ export default function BlogLists(props: IBlogListsProps) {
       blogsService.getAll().then((initialNotes) => {
         props.setBlogs(initialNotes);
       });
-      props.setMessage({
-        type: 'succeed',
+      showMsg({
         msgContent: 'likes succeed',
+        isError: false,
       });
     } catch (error) {
-      props.setMessage({
-        type: 'fail',
+      showMsg({
         msgContent: 'wrong credentials',
+        isError: true,
       });
-
-      setTimeout(() => {
-        props.setMessage({
-          type: null,
-          msgContent: null,
-        });
-      }, 5000);
     }
   };
 
@@ -46,23 +39,16 @@ export default function BlogLists(props: IBlogListsProps) {
         blogsService.getAll().then((initialNotes) => {
           props.setBlogs(initialNotes);
         });
-        props.setMessage({
-          type: 'succeed',
+        showMsg({
           msgContent: 'delete succeed',
+          isError: false,
         });
       }
     } catch (error) {
-      props.setMessage({
-        type: 'fail',
+      showMsg({
         msgContent: 'wrong credentials',
+        isError: true,
       });
-
-      setTimeout(() => {
-        props.setMessage({
-          type: null,
-          msgContent: null,
-        });
-      }, 5000);
     }
   };
 

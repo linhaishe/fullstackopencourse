@@ -1,5 +1,15 @@
 # part4
 
+for project:
+如果登陆后显示没有权限重新登录即可。
+
+```js
+{
+  "username": "chenruotest",
+  "password": "chenruotestpwd"
+}
+```
+
 ## logger
 
 The logger has two functions, info for printing normal log messages, and error for all error messages.
@@ -8,11 +18,11 @@ Extracting logging into its own module is a good idea in several ways. If we wan
 
 ## Test
 
- [unit tests](https://en.wikipedia.org/wiki/Unit_testing)
+[unit tests](https://en.wikipedia.org/wiki/Unit_testing)
 
 This kind of testing where multiple components of the system are being tested as a group is called [integration testing](https://en.wikipedia.org/wiki/Integration_testing).
 
-The convention in Node is to define the execution mode of the application with the *NODE_ENV* environment variable. In our current application, we only load the environment variables defined in the *.env* file if the application is *not* in production mode.
+The convention in Node is to define the execution mode of the application with the _NODE_ENV_ environment variable. In our current application, we only load the environment variables defined in the _.env_ file if the application is _not_ in production mode.
 
 It is common practice to define separate modes for development and testing.
 
@@ -51,10 +61,12 @@ use the [supertest](https://github.com/visionmedia/supertest) package to help us
 
 node --experimental-vm-modules node_modules/.bin/jest --silent=false --verbose --runInBand tests/blog_api.test.js
 ```
+
 ## user administration
+
 ### pwd hash
 
-The password hash is the output of a [one-way hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function) applied to the user's password. It is never wise to store unencrypted plain text passwords in the database!Let's install the [bcrypt](https://github.com/kelektiv/node.bcrypt.js) package for generating the password hashes.Some Windows users have had problems with *bcrypt*. If you run into problems, remove the library with command and install [bcryptjs](https://www.npmjs.com/package/bcryptjs) instead.
+The password hash is the output of a [one-way hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function) applied to the user's password. It is never wise to store unencrypted plain text passwords in the database!Let's install the [bcrypt](https://github.com/kelektiv/node.bcrypt.js) package for generating the password hashes.Some Windows users have had problems with _bcrypt_. If you run into problems, remove the library with command and install [bcryptjs](https://www.npmjs.com/package/bcryptjs) instead.
 
 ```js
 const saltRounds = 10;
@@ -76,13 +88,13 @@ If the application has multiple interfaces requiring identification, JWT's valid
   - 更适合用于资源冲突的情况，比如 `username` 已经存在。
   - 但很多教程/项目里也会直接用 **400** 来处理（保持一致）。
 
-There are several ways of sending the token from the browser to the server. We will use the [Authorization](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization) header. 
+There are several ways of sending the token from the browser to the server. We will use the [Authorization](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization) header.
 
 Other ways?
 
 The header also tells which [authentication scheme](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Authentication_schemes) is used. This can be necessary if the server offers multiple ways to authenticate. Identifying the scheme tells the server how the attached credentials should be interpreted.
 
-The *Bearer* scheme is suitable for our needs.
+The _Bearer_ scheme is suitable for our needs.
 
 ```
 curl -X GET http://localhost:3001/api/blogs
@@ -100,44 +112,43 @@ curl -X GET http://localhost:3001/api/blogs \
 ```
 
 ```js
-  // 用户只能删除自己的post，通过请求token 和 用户自己的token 做对比
-  const reqToken = request.token;
-  const blog = await BlogList.findById(request.params.id);
-  const userToken = jwt.sign(
-    { username: blog.user.username, id: blog.user.id },
-    process.env.SECRET,
-    {
-      expiresIn: 60 * 60,
-    }
-  );
+// 用户只能删除自己的post，通过请求token 和 用户自己的token 做对比
+const reqToken = request.token;
+const blog = await BlogList.findById(request.params.id);
+const userToken = jwt.sign(
+  { username: blog.user.username, id: blog.user.id },
+  process.env.SECRET,
+  {
+    expiresIn: 60 * 60,
+  }
+);
 ```
 
 Therefore, deleting a blog is possible only if the token sent with the request is the same as that of the blog's creator.
 
 其实不需要在删除时再重新生成一个 `userToken` 来和 `reqToken` 比较。
- JWT 是 **一次签发，多次验证** 的，后端只需要：
+JWT 是 **一次签发，多次验证** 的，后端只需要：
 
 1. **解码客户端传过来的 `reqToken`**（就是用户登录时签发的 token）。
 2. **对比 token 里的用户 ID 和 blog 的创建者 ID**。
 
 ```js
-  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+const decodedToken = jwt.verify(request.token, process.env.SECRET);
 
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token missing or invalid' });
-  }
+if (!decodedToken.id) {
+  return response.status(401).json({ error: 'token missing or invalid' });
+}
 
-  const blog = await BlogList.findById(request.params.id);
+const blog = await BlogList.findById(request.params.id);
 
-  if (!blog) {
-    return response.status(404).json({ error: 'blog not found' });
-  }
+if (!blog) {
+  return response.status(404).json({ error: 'blog not found' });
+}
 
-  // 注意：blog.user是 ObjectId，要转成字符串
-  if (blog.user.toString() !== decodedToken.id.toString()) {
-    return response
-      .status(403)
-      .json({ error: 'only the creator can delete this blog' });
-  }
+// 注意：blog.user是 ObjectId，要转成字符串
+if (blog.user.toString() !== decodedToken.id.toString()) {
+  return response
+    .status(403)
+    .json({ error: 'only the creator can delete this blog' });
+}
 ```
-

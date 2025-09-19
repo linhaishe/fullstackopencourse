@@ -4,8 +4,9 @@ import BlogLists from '../BlogLists/BlogLists';
 import type { IBlog } from '../types';
 import blogsService from '../../services/blogs';
 import Togglable from '../Togglable';
+import { useMsg } from '../../MsgContext';
 
-export default function Blog(props: any) {
+export default function Blog() {
   const [blogs, setBlogs] = useState<IBlog[]>([]);
   const [newBlog, setNewBlog] = useState({
     title: '',
@@ -13,6 +14,7 @@ export default function Blog(props: any) {
     url: '',
   });
   const togglableRef = useRef<any>(null);
+  const { showMsg } = useMsg();
 
   const handleAddBlog = async (newBlogContent: any) => {
     try {
@@ -20,23 +22,16 @@ export default function Blog(props: any) {
       blogsService.getAll().then((initialNotes) => {
         setBlogs(initialNotes);
       });
-      props.setMessage({
-        type: 'succeed',
+      showMsg({
         msgContent: 'add succeed',
+        isError: false,
       });
       togglableRef.current.toggleVisibility();
     } catch (error) {
-      props.setMessage({
-        type: 'fail',
+      showMsg({
         msgContent: 'wrong credentials',
+        isError: true,
       });
-
-      setTimeout(() => {
-        props.setMessage({
-          type: null,
-          msgContent: null,
-        });
-      }, 5000);
     } finally {
       setNewBlog({
         title: '',
@@ -56,7 +51,7 @@ export default function Blog(props: any) {
     <div>
       <BlogLists
         blogs={blogs}
-        setMessage={props.setMessage}
+        // setMessage={props.setMessage}
         setBlogs={setBlogs}
       />
       <Togglable buttonLabel='add new blog' ref={togglableRef}>
