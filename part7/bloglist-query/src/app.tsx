@@ -7,6 +7,8 @@ import Blog from './components/Blog/Blog';
 import Msg from './components/Msg/Msg';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from './context/UserContext';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import Users from './components/Users';
 
 /**
  * ---task1---
@@ -59,9 +61,21 @@ function App() {
 
   return (
     <>
-      <Msg />
-      {user?.name ? <Logout user={user} setUser={setUser} /> : <Login />}
-      {user?.name && <Blog blogsList={blogsList} />}
+      <Router>
+        <Msg />
+        {user?.name ? <Logout user={user} setUser={setUser} /> : <Login />}
+        <Routes>
+          {/* <Route
+            path='/'
+            element={
+              user?.name ? <Logout user={user} setUser={setUser} /> : <Login />
+            }
+          /> */}
+          <Route path='/users' element={<Users />} />
+          {/* {user?.name ? <Logout user={user} setUser={setUser} /> : <Login />} */}
+          {/* {user?.name && <Blog blogsList={blogsList} />} */}
+        </Routes>
+      </Router>
     </>
   );
 }
