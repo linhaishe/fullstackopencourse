@@ -1,4 +1,10 @@
-import { createContext, useContext, useReducer, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  type ReactNode,
+} from 'react';
 
 type UserContextType = {
   user: {
@@ -42,6 +48,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const setUser = (user: any) => {
     dispatch({ type: 'SET', payload: user });
   };
+
+  useEffect(() => {
+    const user = window.localStorage.getItem('loggedUser');
+    try {
+      const userObj = JSON.parse(user || '');
+      setUser(userObj);
+    } catch (error) {}
+  }, []);
 
   return (
     <UserContext.Provider value={{ user: state, setUser }}>
