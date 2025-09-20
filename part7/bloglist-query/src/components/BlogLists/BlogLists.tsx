@@ -15,24 +15,6 @@ export default function BlogLists(props: IBlogListsProps) {
   const { showMsg } = useMsg();
   const queryClient = useQueryClient();
 
-  const likeMutation = useMutation({
-    mutationFn: ({ id, newObject }: { id: string; newObject: IBlog }) =>
-      blogsService.update(id, newObject),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      showMsg({
-        msgContent: 'likes succeed',
-        isError: false,
-      });
-    },
-    onError: (err: any) => {
-      showMsg({
-        msgContent: err?.response?.data?.error,
-        isError: true,
-      });
-    },
-  });
-
   const deleteMutation = useMutation({
     mutationFn: ({ id }: { id: string }) => blogsService.deleteBlog(id),
     onSuccess: () => {
@@ -49,17 +31,6 @@ export default function BlogLists(props: IBlogListsProps) {
       });
     },
   });
-
-  const handleLike = async (id: string, newBlogContent: any) => {
-    try {
-      likeMutation.mutate({ id, newObject: newBlogContent });
-    } catch (error) {
-      showMsg({
-        msgContent: 'wrong credentials',
-        isError: true,
-      });
-    }
-  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -85,7 +56,6 @@ export default function BlogLists(props: IBlogListsProps) {
               blog={blog}
               showIndex={showIndex}
               setShowIndex={setShowIndex}
-              handleLike={handleLike}
               handleDelete={handleDelete}
             />
           </div>
