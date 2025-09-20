@@ -27,8 +27,6 @@ export default function index() {
 
   const blog: any = result.data;
 
-  console.log('blog', blog);
-
   return (
     <div>
       <h2>{blog?.title}</h2>
@@ -36,6 +34,16 @@ export default function index() {
       <span>likes: {blog?.likes}</span>
       <LikesBtn blogsItem={blog} />
       <div>add by {blog?.user?.name || 'no name'}</div>
+      <h2>Comments</h2>
+      <ul>
+        {blog?.comments?.map((item: any, index: number) => {
+          return (
+            <div key={index}>
+              <li>{item?.comment}</li>
+            </div>
+          );
+        })}
+      </ul>
     </div>
   );
 }

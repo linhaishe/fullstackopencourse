@@ -3,6 +3,16 @@ import jwt from 'jsonwebtoken';
 import BlogList from '../models/bloglist.js';
 const blogListsRouter = express.Router();
 
+const initialComments = [
+  {
+    id: 0,
+    comment: 'you are good',
+  },
+  {
+    id: 1,
+    comment: 'you are good too!',
+  },
+];
 // blogListsRouter.get('/', (request, response) => {
 //   BlogList.find({}).then((blogs) => {
 //     response.json(blogs);
@@ -24,7 +34,9 @@ blogListsRouter.get('/', async (request, response) => {
       showRemoveBtn: request.user
         ? blogItem?.user?._id?.toString() === request?.user?.id?.toString()
         : false,
+      comments: initialComments,
     }));
+
     response.json(result);
   } catch (err) {
     console.error('Error in GET /blogs:', err.message);
@@ -36,6 +48,29 @@ blogListsRouter.get('/', async (request, response) => {
 });
 
 blogListsRouter.get('/:id', async (request, response) => {
+  try {
+    const blog = await BlogList.findById(request.params.id)
+      .populate('user')
+      .lean();
+
+    const result = Object.assign(blog, {
+      comments: initialComments,
+    });
+
+    console.log('result', result);
+
+    if (blog) {
+      response.json(blog);
+    } else {
+      response.status(404).end();
+    }
+  } catch (error) {
+    // 这里捕获无效的 ObjectId
+    response.status(400).send({ error: 'malformatted id' });
+  }
+});
+
+blogListsRouter.post('/:id', async (request, response) => {
   try {
     const blog = await BlogList.findById(request.params.id)
       .populate('user')

@@ -21,6 +21,9 @@ const blogSchema = new mongoose.Schema({
   showRemoveBtn: {
     type: Boolean,
   },
+  comments: {
+    type: Array,
+  },
 });
 
 // 处理mongodb _id _v的数据格式为id，统一内容
