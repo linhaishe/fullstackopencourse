@@ -2,17 +2,6 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import BlogList from '../models/bloglist.js';
 const blogListsRouter = express.Router();
-
-const initialComments = [
-  {
-    id: 0,
-    comment: 'you are good',
-  },
-  {
-    id: 1,
-    comment: 'you are good too!',
-  },
-];
 // blogListsRouter.get('/', (request, response) => {
 //   BlogList.find({}).then((blogs) => {
 //     response.json(blogs);
@@ -34,7 +23,6 @@ blogListsRouter.get('/', async (request, response) => {
       showRemoveBtn: request.user
         ? blogItem?.user?._id?.toString() === request?.user?.id?.toString()
         : false,
-      comments: initialComments,
     }));
 
     response.json(result);
@@ -53,12 +41,6 @@ blogListsRouter.get('/:id', async (request, response) => {
       .populate('user')
       .lean();
 
-    const result = Object.assign(blog, {
-      comments: initialComments,
-    });
-
-    console.log('result', result);
-
     if (blog) {
       response.json(blog);
     } else {
@@ -70,22 +52,61 @@ blogListsRouter.get('/:id', async (request, response) => {
   }
 });
 
+// add comment
 blogListsRouter.post('/:id', async (request, response) => {
   try {
-    const blog = await BlogList.findById(request.params.id)
-      .populate('user')
-      .lean();
-    if (blog) {
-      response.json(blog);
-    } else {
-      response.status(404).end();
+    const body = request.body;
+    const token = request.token;
+
+    if (!token) {
+      return response.status(401).json({ error: 'token missing' });
     }
+
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.SECRET);
+    } catch (err) {
+      return response.status(401).json({ error: 'token invalid' });
+    }
+
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' });
+    }
+
+    const user = request.user;
+    if (!user) {
+      return response
+        .status(400)
+        .json({ error: 'UserId missing or not valid' });
+    }
+
+    // 找到对应的 blog
+    const blog = await BlogList.findById(request.params.id);
+    if (!blog) {
+      return response.status(404).json({ error: 'blog not found' });
+    }
+
+    const newCommentId =
+      blog.comments.length > 0
+        ? Math.max(...blog.comments.map((c) => c.id)) + 1
+        : 0;
+
+    // 追加评论
+    const newComment = {
+      id: newCommentId,
+      comment: body.comment,
+    };
+
+    blog.comments.push(newComment);
+
+    const savedBlog = await blog.save();
+    response.status(201).json(savedBlog);
   } catch (error) {
-    // 这里捕获无效的 ObjectId
     response.status(400).send({ error: 'malformatted id' });
   }
 });
 
+// add blog
 blogListsRouter.post('/', async (request, response) => {
   try {
     const body = request.body;

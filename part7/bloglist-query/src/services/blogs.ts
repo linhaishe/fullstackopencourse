@@ -19,6 +19,15 @@ const getBlog = (id: string) => {
   return request.then((response) => response.data);
 };
 
+const addComment = (id: string, comment: string) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+
+  const request = axios.post(`${baseUrl}/${id}`, { comment }, config);
+  return request.then((response) => response.data);
+};
+
 const create = async (newObject: IBlog) => {
   const config = {
     headers: { Authorization: token },
@@ -41,4 +50,12 @@ const deleteBlog = (id: string) => {
   return request.then((response) => response.data);
 };
 
-export default { getAll, create, update, setToken, deleteBlog, getBlog };
+export default {
+  getAll,
+  create,
+  update,
+  setToken,
+  deleteBlog,
+  getBlog,
+  addComment,
+};
