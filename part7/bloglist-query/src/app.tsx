@@ -6,8 +6,9 @@ import { useUser } from './context/UserContext';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Users from './components/Users';
 import UsersBlogList from './components/UsersBlogList';
-import './app.css';
 import SingleBlogItem from './components/SingleBlogItem';
+import './app.css';
+import Navigate from './components/Navigate';
 
 function App() {
   const { user, setUser } = useUser();
@@ -17,6 +18,7 @@ function App() {
       <Router>
         <Msg />
         {user?.name ? <Logout user={user} setUser={setUser} /> : <Login />}
+        <Navigate />
         <Routes>
           <Route path='/' element={user?.name && <Blog setUser={setUser} />} />
           <Route path='/users' element={<Users />} />
