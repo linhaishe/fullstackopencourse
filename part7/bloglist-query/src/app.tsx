@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useUser } from './context/UserContext';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Users from './components/Users';
+import UsersBlogList from './components/UsersBlogList';
 
 /**
  * ---task1---
@@ -72,6 +73,7 @@ function App() {
             }
           /> */}
           <Route path='/users' element={<Users />} />
+          <Route path='/users/:id' element={<UsersBlogList />} />
           {/* {user?.name ? <Logout user={user} setUser={setUser} /> : <Login />} */}
           {/* {user?.name && <Blog blogsList={blogsList} />} */}
         </Routes>

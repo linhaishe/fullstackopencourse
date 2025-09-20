@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import usersService from '../../services/users';
+import { Link } from 'react-router-dom';
 
 export default function Users() {
   const result = useQuery({
-    queryKey: ['blogs'],
-    queryFn: usersService,
+    queryKey: ['Users'],
+    queryFn: usersService.getAllUser,
     refetchOnWindowFocus: false,
     retry: false,
   });
@@ -18,8 +19,6 @@ export default function Users() {
   }
 
   const usersList: any = result.data;
-
-  console.log('usersList', usersList);
 
   return (
     <div>
@@ -35,7 +34,9 @@ export default function Users() {
           {usersList?.map((user: any) => {
             return (
               <tr>
-                <td>{user?.username}</td>
+                <td>
+                  <Link to={`/users/${user.id}`}>{user?.username}</Link>
+                </td>
                 <td>{user?.blogs?.length}</td>
               </tr>
             );
