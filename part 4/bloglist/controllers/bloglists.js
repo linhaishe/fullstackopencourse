@@ -35,6 +35,22 @@ blogListsRouter.get('/', async (request, response) => {
   }
 });
 
+blogListsRouter.get('/:id', async (request, response) => {
+  try {
+    const blog = await BlogList.findById(request.params.id)
+      .populate('user')
+      .lean();
+    if (blog) {
+      response.json(blog);
+    } else {
+      response.status(404).end();
+    }
+  } catch (error) {
+    // 这里捕获无效的 ObjectId
+    response.status(400).send({ error: 'malformatted id' });
+  }
+});
+
 blogListsRouter.post('/', async (request, response) => {
   try {
     const body = request.body;
@@ -71,20 +87,6 @@ blogListsRouter.post('/', async (request, response) => {
     response.status(201).json(savedBlog);
   } catch (error) {
     response.status(400).json({ error: error.message });
-  }
-});
-
-blogListsRouter.get('/:id', async (request, response) => {
-  try {
-    const blog = await BlogList.findById(request.params.id);
-    if (blog) {
-      response.json(blog);
-    } else {
-      response.status(404).end();
-    }
-  } catch (error) {
-    // 这里捕获无效的 ObjectId
-    response.status(400).send({ error: 'malformatted id' });
   }
 });
 

@@ -31,10 +31,11 @@ export default function index() {
 
   return (
     <div>
-      <div>title: {blog?.title}</div>
+      <h2>{blog?.title}</h2>
       <div>url: {blog?.url}</div>
       <span>likes: {blog?.likes}</span>
       <LikesBtn blogsItem={blog} />
+      <div>add by {blog?.user?.name || 'no name'}</div>
     </div>
   );
 }
