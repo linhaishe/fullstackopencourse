@@ -18,7 +18,7 @@ function App() {
       <Router>
         <Msg />
         {user?.name ? <Logout user={user} setUser={setUser} /> : <Login />}
-        <Navigate />
+        {user?.name ? <Navigate /> : null}
         <Routes>
           <Route path='/' element={user?.name && <Blog setUser={setUser} />} />
           <Route path='/users' element={<Users />} />

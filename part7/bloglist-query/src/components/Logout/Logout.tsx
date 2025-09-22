@@ -7,7 +7,7 @@ export default function Logout(props: any) {
       <div
         className='logoutBtn'
         onClick={() => {
-          window.localStorage.removeItem('loggedUser');
+          window.sessionStorage.removeItem('loggedUser');
           props.setUser(null);
         }}
       >

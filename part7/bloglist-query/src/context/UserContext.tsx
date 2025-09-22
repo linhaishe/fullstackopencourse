@@ -50,7 +50,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const user = window.localStorage.getItem('loggedUser');
+    const user = window.sessionStorage.getItem('loggedUser');
     try {
       const userObj = JSON.parse(user || '');
       setUser(userObj);

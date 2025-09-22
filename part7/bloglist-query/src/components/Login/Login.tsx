@@ -4,6 +4,7 @@ import { useField } from '../../hooks';
 import loginService from '../../services/login';
 import blogsService from '../../services/blogs';
 import { useUser } from '../../context/UserContext';
+import { Table, Form, Button } from 'react-bootstrap';
 import './Login.css';
 
 export default function Login() {
@@ -18,7 +19,7 @@ export default function Login() {
     onSuccess: (user) => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] });
       setUser(user);
-      window.localStorage.setItem('loggedUser', JSON.stringify(user));
+      window.sessionStorage.setItem('loggedUser', JSON.stringify(user));
       blogsService.setToken(user.token);
       showMsg({
         msgContent: 'login succeed',
@@ -47,28 +48,32 @@ export default function Login() {
   return (
     <div>
       <h2>Login</h2>
-      <form
+      <Form
         onSubmit={(event) => {
           event.preventDefault();
           handleLogin(usernameInput.value, passwordInput.value);
         }}
       >
-        <div>
-          <label>
-            username:
-            <input {...usernameInput} />
-          </label>
-        </div>
-        <br />
-        <div>
-          <label>
-            password:
-            <input {...passwordInput} />
-          </label>
-        </div>
-        <br />
-        <button type='submit'>login</button>
-      </form>
+        <Form.Group>
+          <div>
+            <Form.Label>
+              username:
+              <Form.Control {...usernameInput} />
+            </Form.Label>
+          </div>
+          <br />
+          <div>
+            <Form.Label>
+              password:
+              <Form.Control {...passwordInput} />
+            </Form.Label>
+          </div>
+          <br />
+          <Button variant='primary' type='submit'>
+            login
+          </Button>
+        </Form.Group>
+      </Form>
     </div>
   );
 }

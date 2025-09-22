@@ -19,7 +19,7 @@ export default function Blog(props: IBlogProps) {
   });
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedUser');
+    const loggedUserJSON = window.sessionStorage.getItem('loggedUser');
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
       props.setUser(user);
