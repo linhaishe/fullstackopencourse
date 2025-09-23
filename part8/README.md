@@ -39,6 +39,13 @@ query {
     author
   }
 }
+
+query {
+  allBooks(author: "Robert Martin", genre: "refactoring") {
+    title
+    author
+  }
+}
 ```
 
 # GraphQL

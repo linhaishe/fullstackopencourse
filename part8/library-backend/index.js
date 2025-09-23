@@ -123,13 +123,26 @@ const resolvers = {
     bookCount: () => books.length,
     authorCount: () => authors.length,
     allBooks: (root, args) => {
-      if (args.author) {
-        return books.filter((v, i) => v.author === args.author);
-      } else if (args.genre) {
-        return books.filter((v, i) => v.genres.includes(args.genre));
-      } else {
-        return books;
-      }
+      return books.filter(
+        (book) =>
+          (!args.author || book.author === args.author) &&
+          (!args.genre || book.genres.includes(args.genre))
+      );
+      // if (args.author && args.genre) {
+      //   return books.filter((book) => {
+      //     const matchAuthor = args.author ? book.author === args.author : true;
+      //     const matchGenre = args.genre
+      //       ? book.genres.includes(args.genre)
+      //       : true;
+      //     return matchAuthor && matchGenre;
+      //   });
+      // } else if (args.author && !args.genre) {
+      //   return books.filter((v, i) => v.author === args.author);
+      // } else if (args.genre && !args.author) {
+      //   return books.filter((v, i) => v.genres.includes(args.genre));
+      // } else {
+      //   return books;
+      // }
     },
     allAuthors: () => {
       const result = authors.map((author) => {
