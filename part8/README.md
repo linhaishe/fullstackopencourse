@@ -19,6 +19,19 @@ query {
     genres
   }
 }
+
+query {
+  allAuthors {
+    name
+    bookCount
+  }
+}
+
+query {
+  allBooks(author: "Robert Martin") {
+    title
+  }
+}
 ```
 
 # GraphQL
@@ -39,7 +52,7 @@ Despite its name, GraphQL does not actually have anything to do with databases. 
 
 Let's implement a GraphQL server with today's leading library: [Apollo Server](https://www.apollographql.com/docs/apollo-server/).
 
-The schema describes two [types](https://graphql.org/learn/schema/#type-system). The first type, *Person*, determines that persons have five fields. Four of the fields are type *String*, which is one of the [scalar types](https://graphql.org/learn/schema/#scalar-types) of GraphQL. 
+The schema describes two [types](https://graphql.org/learn/schema/#type-system). The first type, _Person_, determines that persons have five fields. Four of the fields are type _String_, which is one of the [scalar types](https://graphql.org/learn/schema/#scalar-types) of GraphQL.
 
 ```js
 // In the heart of all GraphQL applications is a schema, which describes the data sent between the client and the server.
