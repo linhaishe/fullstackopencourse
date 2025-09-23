@@ -46,6 +46,19 @@ query {
     author
   }
 }
+
+mutation ExampleQuery {
+  addBook(
+    title: "Pimeyden tango",
+    author: "Reijo Mäki",
+    published: 1997,
+    genres: ["crime"]
+  ) {
+    title,
+    author
+  }
+}
+
 ```
 
 # GraphQL
