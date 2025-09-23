@@ -59,6 +59,13 @@ mutation ExampleQuery {
   }
 }
 
+mutation {
+  editAuthor(name: "Reijo Mäki", setBornTo: 1958) {
+    name
+    born
+  }
+}
+
 ```
 
 # GraphQL
