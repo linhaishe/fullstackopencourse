@@ -32,6 +32,13 @@ query {
     title
   }
 }
+
+query {
+  allBooks(genre: "refactoring") {
+    title
+    author
+  }
+}
 ```
 
 # GraphQL
