@@ -4,6 +4,23 @@ library-backend
 
 node/nodemon index.js / node/nodemon demo.js
 
+```js
+// usage in apollo server
+query {
+  bookCount
+  authorCount
+}
+
+query {
+  allBooks {
+    title
+    author
+    published
+    genres
+  }
+}
+```
+
 # GraphQL
 
 ## GraphQL-server
@@ -21,6 +38,8 @@ GraphQL query describes only the data moving between a server and the client. On
 Despite its name, GraphQL does not actually have anything to do with databases. It does not care how the data is saved. The data a GraphQL API uses can be saved into a relational database, document database, or to other servers which a GraphQL server can access with for example REST.
 
 Let's implement a GraphQL server with today's leading library: [Apollo Server](https://www.apollographql.com/docs/apollo-server/).
+
+The schema describes two [types](https://graphql.org/learn/schema/#type-system). The first type, *Person*, determines that persons have five fields. Four of the fields are type *String*, which is one of the [scalar types](https://graphql.org/learn/schema/#scalar-types) of GraphQL. 
 
 ```js
 // In the heart of all GraphQL applications is a schema, which describes the data sent between the client and the server.
