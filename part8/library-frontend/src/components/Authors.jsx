@@ -21,11 +21,11 @@ const Authors = (props) => {
   }
 
   const submit = async (event) => {
+    event.preventDefault();
     if (!authorName) {
       alert('请选择一个作者');
       return;
     }
-    event.preventDefault();
     editAuthor({ variables: { name: authorName, setBornTo: birth } });
     setAuthorName('');
     setBirth('');
