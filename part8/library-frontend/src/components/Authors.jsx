@@ -1,9 +1,16 @@
 /* eslint-disable react/prop-types */
 import { ALL_AUTHORS } from '../queries';
 import { useQuery } from '@apollo/client';
+import { useState } from 'react';
+import { useMutation } from '@apollo/client';
+import { EDIT_AUTHOR } from '../queries';
 
 const Authors = (props) => {
   const allAuthors = useQuery(ALL_AUTHORS);
+  const [authorName, setAuthorName] = useState('');
+  const [birth, setBirth] = useState('');
+  const [editAuthor, result] = useMutation(EDIT_AUTHOR);
+  console.log('result', result);
 
   if (!props.show) {
     return null;
@@ -13,6 +20,12 @@ const Authors = (props) => {
     return null;
   }
 
+  const submit = async (event) => {
+    event.preventDefault();
+    editAuthor({ variables: { name: authorName, setBornTo: birth } });
+    setAuthorName('');
+    setBirth('');
+  };
   return (
     <div>
       <h2>authors</h2>
@@ -32,6 +45,22 @@ const Authors = (props) => {
           ))}
         </tbody>
       </table>
+      <form onSubmit={submit}>
+        authorName
+        <input
+          type='text'
+          value={authorName}
+          onChange={({ target }) => setAuthorName(target.value)}
+        />
+        <br />
+        birth
+        <input
+          type='number'
+          value={birth}
+          onChange={({ target }) => setBirth(Number(target.value))}
+        />
+        <button type='submit'>set born</button>
+      </form>
     </div>
   );
 };

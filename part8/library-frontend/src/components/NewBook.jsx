@@ -10,6 +10,7 @@ const NewBook = (props) => {
   const [genre, setGenre] = useState('');
   const [genres, setGenres] = useState([]);
   const [addBook, result] = useMutation(ADD_BOOK);
+  console.log('result', result);
 
   if (!props.show) {
     return null;
