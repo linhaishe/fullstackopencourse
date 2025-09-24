@@ -54,7 +54,7 @@ mutation ExampleQuery {
     published: 1997,
     genres: ["crime"]
   ) {
-    title,
+    title
     author
   }
 }
