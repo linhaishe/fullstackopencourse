@@ -161,3 +161,279 @@ When Apollo server is run in development mode the page [http://localhost:4000](h
 第一部分的 answer
 
 https://github.com/fullstack-hy2020/misc/tree/master
+
+# React and GraphQL
+
+![](https://s2.loli.net/2025/09/24/9sSRhOlFdiQCL6m.png)
+
+The communication works by sending HTTP POST requests to http://localhost:4000/graphql. The query itself is a string sent as the value of the key *query*.
+
+We could take care of the communication between the React app and GraphQL by using Axios. However, most of the time, it is not very sensible to do so. It is a better idea to use a higher-order library capable of abstracting the unnecessary details of the communication.
+
+At the moment, there are two good options: [Relay](https://facebook.github.io/relay/) by Facebook and [Apollo Client](https://www.apollographql.com/docs/react/), which is the client side of the same library we used in the previous section. Apollo is absolutely the most popular of the two, and we will use it in this section as well.
+
+一般不会用 **Axios** 来直接跟 GraphQL API 通信，因为 Axios 只是个 HTTP 客户端，不会帮你处理 GraphQL 特有的东西（比如 query/mutation 的结构、缓存、订阅、错误处理、类型安全等等）。
+
+在 React 里常见的做法是用 **专门的 GraphQL 客户端库**，最常见的是这两个：
+
+1. **Apollo Client**
+   - 功能最全，生态大。
+   - 内置缓存、状态管理、分页处理、订阅（WebSocket）、乐观更新。
+   - TS 支持好，可以配合 codegen 自动生成 hooks 和类型。
+   - 缺点是比较重。
+2. **Relay**（Facebook 出品）
+   - 更强调性能和规范，严格依赖 GraphQL schema。
+   - 自动规范数据获取，强依赖 Fragment + codegen。
+   - 学习曲线更陡。
+
+除此之外，还有一些轻量的选择：
+
+- **urql** → 相比 Apollo 更轻量灵活，插件式架构，比较适合不想要太重框架的场景。
+- **graphql-request** → 超轻量，只是对 fetch 做了封装，适合小项目。
+
+------
+
+👉 总结：
+
+- 大多数 React 项目：**Apollo Client**
+- 要极致性能/规范：**Relay**
+- 想轻量灵活：**urql**
+- 只要最简单调用：**graphql-request**
+
+```jsx
+import ReactDOM from 'react-dom/client'
+import App from './App'
+
+import { ApolloClient, InMemoryCache, gql, ApolloProvider } from '@apollo/client'
+
+const client = new ApolloClient({
+  uri: 'http://localhost:4000',
+  cache: new InMemoryCache(),
+})
+
+const query = gql`
+  query {
+    allPersons  {
+      name,
+      phone,
+      address {
+        street,
+        city
+      }
+      id
+    }
+  }
+`
+
+client.query({ query })
+  .then((response) => {
+    console.log(response.data)
+  })
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <ApolloProvider client={client}>
+    <App />
+  </ApolloProvider>
+)
+```
+
+```jsx
+import { gql, useQuery } from '@apollo/client'
+
+import Persons from './components/Persons'
+
+const ALL_PERSONS = gql`
+  query {
+    allPersons  {
+      name
+      phone
+      id
+    }
+  }
+`
+
+const App = () => {
+  const result = useQuery(ALL_PERSONS)
+  const [nameToSearch, setNameToSearch] = useState(null)
+  const result2 = useQuery(FIND_PERSON, {
+    variables: { nameToSearch },
+    // for lazyload / One possibility for this kind of situations is the hook function useLazyQuery
+    skip: !nameToSearch,
+  })
+ 
+  if (result.loading)  {
+    return <div>loading...</div>
+  }
+
+  return (
+    <div>
+      <Persons persons={result.data.allPersons}/>
+    </div>
+  )
+}
+
+export default App
+```
+
+```json
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.8.4",
+    "graphql": "^16.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "@vitejs/plugin-react": "^3.1.0",
+    "vite": "^4.1.0"
+  }
+}
+```
+
+```js
+import { gql } from '@apollo/client'
+
+export const ALL_PERSONS = gql`
+  query {
+    allPersons  {
+      name
+      phone
+      id
+    }
+  }
+`
+
+export const CREATE_PERSON = gql`
+  mutation createPerson($name: String!, $street: String!, $city: String!, $phone: String) {
+    addPerson(
+      name: $name,
+      street: $street,
+      city: $city,
+      phone: $phone
+    ) {
+      name
+      phone
+      id
+      address {
+        street
+        city
+      }
+    }
+  }
+`
+
+export const FIND_PERSON = gql`
+  query findPersonByName($nameToSearch: String!) {
+    findPerson(name: $nameToSearch) {
+      name
+      phone
+      id
+      address {
+        street
+        city
+      }
+    }
+  }
+`
+
+export const EDIT_NUMBER = gql`
+  mutation editNumber($name: String!, $phone: String!) {
+    editNumber(name: $name, phone: $phone)  {
+      name
+      phone
+      address {
+        street
+        city
+      }
+      id
+    }
+  }
+`
+```
+
+```jsx
+import { useState } from 'react'
+import { useMutation } from '@apollo/client'
+
+import { CREATE_PERSON, ALL_PERSONS } from '../queries'
+
+const PersonForm = ({ setError }) => {
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [street, setStreet] = useState('')
+  const [city, setCity] = useState('')
+
+  const [ createPerson ] = useMutation(CREATE_PERSON, {
+    refetchQueries: [ { query: ALL_PERSONS } ],
+    onError: (error) => {
+      const messages = error.graphQLErrors.map(e => e.message).join('\n')
+      setError(messages)
+    }
+  })
+
+  const submit = async (event) => {
+    event.preventDefault()
+
+    createPerson({  variables: { name, phone, street, city } })
+
+    setName('')
+    setPhone('')
+    setStreet('')
+    setCity('')
+  }
+
+  return (
+    <div>
+      <h2>create new</h2>
+      <form onSubmit={submit}>
+        <div>
+          name <input value={name}
+            onChange={({ target }) => setName(target.value)}
+          />
+        </div>
+        <div>
+          phone <input value={phone}
+            onChange={({ target }) => setPhone(target.value)}
+          />
+        </div>
+        <div>
+          street <input value={street}
+            onChange={({ target }) => setStreet(target.value)}
+          />
+        </div>
+        <div>
+          city <input value={city}
+            onChange={({ target }) => setCity(target.value)}
+          />
+        </div>
+        <button type='submit'>add!</button>
+      </form>
+    </div>
+  )
+}
+
+export default PersonForm
+```
+
+
+
+
+
+
+
+
+
+
+
