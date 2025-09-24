@@ -21,6 +21,10 @@ const Authors = (props) => {
   }
 
   const submit = async (event) => {
+    if (!authorName) {
+      alert('请选择一个作者');
+      return;
+    }
     event.preventDefault();
     editAuthor({ variables: { name: authorName, setBornTo: birth } });
     setAuthorName('');
@@ -46,14 +50,31 @@ const Authors = (props) => {
         </tbody>
       </table>
       <form onSubmit={submit}>
-        authorName
-        <input
+        authorName:
+        <select
+          value={authorName}
+          onChange={(e) => setAuthorName(e.target.value)}
+        >
+          <option value='' disabled>
+            -- 请选择作者 --
+          </option>
+          {(allAuthors || [])?.data?.allAuthors?.map((a) => (
+            <option value={a?.name} key={a.id}>
+              {a?.name}
+            </option>
+          ))}
+        </select>
+        {/* <select>
+          <option value='someOption'>Some option</option>
+          <option value='otherOption'>Other option</option>
+        </select> */}
+        {/* <input
           type='text'
           value={authorName}
           onChange={({ target }) => setAuthorName(target.value)}
-        />
+        /> */}
         <br />
-        birth
+        birth:
         <input
           type='number'
           value={birth}
