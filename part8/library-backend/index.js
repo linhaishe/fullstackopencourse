@@ -111,6 +111,7 @@ const typeDefs = `
     name: String!
     bookCount: Int!
     born: Int
+    id: ID!
   }
 
   type Query {
@@ -168,6 +169,8 @@ const resolvers = {
         return {
           name: author.name,
           bookCount,
+          id: author.id,
+          born: author.born,
         };
       });
 
