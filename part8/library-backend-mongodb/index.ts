@@ -1,7 +1,5 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { GraphQLError } from 'graphql';
-import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { resolvers, typeDefs } from './graphQL';
@@ -13,7 +11,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 console.log('connecting to', MONGODB_URI);
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI!)
   .then(() => {
     console.log('connected success to MongoDB');
   })

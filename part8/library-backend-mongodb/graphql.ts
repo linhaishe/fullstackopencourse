@@ -4,10 +4,25 @@ import { v1 as uuid } from 'uuid';
 import Book from './models/books';
 import Author from './models/authors';
 import { GraphQLError } from 'graphql';
-import { authors } from './const';
 import { TAddAuthorParams, TAddBookParams, TEditAuthorParams } from './types';
+import jwt from 'jsonwebtoken';
+import User from './models/user';
+import dotenv from 'dotenv';
 
 export const typeDefs = `
+  type User {
+    username: String!
+    id: ID!
+  }
+
+  type Token {
+    value: String!
+  }
+
+  type Query {
+    me: User
+  }
+
   type Book {
     title: String!
     author: String!
@@ -37,14 +52,25 @@ export const typeDefs = `
       published: Int!
       genres: [String!]!
     ): Book
+
     addAuthor(
       name: String!
       born: Int
     ): Author
+
     editAuthor(
       name: String!
       setBornTo: Int!
     ): Author
+
+    createUser(
+      username: String!
+    ): User
+
+    login(
+      username: String!
+      password: String!
+    ): Token
   }
 `;
 
@@ -139,6 +165,39 @@ export const resolvers = {
           },
         });
       }
+    },
+
+    createUser: async (root, args: { username: string }) => {
+      const user = new User({ username: args.username });
+
+      return user.save().catch((error) => {
+        throw new GraphQLError('Creating the user failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.username,
+            error,
+          },
+        });
+      });
+    },
+
+    login: async (root, args: { username: string; password: string }) => {
+      const user = await User.findOne({ username: args.username });
+
+      if (!user || args.password !== 'secret') {
+        throw new GraphQLError('wrong credentials', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
+      }
+
+      const userForToken = {
+        username: user.username,
+        id: user._id,
+      };
+
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET!) };
     },
   },
 };
