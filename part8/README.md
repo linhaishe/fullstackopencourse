@@ -166,7 +166,7 @@ https://github.com/fullstack-hy2020/misc/tree/master
 
 ![](https://s2.loli.net/2025/09/24/9sSRhOlFdiQCL6m.png)
 
-The communication works by sending HTTP POST requests to http://localhost:4000/graphql. The query itself is a string sent as the value of the key *query*.
+The communication works by sending HTTP POST requests to http://localhost:4000/graphql. The query itself is a string sent as the value of the key _query_.
 
 We could take care of the communication between the React app and GraphQL by using Axios. However, most of the time, it is not very sensible to do so. It is a better idea to use a higher-order library capable of abstracting the unnecessary details of the communication.
 
@@ -191,7 +191,7 @@ At the moment, there are two good options: [Relay](https://facebook.github.io/re
 - **urql** → 相比 Apollo 更轻量灵活，插件式架构，比较适合不想要太重框架的场景。
 - **graphql-request** → 超轻量，只是对 fetch 做了封装，适合小项目。
 
-------
+---
 
 👉 总结：
 
@@ -201,79 +201,82 @@ At the moment, there are two good options: [Relay](https://facebook.github.io/re
 - 只要最简单调用：**graphql-request**
 
 ```jsx
-import ReactDOM from 'react-dom/client'
-import App from './App'
+import ReactDOM from 'react-dom/client';
+import App from './App';
 
-import { ApolloClient, InMemoryCache, gql, ApolloProvider } from '@apollo/client'
+import {
+  ApolloClient,
+  InMemoryCache,
+  gql,
+  ApolloProvider,
+} from '@apollo/client';
 
 const client = new ApolloClient({
   uri: 'http://localhost:4000',
   cache: new InMemoryCache(),
-})
+});
 
 const query = gql`
   query {
-    allPersons  {
-      name,
-      phone,
+    allPersons {
+      name
+      phone
       address {
-        street,
+        street
         city
       }
       id
     }
   }
-`
+`;
 
-client.query({ query })
-  .then((response) => {
-    console.log(response.data)
-  })
-
+client.query({ query }).then((response) => {
+  console.log(response.data);
+});
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ApolloProvider client={client}>
     <App />
   </ApolloProvider>
-)
+);
 ```
 
 ```jsx
-import { gql, useQuery } from '@apollo/client'
+import { gql, useQuery } from '@apollo/client';
 
-import Persons from './components/Persons'
+import Persons from './components/Persons';
 
 const ALL_PERSONS = gql`
   query {
-    allPersons  {
+    allPersons {
       name
       phone
       id
     }
   }
-`
+`;
 
 const App = () => {
-  const result = useQuery(ALL_PERSONS)
-  const [nameToSearch, setNameToSearch] = useState(null)
+  const result = useQuery(ALL_PERSONS);
+  const [nameToSearch, setNameToSearch] = useState(null);
   const result2 = useQuery(FIND_PERSON, {
     variables: { nameToSearch },
     // for lazyload / One possibility for this kind of situations is the hook function useLazyQuery
     skip: !nameToSearch,
-  })
- 
-  if (result.loading)  {
-    return <div>loading...</div>
+  });
+
+  if (result.loading) {
+    return <div>loading...</div>;
   }
 
   return (
     <div>
-      <Persons persons={result.data.allPersons}/>
+      <Persons persons={result.data.allPersons} />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
 ```
 
 ```json
@@ -303,26 +306,26 @@ export default App
 ```
 
 ```js
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const ALL_PERSONS = gql`
   query {
-    allPersons  {
+    allPersons {
       name
       phone
       id
     }
   }
-`
+`;
 
 export const CREATE_PERSON = gql`
-  mutation createPerson($name: String!, $street: String!, $city: String!, $phone: String) {
-    addPerson(
-      name: $name,
-      street: $street,
-      city: $city,
-      phone: $phone
-    ) {
+  mutation createPerson(
+    $name: String!
+    $street: String!
+    $city: String!
+    $phone: String
+  ) {
+    addPerson(name: $name, street: $street, city: $city, phone: $phone) {
       name
       phone
       id
@@ -332,7 +335,7 @@ export const CREATE_PERSON = gql`
       }
     }
   }
-`
+`;
 
 export const FIND_PERSON = gql`
   query findPersonByName($nameToSearch: String!) {
@@ -346,11 +349,11 @@ export const FIND_PERSON = gql`
       }
     }
   }
-`
+`;
 
 export const EDIT_NUMBER = gql`
   mutation editNumber($name: String!, $phone: String!) {
-    editNumber(name: $name, phone: $phone)  {
+    editNumber(name: $name, phone: $phone) {
       name
       phone
       address {
@@ -360,78 +363,86 @@ export const EDIT_NUMBER = gql`
       id
     }
   }
-`
+`;
 ```
 
 ```jsx
-import { useState } from 'react'
-import { useMutation } from '@apollo/client'
+import { useState } from 'react';
+import { useMutation } from '@apollo/client';
 
-import { CREATE_PERSON, ALL_PERSONS } from '../queries'
+import { CREATE_PERSON, ALL_PERSONS } from '../queries';
 
 const PersonForm = ({ setError }) => {
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [street, setStreet] = useState('')
-  const [city, setCity] = useState('')
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [street, setStreet] = useState('');
+  const [city, setCity] = useState('');
 
-  const [ createPerson ] = useMutation(CREATE_PERSON, {
-    refetchQueries: [ { query: ALL_PERSONS } ],
+  const [createPerson] = useMutation(CREATE_PERSON, {
+    refetchQueries: [{ query: ALL_PERSONS }],
     onError: (error) => {
-      const messages = error.graphQLErrors.map(e => e.message).join('\n')
-      setError(messages)
-    }
-  })
+      const messages = error.graphQLErrors.map((e) => e.message).join('\n');
+      setError(messages);
+    },
+  });
 
   const submit = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    createPerson({  variables: { name, phone, street, city } })
+    createPerson({ variables: { name, phone, street, city } });
 
-    setName('')
-    setPhone('')
-    setStreet('')
-    setCity('')
-  }
+    setName('');
+    setPhone('');
+    setStreet('');
+    setCity('');
+  };
 
   return (
     <div>
       <h2>create new</h2>
       <form onSubmit={submit}>
         <div>
-          name <input value={name}
+          name{' '}
+          <input
+            value={name}
             onChange={({ target }) => setName(target.value)}
           />
         </div>
         <div>
-          phone <input value={phone}
+          phone{' '}
+          <input
+            value={phone}
             onChange={({ target }) => setPhone(target.value)}
           />
         </div>
         <div>
-          street <input value={street}
+          street{' '}
+          <input
+            value={street}
             onChange={({ target }) => setStreet(target.value)}
           />
         </div>
         <div>
-          city <input value={city}
+          city{' '}
+          <input
+            value={city}
             onChange={({ target }) => setCity(target.value)}
           />
         </div>
         <button type='submit'>add!</button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default PersonForm
+export default PersonForm;
 ```
 
 ## Fragment
 
- in GraphQL that multiple queries return similar results. 
+in GraphQL that multiple queries return similar results.
 
-The fragments ***are not*** defined in the GraphQL schema, but in the client. The fragments must be declared when the client uses them for queries.
+The fragments **_are not_** defined in the GraphQL schema, but in the client. The fragments must be declared when the client uses them for queries.
 
 ```js
 query {
@@ -439,7 +450,7 @@ query {
     name
     phone
     address{
-      street 
+      street
       city
     }
   }
@@ -450,7 +461,7 @@ query {
     name
     phone
     address{
-      street 
+      street
       city
     }
   }
@@ -458,9 +469,9 @@ query {
 
 fragment PersonDetails on Person {
   name
-  phone 
+  phone
   address {
-    street 
+    street
     city
   }
 }
@@ -483,9 +494,9 @@ const PERSON_DETAILS = gql`
   fragment PersonDetails on Person {
     id
     name
-    phone 
+    phone
     address {
-      street 
+      street
       city
     }
   }
@@ -503,11 +514,19 @@ export const FIND_PERSON = gql`
 
 ## Subscriptions
 
-Along with query and mutation types, GraphQL offers a third operation type: [subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/). With subscriptions, clients can *subscribe* to updates about changes in the server.
+Along with query and mutation types, GraphQL offers a third operation type: [subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/). With subscriptions, clients can _subscribe_ to updates about changes in the server.
 
-all interaction between browser and server was due to a React application in the browser making HTTP requests to the server. GraphQL queries and mutations have also been done this way. With subscriptions, the situation is the opposite. After an application has made a subscription, it starts to listen to the server. When changes occur on the server, it sends a notification to all of its *subscribers*.
+all interaction between browser and server was due to a React application in the browser making HTTP requests to the server. GraphQL queries and mutations have also been done this way. With subscriptions, the situation is the opposite. After an application has made a subscription, it starts to listen to the server. When changes occur on the server, it sends a notification to all of its _subscribers_.
 
 Technically speaking, the HTTP protocol is not well-suited for communication from the server to the browser. So, under the hood, Apollo uses [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) for server subscriber communication.
+
+```
+subscription {
+  bookAdded {
+    title
+  }
+}
+```
 
 ## n+1 question
 
@@ -519,23 +538,14 @@ The application we created in this part is not optimally structured: we did some
 
 GraphQL is already a pretty old technology, having been used by Facebook since 2012, so we can see it as "battle-tested" already. Since Facebook published GraphQL in 2015, it has slowly gotten more and more attention, and might in the near future threaten the dominance of REST. The death of REST has also already been [predicted](https://www.radiofreerabbit.com/podcast/52-is-2018-the-year-graphql-kills-rest). Even though that will not happen quite yet, GraphQL is absolutely worth [learning](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
 
-
-
-
-
-
-
-
-
-
-
 ## QA
 
-安装包里有tsx，但是跑起来报错zsh: command not found: tsx
+安装包里有 tsx，但是跑起来报错 zsh: command not found: tsx
 
 ```
 tsx index.js
 ```
+
 你能安装到依赖里，但是 zsh 报 command not found: tsx，说明 没装全局命令 或者 环境变量里找不到本地的 .bin。
 
 ### ✅ 1. 用 `npx` 执行（推荐）
@@ -552,7 +562,7 @@ watch 模式：
 npx tsx watch src/index.ts
 ```
 
-------
+---
 
 ### ✅ 2. 在 `package.json` 里写 script
 
@@ -570,8 +580,3 @@ npx tsx watch src/index.ts
 ```
 npm run dev
 ```
-
-
-
-
-

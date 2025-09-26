@@ -26,6 +26,10 @@ export const typeDefs = `
     genres: [String!]!
     id: ID!
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }
   
   type Query {
     bookCount: Int!

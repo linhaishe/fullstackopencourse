@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { v1 as uuid } from 'uuid';
@@ -8,6 +9,8 @@ import { TAddAuthorParams, TAddBookParams, TEditAuthorParams } from '../types';
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import dotenv from 'dotenv';
+import { PubSub } from 'graphql-subscriptions';
+const pubsub = new PubSub();
 
 export const resolvers = {
   Query: {
@@ -57,6 +60,7 @@ export const resolvers = {
         });
 
         await book.save();
+        pubsub.publish('BOOK_ADDED', { addBook: book });
         return await book.populate('author', 'name');
       } catch (error) {
         throw new GraphQLError('Saving book failed', {
@@ -140,6 +144,12 @@ export const resolvers = {
       };
 
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET!) };
+    },
+  },
+
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterableIterator('BOOK_ADDED'),
     },
   },
 };
