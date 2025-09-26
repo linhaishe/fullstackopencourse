@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ALL_BOOKS, ALL_GENRES } from '../queries';
 import { useQuery } from '@apollo/client';
 
-const Recommend = (props) => {
+const Recommend = (props: { show: boolean }) => {
   const [favorite, setFavorite] = useState('patterns');
   const { data: allBooks } = useQuery(ALL_BOOKS, {
     variables: { genre: 'patterns' },
@@ -35,13 +35,21 @@ const Recommend = (props) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books?.map((a) => (
-            <tr key={a?.title}>
-              <td>{a?.title}</td>
-              <td>{a?.author?.name}</td>
-              <td>{a?.published}</td>
-            </tr>
-          ))}
+          {books?.map(
+            (a: {
+              title: string;
+              author: {
+                name: string;
+              };
+              published: number;
+            }) => (
+              <tr key={a?.title}>
+                <td>{a?.title}</td>
+                <td>{a?.author?.name}</td>
+                <td>{a?.published}</td>
+              </tr>
+            )
+          )}
         </tbody>
       </table>
     </div>
