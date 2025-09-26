@@ -4,21 +4,13 @@ import Books from './components/Books';
 import NewBook from './components/NewBook';
 import Login from './components/Login';
 import Recommend from './components/Recommend';
-import { useSubscription } from '@apollo/client';
-import { BOOK_ADDED } from './queries';
 
 import './App.css';
 
 const App = () => {
   const [page, setPage] = useState('books');
   const [token, setToken] = useState(null);
-  useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
-      window.alert('new book!');
-      console.log('收到数据:', data);
-    },
-    onError: (err) => console.error('订阅出错', err),
-  });
+
   return (
     <div>
       <div>

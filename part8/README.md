@@ -686,3 +686,13 @@ pubsub.publish('BOOK_ADDED', { bookAdded: savedBook });
   1. 手动把 `_id` 转成字符串
   2. 或者在 schema 中设置 `toJSON` 转换
 - 一旦转换正确，订阅事件就不会报错，前端 `useSubscription` 的 `onData` 可以正常接收。
+
+### 3。
+
+你在两个地方都往 **Apollo Client cache** 里加了同一个新对象，所以组件渲染的时候，列表里出现了重复的数据。
+
+具体情况：
+
+- `PersonForm`（或你这边的 `AddBook` 表单）提交后，`mutation` 的 `update` 或者 `onCompleted` 回调里，已经调用过 `cache.updateQuery` 把新数据加进缓存。
+- 同时你还在 **订阅 `BOOK_ADDED`** 里，又一次 `updateQuery`，再把同一个新对象加了一遍。
+- 最终 Apollo cache 里出现了两份一模一样的数据，组件渲染时就显示重复。
