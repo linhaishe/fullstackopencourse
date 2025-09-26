@@ -1,20 +1,36 @@
 /* eslint-disable react/prop-types */
-import { ALL_BOOKS } from '../queries';
+import { useState } from 'react';
+import { ALL_BOOKS, ALL_GENRES } from '../queries';
 import { useQuery } from '@apollo/client';
 
 const Books = (props) => {
-  const allBooks = useQuery(ALL_BOOKS);
+  const [searchGenres, setSearchGenres] = useState(null);
+  const { data: allBooks, refetch } = useQuery(ALL_BOOKS);
+  const { data: allGenres } = useQuery(ALL_GENRES);
 
   if (!props.show) {
     return null;
   }
 
-  const books = allBooks?.data?.allBooks;
+  const books = allBooks?.allBooks;
+  const genresList = allGenres?.allGenres;
+  const onFilter = (genre) => {
+    refetch({ genre });
+  };
 
   return (
     <div>
       <h2>books</h2>
-
+      <p>
+        {'in Genre: '}
+        <span
+          style={{
+            fontWeight: '900',
+          }}
+        >
+          {searchGenres || ' '}
+        </span>
+      </p>
       <table>
         <tbody>
           <tr>
@@ -31,6 +47,19 @@ const Books = (props) => {
           ))}
         </tbody>
       </table>
+      {genresList?.map((v, index) => {
+        return (
+          <button
+            key={index}
+            onClick={() => {
+              setSearchGenres(v);
+              onFilter(v);
+            }}
+          >
+            {v}
+          </button>
+        );
+      })}
     </div>
   );
 };

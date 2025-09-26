@@ -37,12 +37,13 @@ export const typeDefs = `
     genres: [String!]!
     id: ID!
   }
-
+  
   type Query {
     bookCount: Int!
     authorCount: Int!
     allBooks(author: String, genre: String): [Book]
     allAuthors: [Author]
+    allGenres: [String!]!
   }
   
   type Mutation { 
@@ -84,17 +85,25 @@ export const resolvers = {
         return Book.find({
           author: authorDoc?._id,
           genres: { $in: [args.genre] },
-        });
+        }).populate('author', 'name');
       } else if (args.author && !args.genre) {
         const authorDoc = await Author.findOne({ name: args.author });
-        return Book.find({ author: authorDoc?._id });
+        return Book.find({ author: authorDoc?._id }).populate('author', 'name');
       } else if (args.genre && !args.author) {
-        return Book.find({ genres: { $in: [args.genre] } });
+        return Book.find({ genres: { $in: [args.genre] } }).populate(
+          'author',
+          'name'
+        );
       } else {
         return Book.find({}).populate('author', 'name');
       }
     },
     allAuthors: async () => Author.find({}),
+    allGenres: async () => {
+      const books = await Book.find({});
+      const genres = books.flatMap((b) => b.genres);
+      return [...new Set(genres)];
+    },
   },
 
   Mutation: {

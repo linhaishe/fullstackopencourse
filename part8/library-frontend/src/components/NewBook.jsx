@@ -12,7 +12,6 @@ const NewBook = (props) => {
   const [addBook, result] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_BOOKS }],
   });
-  console.log('result', result);
 
   if (!props.show) {
     return null;

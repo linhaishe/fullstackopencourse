@@ -7,7 +7,7 @@ import Login from './components/Login';
 import './App.css';
 
 const App = () => {
-  const [page, setPage] = useState('authors');
+  const [page, setPage] = useState('books');
   const [token, setToken] = useState(null);
 
   return (
