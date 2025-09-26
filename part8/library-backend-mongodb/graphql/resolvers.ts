@@ -59,9 +59,12 @@ export const resolvers = {
           author: authorDoc._id,
         });
 
-        await book.save();
-        pubsub.publish('BOOK_ADDED', { addBook: book });
-        return await book.populate('author', 'name');
+        const savedBook = await book.save();
+        await savedBook.populate('author', 'name');
+
+        pubsub.publish('BOOK_ADDED', { bookAdded: savedBook });
+
+        return savedBook;
       } catch (error) {
         throw new GraphQLError('Saving book failed', {
           extensions: {
@@ -127,6 +130,7 @@ export const resolvers = {
         });
       });
     },
+
     login: async (root, args: { username: string; password: string }) => {
       const user = await User.findOne({ username: args.username });
 
@@ -149,7 +153,10 @@ export const resolvers = {
 
   Subscription: {
     bookAdded: {
-      subscribe: () => pubsub.asyncIterableIterator('BOOK_ADDED'),
+      subscribe: () => {
+        console.log('客户端订阅 bookAdded 成功', new Date());
+        return pubsub.asyncIterableIterator('BOOK_ADDED');
+      },
     },
   },
 };

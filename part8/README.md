@@ -540,6 +540,8 @@ GraphQL is already a pretty old technology, having been used by Facebook since 2
 
 ## QA
 
+### 1. 
+
 安装包里有 tsx，但是跑起来报错 zsh: command not found: tsx
 
 ```
@@ -548,7 +550,7 @@ tsx index.js
 
 你能安装到依赖里，但是 zsh 报 command not found: tsx，说明 没装全局命令 或者 环境变量里找不到本地的 .bin。
 
-### ✅ 1. 用 `npx` 执行（推荐）
+ ✅ 1. 用 `npx` 执行（推荐）
 
 `tsx` 是装在 `node_modules/.bin/tsx` 里的，本地运行时直接用 `npx` 就行：
 
@@ -564,7 +566,7 @@ npx tsx watch src/index.ts
 
 ---
 
-### ✅ 2. 在 `package.json` 里写 script
+✅ 2. 在 `package.json` 里写 script
 
 这样只用 `npm run` 或 `pnpm run` 调用，不用管 PATH：
 
@@ -580,3 +582,107 @@ npx tsx watch src/index.ts
 ```
 npm run dev
 ```
+
+### 2.
+
+订阅成功了，但是有报错 App.jsx:20 订阅出错 ApolloError: ID cannot represent value: { type: "Buffer", data: [Array] }
+
+ChatGPT 说：
+
+明白了，你现在订阅成功，但是前端报错：
+
+```
+ApolloError: ID cannot represent value: { type: "Buffer", data: [Array] }
+```
+
+这个问题其实是 **GraphQL 类型和 MongoDB 数据类型不匹配**。具体分析如下：
+
+------
+
+ 1️⃣ 问题原因
+
+- 你的 `Book` model 里 `author` 和 `_id` 都是 MongoDB `ObjectId` 类型。
+- 在 GraphQL schema 中，你可能定义了：
+
+```
+type Book {
+  id: ID!
+  title: String!
+  author: Author!
+  published: Int!
+  genres: [String!]!
+}
+```
+
+- GraphQL 的 `ID` 类型 **只能序列化成字符串**，不能直接返回 MongoDB 的 `ObjectId` 或 Buffer。
+- 错误信息说明，你在 `bookAdded` payload 返回了一个对象，包含了 **MongoDB 的 Buffer** 或 ObjectId，没有经过 `toString()` 转换。
+
+------
+
+2️⃣ Mutation / Subscription 返回值处理
+
+你在 `addBook` resolver 里：
+
+```
+await book.save();
+pubsub.publish('BOOK_ADDED', { bookAdded: book });
+return await book.populate('author', 'name');
+```
+
+问题：
+
+- `book` 里 `_id` 是 ObjectId
+- 你没有调用 `toJSON()` 或手动转换
+- GraphQL 无法序列化 `ObjectId` → 导致 `ID cannot represent value` 错误
+
+------
+
+ 3️⃣ 解决方法
+
+方法 1️⃣ 使用 `toJSON` / `toObject` 并转换 `_id`
+
+```
+const savedBook = await book.populate('author', 'name');
+
+const payload = {
+  bookAdded: {
+    ...savedBook.toJSON(),       // ObjectId 会被自动转换成字符串
+    id: savedBook._id.toString() // 确保 id 是字符串
+  }
+};
+
+pubsub.publish('BOOK_ADDED', payload);
+return savedBook;
+```
+
+------
+
+方法 2️⃣ 在 Mongoose schema 中设置 `toJSON` 转换
+
+```
+bookSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    ret.id = ret._id.toString();
+    delete ret._id;
+    delete ret.__v;
+  }
+});
+```
+
+然后你直接：
+
+```
+pubsub.publish('BOOK_ADDED', { bookAdded: savedBook });
+```
+
+- 订阅返回的对象会自动把 `_id` 转成字符串，GraphQL ID 就能正确序列化了。
+
+------
+
+ 4️⃣ 小结
+
+- 错误原因：GraphQL 的 ID 类型不能直接序列化 MongoDB ObjectId/Buffer
+- 解决方法：
+  1. 手动把 `_id` 转成字符串
+  2. 或者在 schema 中设置 `toJSON` 转换
+- 一旦转换正确，订阅事件就不会报错，前端 `useSubscription` 的 `onData` 可以正常接收。

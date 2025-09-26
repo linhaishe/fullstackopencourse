@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 
-const schema = new mongoose.Schema({
+const bookSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -18,8 +18,20 @@ const schema = new mongoose.Schema({
   genres: [{ type: String }],
 });
 
-schema.plugin(uniqueValidator);
+bookSchema.plugin(uniqueValidator);
 
-const Book = mongoose.model('Book', schema);
+bookSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    ret.id = ret._id.toString();
+    delete ret._id;
+    delete ret.__v;
+    if (ret.author && ret.author._id) {
+      ret.author.id = ret.author._id.toString();
+      delete ret.author._id;
+    }
+  },
+});
+
+const Book = mongoose.model('Book', bookSchema);
 
 export default Book;
