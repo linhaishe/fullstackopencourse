@@ -429,9 +429,47 @@ export default PersonForm
 
 
 
+## QA
 
+安装包里有tsx，但是跑起来报错zsh: command not found: tsx
 
+```
+tsx index.js
+```
+你能安装到依赖里，但是 zsh 报 command not found: tsx，说明 没装全局命令 或者 环境变量里找不到本地的 .bin。
 
+### ✅ 1. 用 `npx` 执行（推荐）
+
+`tsx` 是装在 `node_modules/.bin/tsx` 里的，本地运行时直接用 `npx` 就行：
+
+```
+npx tsx src/index.ts
+```
+
+watch 模式：
+
+```
+npx tsx watch src/index.ts
+```
+
+------
+
+### ✅ 2. 在 `package.json` 里写 script
+
+这样只用 `npm run` 或 `pnpm run` 调用，不用管 PATH：
+
+```
+"scripts": {
+  "dev": "tsx watch src/index.ts",
+  "start": "tsx src/index.ts"
+}
+```
+
+然后运行：
+
+```
+npm run dev
+```
 
 
 
