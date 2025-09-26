@@ -9,7 +9,9 @@ const Authors = (props) => {
   const allAuthors = useQuery(ALL_AUTHORS);
   const [authorName, setAuthorName] = useState('');
   const [birth, setBirth] = useState('');
-  const [editAuthor, result] = useMutation(EDIT_AUTHOR);
+  const [editAuthor, result] = useMutation(EDIT_AUTHOR, {
+    refetchQueries: [{ query: ALL_AUTHORS }],
+  });
   console.log('result', result);
 
   if (!props.show) {
@@ -49,39 +51,41 @@ const Authors = (props) => {
           ))}
         </tbody>
       </table>
-      <form onSubmit={submit}>
-        authorName:
-        <select
-          value={authorName}
-          onChange={(e) => setAuthorName(e.target.value)}
-        >
-          <option value='' disabled>
-            -- 请选择作者 --
-          </option>
-          {(allAuthors || [])?.data?.allAuthors?.map((a) => (
-            <option value={a?.name} key={a.id}>
-              {a?.name}
+      {props?.token && (
+        <form onSubmit={submit}>
+          authorName:
+          <select
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+          >
+            <option value='' disabled>
+              -- 请选择作者 --
             </option>
-          ))}
-        </select>
-        {/* <select>
+            {(allAuthors || [])?.data?.allAuthors?.map((a) => (
+              <option value={a?.name} key={a.id}>
+                {a?.name}
+              </option>
+            ))}
+          </select>
+          {/* <select>
           <option value='someOption'>Some option</option>
           <option value='otherOption'>Other option</option>
         </select> */}
-        {/* <input
+          {/* <input
           type='text'
           value={authorName}
           onChange={({ target }) => setAuthorName(target.value)}
         /> */}
-        <br />
-        birth:
-        <input
-          type='number'
-          value={birth}
-          onChange={({ target }) => setBirth(Number(target.value))}
-        />
-        <button type='submit'>set born</button>
-      </form>
+          <br />
+          birth:
+          <input
+            type='number'
+            value={birth}
+            onChange={({ target }) => setBirth(Number(target.value))}
+          />
+          <button type='submit'>set born</button>
+        </form>
+      )}
     </div>
   );
 };

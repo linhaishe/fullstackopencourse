@@ -180,7 +180,6 @@ export const resolvers = {
         });
       });
     },
-
     login: async (root, args: { username: string; password: string }) => {
       const user = await User.findOne({ username: args.username });
 
