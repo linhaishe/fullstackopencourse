@@ -20,7 +20,8 @@ const App = () => {
         {token && (
           <button
             onClick={() => {
-              console.log('123logout');
+              sessionStorage.clear();
+              setToken(null);
             }}
           >
             logout
