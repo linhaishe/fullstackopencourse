@@ -696,3 +696,84 @@ pubsub.publish('BOOK_ADDED', { bookAdded: savedBook });
 - `PersonForm`（或你这边的 `AddBook` 表单）提交后，`mutation` 的 `update` 或者 `onCompleted` 回调里，已经调用过 `cache.updateQuery` 把新数据加进缓存。
 - 同时你还在 **订阅 `BOOK_ADDED`** 里，又一次 `updateQuery`，再把同一个新对象加了一遍。
 - 最终 Apollo cache 里出现了两份一模一样的数据，组件渲染时就显示重复。
+
+### 4.
+
+query {  allAuthors {    name     bookCount  } } 说是这里会有n+1问题，怎么复现这个问题
+
+1. 你现在的 query
+
+```
+query {
+  allAuthors {
+    name 
+    bookCount
+  }
+}
+```
+
+------
+
+2. 服务端可能的 resolver 实现（常见写法）
+
+```
+const resolvers = {
+  Query: {
+    allAuthors: async () => {
+      return Author.find({}); // 返回所有作者
+    },
+  },
+  Author: {
+    bookCount: async (root) => {
+      // root = 单个 author
+      return await Book.countDocuments({ author: root._id });
+    },
+  },
+};
+```
+
+------
+
+3. 这里会发生什么？
+
+- `allAuthors` resolver 执行一次 → 查出 **所有作者**，假设有 `N` 个作者。
+- GraphQL 再去解析每个作者的 `bookCount` 字段 → 每次都执行一次 `Book.countDocuments(...)` 查询。
+- 总共：**1 + N 次查询**（这就是 N+1 问题）。
+
+比如：
+
+- 数据库有 10 个作者。
+- 查询 `allAuthors { name bookCount }`。
+- Mongo 查询次数：1（查所有作者）+ 10（每个作者查书籍数量） = **11 次**。
+
+------
+
+4. 如何复现
+
+1. 在你的 MongoDB 中插入多个作者（比如 10 个）。
+
+2. 用上面那段 resolver 实现。
+
+3. 执行 query：
+
+   ```
+   query {
+     allAuthors {
+       name
+       bookCount
+     }
+   }
+   ```
+
+4. 打开数据库 query log（或在 resolver 里加 `console.log(...)`）。
+    你会看到：
+
+   - `Author.find({})` 执行一次
+   - `Book.countDocuments(...)` 执行 10 次
+
+------
+
+5. 怎么优化？
+
+- 用 **DataLoader**（批处理 + 缓存）。
+- 或者预先用 `aggregate` 一次性统计好每个作者的书籍数量。

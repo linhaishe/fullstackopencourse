@@ -14,7 +14,10 @@ const pubsub = new PubSub();
 
 export const resolvers = {
   Query: {
-    bookCount: async () => Book.collection.countDocuments(),
+    bookCount: async () => {
+      console.log('bookCount.find');
+      return Book.collection.countDocuments();
+    },
     authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root: any, args: { author: string; genre: string }) => {
       if (args.author && args.genre) {
@@ -35,7 +38,10 @@ export const resolvers = {
         return Book.find({}).populate('author', 'name');
       }
     },
-    allAuthors: async () => Author.find({}),
+    allAuthors: async () => {
+      console.log('allAuthors.find');
+      return Author.find({});
+    },
     allGenres: async () => {
       const books = await Book.find({});
       const genres = books.flatMap((b) => b.genres);
@@ -157,6 +163,13 @@ export const resolvers = {
         console.log('客户端订阅 bookAdded 成功', new Date());
         return pubsub.asyncIterableIterator('BOOK_ADDED');
       },
+    },
+  },
+
+  Author: {
+    bookCount: async (root) => {
+      console.log('counting books for', root.name);
+      return await Book.countDocuments({ author: root._id }); // 每个作者查一次 → N
     },
   },
 };
