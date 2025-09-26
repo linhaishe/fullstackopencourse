@@ -117,6 +117,7 @@ export const resolvers = {
       try {
         const authorDoc = await Author.findOne({ name: args.name });
         if (!authorDoc) {
+          // add error
           throw new GraphQLError('Editing AUTHOR failed', {
             extensions: {
               code: 'AUTHOR_NOT_FOUND',
