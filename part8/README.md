@@ -777,3 +777,172 @@ const resolvers = {
 
 - 用 **DataLoader**（批处理 + 缓存）。
 - 或者预先用 `aggregate` 一次性统计好每个作者的书籍数量。
+
+### 5.
+
+allAuthors 的请求为什么会带动Author里的bookCount？
+
+```js
+import Author from './models/author.js'
+import Book from './models/book.js'
+
+const resolvers = {
+  Query: {
+    allAuthors: async () => {
+      console.log('allAuthors.find')
+      return Author.find({})   // 这里查一次 → 1
+    },
+  },
+  Author: {
+    bookCount: async (root) => {
+      console.log('counting books for', root.name)
+      return await Book.countDocuments({ author: root._id }) // 每个作者查一次 → N
+    },
+  },
+}
+
+export default resolvers
+
+```
+
+1. 你请求的 Query
+
+```
+query {
+  allAuthors {
+    name
+    bookCount
+  }
+}
+```
+
+GraphQL 的执行步骤是这样的：
+
+- 先执行 `Query.allAuthors` → 返回一个 `Author` 数组（比如 3 个作者）。
+- 然后 GraphQL 会遍历数组里的每个 Author，**根据 schema 里定义的字段解析函数（resolver）去取值**。
+
+------
+
+2. resolvers 结构
+
+```
+const resolvers = {
+  Query: {
+    allAuthors: async () => Author.find({}),
+  },
+  Author: {
+    bookCount: async (root) => {
+      return Book.countDocuments({ author: root._id })
+    },
+  },
+}
+```
+
+- `allAuthors` resolver 只负责返回作者列表。
+- 但是你 query 里请求了 `bookCount` 字段，所以 **GraphQL 会进入 `Author.bookCount` resolver**，对每一个作者执行一次。
+
+这就是为什么 `allAuthors` 请求会“带动” `Author.bookCount`。
+
+------
+
+3. N+1 的由来
+
+- `allAuthors` → 1 次 DB 查询（拿到作者列表）。
+- 对每个作者，GraphQL 又调用 `Author.bookCount` resolver → 每个作者 1 次 DB 查询。
+- 所以变成了 **1 + N 次查询** → **N+1 问题**。
+
+------
+
+✅ 你如果只写：
+
+```
+query {
+  allAuthors {
+    name
+  }
+}
+```
+
+就只会执行一次 `Author.find`，不会触发 `bookCount` 的 resolver。
+
+----------------------------
+
+✅ 解决方案 1：在 Query 层批量查（聚合）
+
+一次性把每个作者的书籍数量算出来，再返回。
+ Mongoose 里可以用 `aggregate`：
+
+```
+Query: {
+  allAuthors: async () => {
+    const authors = await Author.find({})
+    const counts = await Book.aggregate([
+      { $group: { _id: "$author", count: { $sum: 1 } } }
+    ])
+
+    // 把 count 映射成一个 Map
+    const countMap = new Map()
+    counts.forEach((c) => countMap.set(c._id.toString(), c.count))
+
+    // 给每个作者加上 bookCount
+    return authors.map((author) => ({
+      ...author.toObject(),
+      bookCount: countMap.get(author._id.toString()) || 0
+    }))
+  }
+}
+```
+
+这样：
+
+- 只会发 **2 次查询**（一次查作者，一次查聚合）。
+- `Author.bookCount` resolver 就不需要单独写了，可以直接在返回对象里带上。
+
+------
+
+✅ 解决方案 2：用 DataLoader 批处理
+
+如果你想保留 `Author.bookCount` 作为 field resolver，不改 Query 层逻辑，可以用 [dataloader](https://github.com/graphql/dataloader) 批量请求。
+
+```
+import DataLoader from 'dataloader'
+
+const bookCountLoader = new DataLoader(async (authorIds) => {
+  const counts = await Book.aggregate([
+    { $match: { author: { $in: authorIds } } },
+    { $group: { _id: "$author", count: { $sum: 1 } } }
+  ])
+
+  const countMap = new Map()
+  counts.forEach((c) => countMap.set(c._id.toString(), c.count))
+
+  return authorIds.map((id) => countMap.get(id.toString()) || 0)
+})
+
+const resolvers = {
+  Query: {
+    allAuthors: async () => Author.find({})
+  },
+  Author: {
+    bookCount: (root) => bookCountLoader.load(root._id)
+  }
+}
+```
+
+这样：
+
+- GraphQL 在一次请求中访问多个作者的 `bookCount` 时，会被 dataloader 批量化 → 最终还是 1 次 DB 查询。
+
+------
+
+对比
+
+| 方案                    | 优点                                     | 缺点                                                         |
+| ----------------------- | ---------------------------------------- | ------------------------------------------------------------ |
+| **聚合（方案1）**       | 简单直接、查询次数固定                   | Resolver 逻辑被“搬到” Query 层，缺少 field resolver 的灵活性 |
+| **DataLoader（方案2）** | 保持 resolver 粒度，自动批处理，复用性强 | 多一层工具学习成本                                           |
+
+------
+
+👉 如果你只是练习项目 / 数据量不大，用 **方案 1（aggregate）** 就够了。
+ 👉 如果项目会规模化发展，推荐 **方案 2（DataLoader）**，是 GraphQL 处理 N+1 的标准解法。

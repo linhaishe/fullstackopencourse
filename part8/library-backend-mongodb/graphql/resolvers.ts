@@ -2,15 +2,29 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { v1 as uuid } from 'uuid';
-import Book from '../models/books';
-import Author from '../models/authors';
 import { GraphQLError } from 'graphql';
-import { TAddAuthorParams, TAddBookParams, TEditAuthorParams } from '../types';
 import jwt from 'jsonwebtoken';
-import User from '../models/user';
+import DataLoader from 'dataloader';
 import dotenv from 'dotenv';
 import { PubSub } from 'graphql-subscriptions';
 const pubsub = new PubSub();
+
+import Book from '../models/books';
+import Author from '../models/authors';
+import User from '../models/user';
+import { TAddAuthorParams, TAddBookParams, TEditAuthorParams } from '../types';
+
+const bookCountLoader = new DataLoader(async (authorIds) => {
+  const counts = await Book.aggregate([
+    { $match: { author: { $in: authorIds } } },
+    { $group: { _id: '$author', count: { $sum: 1 } } },
+  ]);
+
+  const countMap = new Map();
+  counts.forEach((c) => countMap.set(c._id.toString(), c.count));
+
+  return authorIds.map((id) => countMap.get(id.toString()) || 0);
+});
 
 export const resolvers = {
   Query: {
@@ -167,9 +181,13 @@ export const resolvers = {
   },
 
   Author: {
-    bookCount: async (root) => {
+    // bookCount: async (root) => {
+    //   console.log('counting books for', root.name);
+    //   return await Book.countDocuments({ author: root._id }); // 每个作者查一次 → N
+    // },
+    bookCount: (root) => {
       console.log('counting books for', root.name);
-      return await Book.countDocuments({ author: root._id }); // 每个作者查一次 → N
+      return bookCountLoader.load(root._id);
     },
   },
 };
