@@ -427,6 +427,106 @@ const PersonForm = ({ setError }) => {
 export default PersonForm
 ```
 
+## Fragment
+
+ in GraphQL that multiple queries return similar results. 
+
+The fragments ***are not*** defined in the GraphQL schema, but in the client. The fragments must be declared when the client uses them for queries.
+
+```js
+query {
+  findPerson(name: "Pekka Mikkola") {
+    name
+    phone
+    address{
+      street 
+      city
+    }
+  }
+}
+
+query {
+  allPersons {
+    name
+    phone
+    address{
+      street 
+      city
+    }
+  }
+}
+
+fragment PersonDetails on Person {
+  name
+  phone 
+  address {
+    street 
+    city
+  }
+}
+
+// With the fragment, we can do the queries in a compact form:
+
+query {
+  allPersons {
+    ...PersonDetails
+  }
+}
+
+query {
+  findPerson(name: "Pekka Mikkola") {
+    ...PersonDetails
+  }
+}
+
+const PERSON_DETAILS = gql`
+  fragment PersonDetails on Person {
+    id
+    name
+    phone 
+    address {
+      street 
+      city
+    }
+  }
+`
+
+export const FIND_PERSON = gql`
+  query findPersonByName($nameToSearch: String!) {
+    findPerson(name: $nameToSearch) {
+      ...PersonDetails
+    }
+  }
+  ${PERSON_DETAILS}
+`
+```
+
+## Subscriptions
+
+Along with query and mutation types, GraphQL offers a third operation type: [subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/). With subscriptions, clients can *subscribe* to updates about changes in the server.
+
+all interaction between browser and server was due to a React application in the browser making HTTP requests to the server. GraphQL queries and mutations have also been done this way. With subscriptions, the situation is the opposite. After an application has made a subscription, it starts to listen to the server. When changes occur on the server, it sends a notification to all of its *subscribers*.
+
+Technically speaking, the HTTP protocol is not well-suited for communication from the server to the browser. So, under the hood, Apollo uses [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) for server subscriber communication.
+
+## n+1 question
+
+GraphQL Foundation's [DataLoader](https://github.com/graphql/dataloader) library offers a good solution for the n+1 problem among other issues. More about using DataLoader with Apollo server [here](https://www.robinwieruch.de/graphql-apollo-server-tutorial/#graphql-server-data-loader-caching-batching) and [here](http://www.petecorey.com/blog/2017/08/14/batching-graphql-queries-with-dataloader/).
+
+## Epilogue
+
+The application we created in this part is not optimally structured: we did some cleanups but much would still need to be done. Examples for better structuring of GraphQL applications can be found on the internet. For example, for the server [here](https://www.apollographql.com/blog/modularizing-your-graphql-schema-code) and the client [here](https://medium.com/@peterpme/thoughts-on-structuring-your-apollo-queries-mutations-939ba4746cd8).
+
+GraphQL is already a pretty old technology, having been used by Facebook since 2012, so we can see it as "battle-tested" already. Since Facebook published GraphQL in 2015, it has slowly gotten more and more attention, and might in the near future threaten the dominance of REST. The death of REST has also already been [predicted](https://www.radiofreerabbit.com/podcast/52-is-2018-the-year-graphql-kills-rest). Even though that will not happen quite yet, GraphQL is absolutely worth [learning](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
+
+
+
+
+
+
+
+
+
 
 
 ## QA
