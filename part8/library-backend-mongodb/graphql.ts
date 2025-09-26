@@ -23,18 +23,18 @@ export const typeDefs = `
     me: User
   }
 
-  type Book {
-    title: String!
-    author: String!
-    published: Int!
-    genres: [String!]!
-    id: ID!
-  }
-
   type Author {
     name: String!
     bookCount: Int!
     born: Int
+    id: ID!
+  }
+
+  type Book {
+    title: String!
+    author: Author!
+    published: Int!
+    genres: [String!]!
     id: ID!
   }
 
@@ -91,27 +91,30 @@ export const resolvers = {
       } else if (args.genre && !args.author) {
         return Book.find({ genres: { $in: [args.genre] } });
       } else {
-        return Book.find({});
+        return Book.find({}).populate('author', 'name');
       }
     },
     allAuthors: async () => Author.find({}),
   },
 
   Mutation: {
-    addBook: async (root: any, args: TAddBookParams) => {
+    addBook: async (root, args: TAddBookParams) => {
       try {
-        const authorDoc = await Author.findOne({ name: args.author });
+        let authorDoc = await Author.findOne({ name: args.author });
         if (!authorDoc) {
-          throw new GraphQLError('Saving AUTHOR failed', {
-            extensions: {
-              code: 'AUTHOR_NOT_FOUND',
-            },
-          });
-        } else {
-          const book = new Book({ ...args, author: authorDoc?._id });
-          await book.save();
-          return book;
+          authorDoc = new Author({ name: args.author });
+          await authorDoc.save();
         }
+
+        const book = new Book({
+          title: args.title,
+          published: args.published,
+          genres: args.genres,
+          author: authorDoc._id,
+        });
+
+        await book.save();
+        return await book.populate('author', 'name');
       } catch (error) {
         throw new GraphQLError('Saving book failed', {
           extensions: {
@@ -143,7 +146,6 @@ export const resolvers = {
       try {
         const authorDoc = await Author.findOne({ name: args.name });
         if (!authorDoc) {
-          // add error
           throw new GraphQLError('Editing AUTHOR failed', {
             extensions: {
               code: 'AUTHOR_NOT_FOUND',
@@ -151,8 +153,6 @@ export const resolvers = {
           });
         } else {
           authorDoc.born = args.setBornTo;
-          const book = new Book({ ...args, author: authorDoc?._id });
-          await book.save();
           await authorDoc.save();
           return authorDoc;
         }

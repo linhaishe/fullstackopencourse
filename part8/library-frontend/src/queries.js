@@ -15,7 +15,10 @@ export const ALL_BOOKS = gql`
   query {
     allBooks {
       title
-      author
+      author {
+        id
+        name
+      }
       published
       genres
       id
@@ -37,24 +40,13 @@ export const ADD_BOOK = gql`
       genres: $genres
     ) {
       title
-      author
+      author {
+        id
+        name
+      }
       published
       genres
       id
-    }
-  }
-`;
-
-export const FIND_PERSON = gql`
-  query findPersonByName($nameToSearch: String!) {
-    findPerson(name: $nameToSearch) {
-      name
-      phone
-      id
-      address {
-        street
-        city
-      }
     }
   }
 `;
