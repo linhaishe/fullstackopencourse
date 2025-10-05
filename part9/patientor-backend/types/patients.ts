@@ -1,7 +1,7 @@
 import z from 'zod';
 import { NewEntrySchema } from '../utils';
 
-export enum GenderE {
+export enum Gender {
   Male = 'male',
   Female = 'female',
   Other = 'other',
@@ -12,7 +12,7 @@ export interface IPatientsEntry {
   name: string;
   dateOfBirth: string;
   ssn?: string;
-  gender: GenderE;
+  gender: Gender;
   occupation: string;
 }
 

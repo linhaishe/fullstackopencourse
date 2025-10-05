@@ -1,8 +1,3 @@
-// import {
-//   NonSensitivePatientEntry,
-//   PatientEntry,
-//   NewPatientEntry
-// } from '../types';
 import { v1 as uuid } from 'uuid';
 import allPatients from '../data/patients';
 import {
@@ -10,33 +5,24 @@ import {
   NewPatientEntry,
   NonSensitivePatientsEntry,
 } from '../types/patients';
-
-// import diaries from '../../data/entries';
-
-// const getEntries = (): PatientEntry[] => {
-//   return diaries;
-// };
+import { toGender } from '../utils';
 
 const getNonSensitiveEntries = (): NonSensitivePatientsEntry[] => {
   return allPatients.map(({ id, name, dateOfBirth, gender, occupation }) => ({
     id,
     name,
     dateOfBirth,
-    gender,
+    gender: toGender(gender),
     occupation,
   }));
 };
-
-// const findById = (id: number): PatientEntry | undefined => {
-//   const entry = diaries.find(d => d.id === id);
-//   return entry;
-// };
 
 const addPatient = (entry: NewPatientEntry): IPatientsEntry => {
   const id = uuid();
   const newPatientEntry = {
     id,
     ...entry,
+    gender: toGender(entry.gender),
   };
 
   allPatients.push(newPatientEntry);
