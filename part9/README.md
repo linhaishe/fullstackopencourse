@@ -65,3 +65,99 @@ npm install --save-dev ts-node-dev
   // ...
 }
 ```
+
+TypeScript's Native Compiler (*tsc*) can help us initialize our project by generating our *tsconfig.json* file.
+
+```bash
+npm init
+npm install typescript --save-dev
+npm run tsc -- --init
+// Note the extra -- before the actual argument! Arguments before -- are interpreted as being for the npm command, while the ones after that are meant for the command that is run through the script (i.e. tsc in this case).
+npm install express
+npm install --save-dev eslint @eslint/js typescript-eslint @stylistic/eslint-plugin @types/express @types/eslint__js
+npm install --save-dev ts-node-dev
+```
+
+```json
+{
+  // ...
+  "scripts": {
+    "tsc": "tsc",
+    "dev": "ts-node-dev index.ts",
+    "lint": "eslint .",
+    "start": "node build/index.js"
+  },
+  // ...
+}
+```
+
+```json
+ {
+  "compilerOptions": {
+    // ...
+    "resolveJsonModule": true
+  }
+}
+// According to the node documentation for file modules, node will try to resolve modules in order of extensions:
+ ["js", "json", "node", "ts", "tsx"]
+// We notice that the .json file extension takes precedence over .ts and so myModule.json will be imported and not myModule.ts.
+// To avoid time-eating bugs, it is recommended that within a flat directory, each file with a valid node module extension has a unique filename.
+```
+
+https://www.typescriptlang.org/docs/handbook/utility-types.html#omittype-keys
+
+```js
+const isString = (text: unknown): text is string => {
+ return typeof text === 'string' || text instanceof String;
+}
+
+const a = "I'm a string primitive";
+const b = new String("I'm a String Object");
+typeof a; --> returns 'string'
+typeof b; --> returns 'object'
+a instanceof String; --> returns false
+b instanceof String; --> returns true
+```
+
+### Using schema validation libraries
+
+Writing a validator to the request body can be a huge burden. Thankfully there exists several *schema validator libraries* that can help. Let us now have a look at [Zod](https://zod.dev/) that works pretty well with TypeScript.
+
+```
+npm install zod
+```
+
+```js
+const isString = (text: unknown): text is string => {
+  return typeof text === 'string' || text instanceof String;
+};
+
+const parseComment = (comment: unknown): string => {
+  if (!isString(comment)) {
+    throw new Error('Incorrect comment');
+  }
+
+  return comment;
+};
+
+//...
+
+const parseComment = (comment: unknown): string => {
+  return z.string().parse(comment);
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
