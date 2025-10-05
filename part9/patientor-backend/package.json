@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "tsc": "tsc",
-    "dev": "nodemon ts-node-dev index.ts",
+    "dev": "nodemon --exec ts-node index.ts",
     "lint": "eslint .",
     "start": "node build/index.js"
   },
@@ -14,6 +14,7 @@
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@stylistic/eslint-plugin": "^2.6.1",
+    "@types/cors": "^2.8.19",
     "@types/eslint__js": "^8.42.3",
     "@types/express": "^5.0.3",
     "@types/node": "^24.6.2",
@@ -23,6 +24,7 @@
     "typescript-eslint": "^8.0.0"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "zod": "^4.1.11"
   }
