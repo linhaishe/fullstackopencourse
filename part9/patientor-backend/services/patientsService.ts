@@ -1,15 +1,19 @@
 // import {
-//   NonSensitiveDiaryEntry,
-//   DiaryEntry,
-//   NewDiaryEntry
+//   NonSensitivePatientEntry,
+//   PatientEntry,
+//   NewPatientEntry
 // } from '../types';
-
+import { v1 as uuid } from 'uuid';
 import allPatients from '../data/patients';
-import { NonSensitivePatientsEntry } from '../types/patients';
+import {
+  IPatientsEntry,
+  NewPatientEntry,
+  NonSensitivePatientsEntry,
+} from '../types/patients';
 
 // import diaries from '../../data/entries';
 
-// const getEntries = (): DiaryEntry[] => {
+// const getEntries = (): PatientEntry[] => {
 //   return diaries;
 // };
 
@@ -23,21 +27,23 @@ const getNonSensitiveEntries = (): NonSensitivePatientsEntry[] => {
   }));
 };
 
-// const findById = (id: number): DiaryEntry | undefined => {
+// const findById = (id: number): PatientEntry | undefined => {
 //   const entry = diaries.find(d => d.id === id);
 //   return entry;
 // };
 
-// const addDiary = ( entry: NewDiaryEntry ): DiaryEntry => {
-//   const newDiaryEntry = {
-//     id: Math.max(...diaries.map(d => d.id)) + 1,
-//     ...entry
-//   };
+const addPatient = (entry: NewPatientEntry): IPatientsEntry => {
+  const id = uuid();
+  const newPatientEntry = {
+    id,
+    ...entry,
+  };
 
-//   diaries.push(newDiaryEntry);
-//   return newDiaryEntry;
-// };
+  allPatients.push(newPatientEntry);
+  return newPatientEntry;
+};
 
 export default {
   getNonSensitiveEntries,
+  addPatient,
 };

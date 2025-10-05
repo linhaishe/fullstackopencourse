@@ -1,8 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 
 import { z } from 'zod';
-import { IPatientsEntry } from '../types/patients';
+import { IPatientsEntry, NewPatientEntry } from '../types/patients';
 import patientsService from '../services/patientsService';
+import { NewEntrySchema } from '../utils';
 
 const router = express.Router();
 
@@ -10,15 +11,27 @@ router.get('/', (_req, res: Response<IPatientsEntry[]>) => {
   res.send(patientsService.getNonSensitiveEntries());
 });
 
-// const newDiaryParser = (req: Request, _res: Response, next: NextFunction) => {
-//   try {
-//     NewEntrySchema.parse(req.body);
-//     console.log(req.body);
-//     next();
-//   } catch (error: unknown) {
-//     next(error);
-//   }
-// };
+const newPatientParser = (req: Request, _res: Response, next: NextFunction) => {
+  try {
+    NewEntrySchema.parse(req.body);
+    console.log(req.body);
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+router.post(
+  '/',
+  newPatientParser,
+  (
+    req: Request<unknown, unknown, NewPatientEntry>,
+    res: Response<IPatientsEntry>
+  ) => {
+    const addedEntry = patientsService.addPatient(req.body);
+    res.json(addedEntry);
+  }
+);
 
 const errorMiddleware = (
   error: unknown,
