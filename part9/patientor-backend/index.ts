@@ -1,19 +1,16 @@
 import express from 'express';
 import cors from 'cors';
-import allPatients from './data/patients';
+import patientsRouter from './routes/patients';
 
 const app = express();
 app.use(express.json());
-
 app.use(cors());
 
 app.get('/api/ping', (req, res) => {
   res.send('pong');
 });
 
-app.get('/api/patients', (req, res) => {
-  res.send(allPatients);
-});
+app.use('/api/patients', patientsRouter);
 
 const PORT = 3003;
 
