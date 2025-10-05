@@ -5,7 +5,7 @@
   "main": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "nodemon --exec ts-node index.ts",
     "dev": "ts-node-dev bmiCalculator.ts",
     "calculateBmi": "ts-node bmiCalculator.ts",
     "calculateExercises": "ts-node exerciseCalculator.ts",
