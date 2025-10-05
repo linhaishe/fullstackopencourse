@@ -1,5 +1,5 @@
 const bmiCal = (height: number, weight: number) => {
-  const bmi = weight / ((height / 100) * (height / 100));
+  const bmi = weight / ((height * height) / 10000);
 
   if (bmi < 16) {
     return 'Underweight (Severe thinness)';
@@ -20,4 +20,9 @@ const bmiCal = (height: number, weight: number) => {
   }
 };
 
-console.log(bmiCal(180, 74));
+// console.log(bmiCal(180, 74));
+const height = Number(process.argv[2]);
+const weight = Number(process.argv[3]);
+
+console.log(`Height: ${height} cm, Weight: ${weight} kg`);
+console.log(`BMI Category: ${bmiCal(height, weight)}`);
