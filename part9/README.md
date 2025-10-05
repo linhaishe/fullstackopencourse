@@ -2,7 +2,14 @@
 
 ```
 npm run calculateBmi 180 91
+
 npm run calculateExercises -- "[2,1,0,2,4.5,0,3,1,0,4]"
+
+curl -X POST http://localhost:3003/exercises \
+  -H "Content-Type: application/json" \
+  -d '{"daily_exercises": [1, 0, 2, 0, 3, 0, 2.5],
+  "target": 2.5}'
+
 ```
 
 # TypeScript

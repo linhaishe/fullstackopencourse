@@ -20,7 +20,7 @@ interface IExercisesOutput {
 
 const demo = [3, 0, 2, 4.5, 0, 3, 1];
 
-const exerciseCalculator = (
+export const exerciseCalculator = (
   timeArr: number[],
   targetTime?: number
 ): IExercisesOutput => {
@@ -46,8 +46,8 @@ const exerciseCalculator = (
 };
 
 // npm run calculateExercises -- "[2,1,0,2,4.5,0,3,1,0,4]"
-const timeArr = JSON.parse(process.argv[2]);
-const targetTime = Number(process.argv[3]);
-console.log(`exerciseCalculator: ${exerciseCalculator(timeArr, targetTime)}`);
-console.log(JSON.stringify(exerciseCalculator(timeArr, targetTime)));
+// const timeArr = JSON.parse(process.argv[2]);
+// const targetTime = Number(process.argv[3]);
+// console.log(`exerciseCalculator: ${exerciseCalculator(timeArr, targetTime)}`);
+// console.log(JSON.stringify(exerciseCalculator(timeArr, targetTime)));
 // npm run calculateExercises [2 1 0 2 4.5 0 3 1 0 4]
