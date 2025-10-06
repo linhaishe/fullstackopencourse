@@ -1,13 +1,16 @@
-export interface Diagnosis {
-  code: string;
-  name: string;
-  latin?: string;
+export enum VisibilityE {
+  GREAT = 'great',
+  GOOD = 'good',
+  OK = 'ok',
+  POOR = 'poor',
 }
 
-export enum Gender {
-  Male = 'male',
-  Female = 'female',
-  Other = 'other',
+export enum WeatherE {
+  SUNNY = 'sunny',
+  RAINY = 'rainy',
+  CLOUDY = 'cloudy',
+  STORMY = 'stormy',
+  WINDY = 'windy',
 }
 
 export interface Diary {
