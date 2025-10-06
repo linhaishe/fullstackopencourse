@@ -147,9 +147,11 @@ const parseComment = (comment: unknown): string => {
 };
 ```
 
+## React with types
 
-
-
+```shell
+npm create vite@latest my-app-name -- --template react-ts
+```
 
 
 
