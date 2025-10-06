@@ -14,6 +14,7 @@ const getNonSensitiveEntries = (): NonSensitivePatientsEntry[] => {
     dateOfBirth,
     gender: toGender(gender),
     occupation,
+    entries: [],
   }));
 };
 
@@ -23,13 +24,27 @@ const addPatient = (entry: NewPatientEntry): IPatientsEntry => {
     id,
     ...entry,
     gender: toGender(entry.gender),
+    entries: [],
   };
 
   allPatients.push(newPatientEntry);
   return newPatientEntry;
 };
 
+const findById = (id: string): IPatientsEntry => {
+  const entry = allPatients.find((d) => d.id === id);
+  if (entry) return entry as IPatientsEntry;
+  return {
+    id: '',
+    name: '',
+    dateOfBirth: '',
+    gender: 'other',
+    occupation: '',
+  } as IPatientsEntry;
+};
+
 export default {
   getNonSensitiveEntries,
   addPatient,
+  findById,
 };

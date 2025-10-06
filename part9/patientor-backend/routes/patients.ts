@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from 'express';
-
 import { z } from 'zod';
 import { IPatientsEntry, NewPatientEntry } from '../types/patients';
 import patientsService from '../services/patientsService';
@@ -11,6 +10,16 @@ router.get('/', (_req, res: Response<IPatientsEntry[]>) => {
   res.send(patientsService.getNonSensitiveEntries());
 });
 
+router.get('/:id', (req, res) => {
+  const patient = patientsService.findById(req.params.id);
+
+  if (patient) {
+    res.send(patient);
+  } else {
+    res.sendStatus(404);
+  }
+});
+
 const newPatientParser = (req: Request, _res: Response, next: NextFunction) => {
   try {
     NewEntrySchema.parse(req.body);
@@ -20,7 +29,6 @@ const newPatientParser = (req: Request, _res: Response, next: NextFunction) => {
     next(error);
   }
 };
-
 router.post(
   '/',
   newPatientParser,

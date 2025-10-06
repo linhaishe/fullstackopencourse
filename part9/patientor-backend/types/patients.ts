@@ -1,6 +1,8 @@
 import z from 'zod';
 import { NewEntrySchema } from '../utils';
 
+export interface Entry {}
+
 export enum Gender {
   Male = 'male',
   Female = 'female',
@@ -14,6 +16,7 @@ export interface IPatientsEntry {
   ssn?: string;
   gender: Gender;
   occupation: string;
+  entries: Entry[];
 }
 
 export type NonSensitivePatientsEntry = Omit<IPatientsEntry, 'ssn'>;
