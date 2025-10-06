@@ -2,8 +2,10 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { apiBaseUrl } from '../../constants';
-import { Patient } from '../../types';
+import { Gender, Patient } from '../../types';
 import patientService from '../../services/patients';
+import FemaleIcon from '@mui/icons-material/Female';
+import MaleIcon from '@mui/icons-material/Male';
 
 export const PatientDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,9 +27,21 @@ export const PatientDetailPage = () => {
 
   return (
     <div>
-      <h2>{patient.name}</h2>
-      <p>{patient.dateOfBirth}</p>
-      <p>{patient.gender}</p>
+      <div
+        style={{
+          display: 'flex',
+        }}
+      >
+        <h2>{patient.name}</h2>
+        {patient.gender === Gender.Female ? (
+          <FemaleIcon />
+        ) : patient.gender === Gender.Male ? (
+          <MaleIcon />
+        ) : null}
+      </div>
+
+      <p>ssn: {patient?.ssn}</p>
+      <p>occupation: {patient.occupation}</p>
     </div>
   );
 };

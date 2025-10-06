@@ -1,3 +1,5 @@
+import { entryData } from './entry';
+
 const allPatients = [
   {
     id: 'd2773336-f723-11e9-8f0b-362b9e155667',
@@ -6,7 +8,7 @@ const allPatients = [
     ssn: '090786-122X',
     gender: 'male',
     occupation: 'New york city cop',
-    entries: [],
+    entries: entryData,
   },
   {
     id: 'd2773598-f723-11e9-8f0b-362b9e155667',

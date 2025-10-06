@@ -184,7 +184,75 @@ which tells us that we are using a variable somewhere where it should never be u
 
 
 
+Ah! I see exactly what you’re running into. This is a **TypeScript nuance with unions and mapped types**. Let me break it down clearly.
 
+------
+
+### 1️⃣ The problem with `Omit` on unions
+
+Suppose you have a union type:
+
+```
+type Entry = 
+  | { id: string; name: string; type: 'A'; extraA: number }
+  | { id: string; name: string; type: 'B'; extraB: string };
+```
+
+If you do:
+
+```
+type WithoutId = Omit<Entry, 'id'>;
+```
+
+You **might expect** `WithoutId` to be:
+
+```
+| { name: string; type: 'A'; extraA: number }
+| { name: string; type: 'B'; extraB: string }
+```
+
+…but **it actually becomes only the properties common to all union members**:
+
+```
+{ name: string; type: 'A' | 'B' } // ❌ extraA / extraB are gone
+```
+
+This happens because `Omit<T, K>` applied directly on a union **does not distribute over the union** by default in TypeScript.
+
+------
+
+### 2️⃣ The fix: a distributed `Omit`
+
+You can force `Omit` to distribute over each member of the union using a conditional type:
+
+```
+type UnionOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
+```
+
+Then:
+
+```
+type EntryWithoutId = UnionOmit<Entry, 'id'>;
+```
+
+✅ Now `EntryWithoutId` is:
+
+```
+| { name: string; type: 'A'; extraA: number }
+| { name: string; type: 'B'; extraB: string }
+```
+
+Exactly what you expect.
+
+------
+
+### 3️⃣ Why this works
+
+- `T extends unknown ? ... : never` is called a **distributive conditional type**.
+- When `T` is a union (`A | B`), TypeScript distributes the `Omit` over each member:
+  - `Omit<A, 'id'> | Omit<B, 'id'>`
+
+This is a common trick when dealing with unions and mapped types in TypeScript.
 
 
 

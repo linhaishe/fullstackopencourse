@@ -5,9 +5,9 @@ export interface Diagnosis {
 }
 
 export enum Gender {
-  Male = "male",
-  Female = "female",
-  Other = "other"
+  Male = 'male',
+  Female = 'female',
+  Other = 'other',
 }
 
 export interface Patient {
@@ -19,4 +19,48 @@ export interface Patient {
   dateOfBirth?: string;
 }
 
-export type PatientFormValues = Omit<Patient, "id" | "entries">;
+export interface BaseEntry {
+  id: string;
+  description: string;
+  date: string;
+  specialist: string;
+  diagnosisCodes?: Diagnosis['code'][];
+}
+
+export enum HealthCheckRating {
+  'Healthy' = 0,
+  'LowRisk' = 1,
+  'HighRisk' = 2,
+  'CriticalRisk' = 3,
+}
+
+export interface HealthCheckEntry extends BaseEntry {
+  type: 'HealthCheck';
+  healthCheckRating: HealthCheckRating;
+}
+
+export interface HospitalEntry extends BaseEntry {
+  type: 'Hospital';
+  sickLeave: {
+    date: string;
+    criteria: string;
+  };
+}
+
+export interface OccupationalHealthcareEntry extends BaseEntry {
+  type: 'OccupationalHealthcare';
+  employerName: string;
+  sickLeave: {
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export type Entry =
+  | HospitalEntry
+  | OccupationalHealthcareEntry
+  | HealthCheckEntry;
+
+type UnionOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
+
+export type PatientFormValues = UnionOmit<Patient, 'id' | 'entries'>;
