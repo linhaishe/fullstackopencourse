@@ -153,6 +153,51 @@ const parseComment = (comment: unknown): string => {
 npm create vite@latest my-app-name -- --template react-ts
 ```
 
+The specific technique of type narrowing where a union type is narrowed based on literal attribute value is called [discriminated union](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions).
+
+https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
+
+```ts
+courseParts.forEach(part => {
+  if (part.kind === 'background') {
+    console.log('see the following:', part.backgroundMaterial)
+  }
+
+  // can not refer to part.backgroundMaterial here!
+});
+```
+
+With TypeScript, we can use a method called [exhaustive type checking](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking). Its basic principle is that if we encounter an unexpected value, we call a function that accepts a value with the type [never](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#the-never-type) and also has the return type *never*.
+
+```ts
+/**
+ * Helper function for exhaustive type checking
+ */
+const assertNever = (value: never): never => {
+  throw new Error(
+    `Unhandled discriminated union member: ${JSON.stringify(value)}`
+  );
+};
+```
+
+which tells us that we are using a variable somewhere where it should never be used. This tells us that something needs to be fixed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
