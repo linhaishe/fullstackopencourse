@@ -23,7 +23,7 @@ export const PatientDetailPage = () => {
     }
   }, [id]);
 
-  if (!patient) return <div>Loading...</div>;
+  if (!patient) return <div>no person...</div>;
 
   return (
     <div>
@@ -42,6 +42,20 @@ export const PatientDetailPage = () => {
 
       <p>ssn: {patient?.ssn}</p>
       <p>occupation: {patient.occupation}</p>
+      {patient?.entries?.map((v, i) => {
+        return (
+          <div>
+            <span>
+              {v.date} {v.description}
+            </span>
+            <ul>
+              {v?.diagnosisCodes?.map((v, i) => {
+                return <li>{v}</li>;
+              })}
+            </ul>
+          </div>
+        );
+      })}
     </div>
   );
 };

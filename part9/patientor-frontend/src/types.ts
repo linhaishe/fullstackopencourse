@@ -17,6 +17,7 @@ export interface Patient {
   gender: Gender;
   ssn?: string;
   dateOfBirth?: string;
+  entries: Entry[];
 }
 
 export interface BaseEntry {
@@ -41,7 +42,7 @@ export interface HealthCheckEntry extends BaseEntry {
 
 export interface HospitalEntry extends BaseEntry {
   type: 'Hospital';
-  sickLeave: {
+  discharge: {
     date: string;
     criteria: string;
   };
