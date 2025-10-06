@@ -1,4 +1,6 @@
-export const entryData = [
+import { Entry } from '../types/patients';
+
+export const entryData: Entry[] = [
   {
     id: 'd811e46d-70b3-4d90-b090-4535c7cf8fb1',
     description:

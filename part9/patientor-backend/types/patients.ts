@@ -1,5 +1,17 @@
 import z from 'zod';
-import { NewEntrySchema } from '../utils';
+import {
+  HealthCheckEntrySchema,
+  HospitalEntrySchema,
+  NewPatientEntrySchema,
+  OccupationalHealthcareEntrySchema,
+} from '../utils';
+
+enum HealthCheckRating {
+  'Healthy' = 0,
+  'LowRisk' = 1,
+  'HighRisk' = 2,
+  'CriticalRisk' = 3,
+}
 
 export enum Gender {
   Male = 'male',
@@ -29,13 +41,6 @@ export interface BaseEntry {
   date: string;
   specialist: string;
   diagnosisCodes?: Diagnosis['code'][];
-}
-
-export enum HealthCheckRating {
-  'Healthy' = 0,
-  'LowRisk' = 1,
-  'HighRisk' = 2,
-  'CriticalRisk' = 3,
 }
 
 export interface HealthCheckEntry extends BaseEntry {
@@ -68,4 +73,12 @@ export type Entry =
 type UnionOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
 
 export type NonSensitivePatientsEntry = UnionOmit<IPatientsEntry, 'ssn'>;
-export type NewPatientEntry = z.infer<typeof NewEntrySchema>;
+export type NewPatientEntry = z.infer<typeof NewPatientEntrySchema>;
+
+export const NewEntrySchema = z.discriminatedUnion('type', [
+  HealthCheckEntrySchema,
+  HospitalEntrySchema,
+  OccupationalHealthcareEntrySchema,
+]);
+export type NewEntry = z.infer<typeof NewEntrySchema>;
+export type NewImportEntry = Omit<Entry, 'id'>;
