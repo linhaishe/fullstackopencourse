@@ -11,8 +11,8 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 
-import { PatientFormValues, Diary } from '../../types';
-import AddPatientModal from '../AddPatientModal';
+import { DiaryFormValues, Diary } from '../../types';
+import AddPatientModal from '../AddDiaryModal';
 
 import patientService from '../../services/diaries';
 
@@ -32,7 +32,7 @@ const DiaryListPage = ({ diaries, setDiaries }: Props) => {
     setError(undefined);
   };
 
-  const submitNewPatient = async (values: PatientFormValues) => {
+  const submitNewPatient = async (values: DiaryFormValues) => {
     try {
       const diary = await patientService.create(values);
       setDiaries(diaries.concat(diary));
@@ -88,7 +88,7 @@ const DiaryListPage = ({ diaries, setDiaries }: Props) => {
         onClose={closeModal}
       />
       <Button variant='contained' onClick={() => openModal()}>
-        Add New Patient
+        Add New Diary
       </Button>
     </div>
   );

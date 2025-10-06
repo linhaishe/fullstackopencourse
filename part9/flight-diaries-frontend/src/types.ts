@@ -15,6 +15,7 @@ export interface Diary {
   date: string;
   weather: string;
   visibility: string;
+  comment?: string;
 }
 
-export type PatientFormValues = Omit<Diary, 'id' | 'entries'>;
+export type DiaryFormValues = Omit<Diary, 'id'>;
