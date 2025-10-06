@@ -6,6 +6,7 @@ import { Gender, Patient } from '../../types';
 import patientService from '../../services/patients';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
+import EntryDetails from '../EntryDetails';
 
 export const PatientDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,20 +43,11 @@ export const PatientDetailPage = () => {
 
       <p>ssn: {patient?.ssn}</p>
       <p>occupation: {patient.occupation}</p>
-      {patient?.entries?.map((v, i) => {
-        return (
-          <div>
-            <span>
-              {v.date} {v.description}
-            </span>
-            <ul>
-              {v?.diagnosisCodes?.map((v, i) => {
-                return <li>{v}</li>;
-              })}
-            </ul>
-          </div>
-        );
-      })}
+      {patient?.entries?.map((v, i) => (
+        <div key={i}>
+          <EntryDetails entry={v} />
+        </div>
+      ))}
     </div>
   );
 };
