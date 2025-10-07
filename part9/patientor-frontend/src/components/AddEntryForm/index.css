@@ -1,0 +1,10 @@
+.formWrap {
+  border: 1px dashed black;
+  height: max-content;
+  width: 95%;
+  padding: 20px;
+}
+
+.inputTextLabel {
+  margin-top: 20px;
+}

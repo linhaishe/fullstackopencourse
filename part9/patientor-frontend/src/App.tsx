@@ -7,6 +7,7 @@ import { Patient } from './types';
 import patientService from './services/patients';
 import PatientListPage from './components/PatientListPage';
 import { PatientDetailPage } from './components/PatientDetailPage';
+import AddEntryForm from './components/AddEntryForm';
 
 import './index.css';
 
@@ -44,7 +45,9 @@ const App = () => {
                 />
               }
             />
-            <Route path='/patients/:id' element={<PatientDetailPage />} />
+            <Route path='/patients/:id' element={<PatientDetailPage />}>
+              <Route path='entry' element={<AddEntryForm />} />
+            </Route>
           </Routes>
         </Container>
       </Router>
