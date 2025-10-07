@@ -3,33 +3,28 @@ import {
   Button,
   FormControlLabel,
   InputLabel,
+  MenuItem,
   RadioGroup,
+  Select,
   TextField,
 } from '@mui/material';
 import { SyntheticEvent, useState } from 'react';
 import { Radio } from '@mui/material';
 import patientService from '../../services/patients';
-import { EntryFormValues, Patient } from '../../types';
+import { EntryFormValues, HealthCheckRating, Patient } from '../../types';
 import axios from 'axios';
 import { useParams, useOutletContext } from 'react-router-dom';
-
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import {
+  diagnosisCodesOptions,
+  EntryTypeE,
+  healthCheckRatingOptions,
+  typeOptions,
+} from './types';
 import './index.css';
-
-enum EntryTypeE {
-  'HealthCheck' = 'HealthCheck',
-  'Hospital' = 'Hospital',
-  'OccupationalHealthcare' = 'OccupationalHealthcare',
-}
-
-interface TEntryTypeOption {
-  value: EntryTypeE;
-  label: string;
-}
-
-const typeOptions: TEntryTypeOption[] = Object.values(EntryTypeE).map((v) => ({
-  value: v,
-  label: v.toString(),
-}));
 
 const BasicForm = (props: {
   type: EntryTypeE;
@@ -40,8 +35,8 @@ const BasicForm = (props: {
   setDate: (arg0: string) => void;
   specialist: string;
   setSpecialist: (arg0: string) => void;
-  diagnosisCodes: string;
-  setDiagnosisCodes: (arg0: string) => void;
+  diagnosisCodes: string[];
+  setDiagnosisCodes: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
   return (
     <div>
@@ -69,14 +64,21 @@ const BasicForm = (props: {
         onChange={({ target }) => props.setDescription(target.value)}
       />
       <br />
-      <TextField
-        id='standard-basic'
-        label='Date'
-        variant='standard'
-        value={props.date}
-        onChange={({ target }) => props.setDate(target.value)}
-      />
-      <br />
+      <div
+        style={{
+          marginTop: '20px',
+        }}
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label='Date'
+            value={props.date ? dayjs(props.date) : null}
+            onChange={(newValue) => {
+              if (newValue) props.setDate(dayjs(newValue).format('YYYY-MM-DD'));
+            }}
+          />
+        </LocalizationProvider>
+      </div>
       <TextField
         id='standard-basic'
         label='specialist'
@@ -86,30 +88,51 @@ const BasicForm = (props: {
       />
 
       <br />
-      <TextField
-        id='standard-basic'
-        label='Diagnosis Codes'
-        variant='standard'
+      <InputLabel className={'inputTextLabel'} htmlFor='my-input4'>
+        diagnosis
+      </InputLabel>
+      <Select
+        label='diagnosisCodes'
+        fullWidth
+        multiple
         value={props.diagnosisCodes}
-        onChange={({ target }) => props.setDiagnosisCodes(target.value)}
-      />
+        onChange={({ target }) =>
+          props.setDiagnosisCodes(target.value as string[])
+        }
+      >
+        {diagnosisCodesOptions.map((option) => (
+          <MenuItem key={option.label} value={option.value}>
+            {option.value}
+          </MenuItem>
+        ))}
+      </Select>
     </div>
   );
 };
 
 const HealthCheckForm = (props: {
-  healthCheckRating: string;
-  setHealthCheckRating: (arg0: string) => void;
+  healthCheckRating: HealthCheckRating;
+  setHealthCheckRating: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   return (
     <div>
-      <TextField
-        id='standard-basic'
-        label='healthCheckRating'
-        variant='standard'
+      <InputLabel className={'inputTextLabel'} htmlFor='my-input4'>
+        healthCheckRating
+      </InputLabel>
+      <Select
+        label='diagnosisCodes'
+        fullWidth
         value={props.healthCheckRating}
-        onChange={({ target }) => props.setHealthCheckRating(target.value)}
-      />
+        onChange={({ target }) =>
+          props.setHealthCheckRating(target.value as number)
+        }
+      >
+        {healthCheckRatingOptions.map((option) => (
+          <MenuItem key={option.label} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
     </div>
   );
 };
@@ -122,18 +145,26 @@ const HospitalForm = (props: {
     <div>
       <br />
       <InputLabel htmlFor='my-input4'>discharge</InputLabel>
-      <TextField
-        id='standard-basic'
-        label='date'
-        variant='standard'
-        value={props.discharge.date}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          props.setDischarge((prev: any) => ({
-            ...prev,
-            date: event.target.value,
-          }));
+      <div
+        style={{
+          marginTop: '20px',
         }}
-      />
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label='Date'
+            value={props.discharge.date ? dayjs(props.discharge.date) : null}
+            onChange={(newValue) => {
+              if (newValue) {
+                props.setDischarge((prev: any) => ({
+                  ...prev,
+                  date: dayjs(newValue).format('YYYY-MM-DD'),
+                }));
+              }
+            }}
+          />
+        </LocalizationProvider>
+      </div>
       <TextField
         id='standard-basic'
         label='criteria'
@@ -170,30 +201,52 @@ const OccupationalHealthcareForm = (props: {
       <InputLabel className={'inputTextLabel'} htmlFor='my-input4'>
         sickLeave
       </InputLabel>
-      <TextField
-        id='standard-basic'
-        label='startDate'
-        variant='standard'
-        value={props.sickLeave.startDate}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          props.setSickLeave((prev: any) => ({
-            ...prev,
-            startDate: event.target.value,
-          }));
+      <div
+        style={{
+          marginTop: '20px',
         }}
-      />
-      <TextField
-        id='standard-basic'
-        label='endDate'
-        variant='standard'
-        value={props.sickLeave.endDate}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          props.setSickLeave((prev: any) => ({
-            ...prev,
-            endDate: event.target.value,
-          }));
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label='startDate'
+            value={
+              props.sickLeave.startDate
+                ? dayjs(props.sickLeave.startDate)
+                : null
+            }
+            onChange={(newValue) => {
+              if (newValue) {
+                props.setSickLeave((prev: any) => ({
+                  ...prev,
+                  startDate: dayjs(newValue).format('YYYY-MM-DD'),
+                }));
+              }
+            }}
+          />
+        </LocalizationProvider>
+      </div>
+      <div
+        style={{
+          marginTop: '20px',
         }}
-      />
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label='endDate'
+            value={
+              props.sickLeave.endDate ? dayjs(props.sickLeave.endDate) : null
+            }
+            onChange={(newValue) => {
+              if (newValue) {
+                props.setSickLeave((prev: any) => ({
+                  ...prev,
+                  endDate: dayjs(newValue).format('YYYY-MM-DD'),
+                }));
+              }
+            }}
+          />
+        </LocalizationProvider>
+      </div>
     </div>
   );
 };
@@ -206,10 +259,10 @@ export default function Index() {
   const { setPatient } = useOutletContext<ContextType>();
   const { id } = useParams<{ id: string }>();
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState<string>('');
   const [specialist, setSpecialist] = useState('');
-  const [diagnosisCodes, setDiagnosisCodes] = useState('');
-  const [healthCheckRating, setHealthCheckRating] = useState('');
+  const [diagnosisCodes, setDiagnosisCodes] = useState<string[]>([]);
+  const [healthCheckRating, setHealthCheckRating] = useState(0);
   const [discharge, setDischarge] = useState({
     date: '',
     criteria: '',
@@ -260,7 +313,7 @@ export default function Index() {
       description,
       date,
       specialist,
-      diagnosisCodes: diagnosisCodes?.split(',') || [],
+      diagnosisCodes,
       type,
     };
     if (type === EntryTypeE.HealthCheck) {
