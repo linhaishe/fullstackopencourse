@@ -8,3 +8,10 @@
 .inputTextLabel {
   margin-top: 20px;
 }
+
+.BtnWrap {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

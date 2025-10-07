@@ -1,4 +1,5 @@
 import {
+  Button,
   FormControlLabel,
   InputLabel,
   RadioGroup,
@@ -244,6 +245,12 @@ export default function Index() {
             setEmployerName={setEmployerName}
           />
         )}
+        <div className={'BtnWrap'}>
+          <Button variant='contained'>CANCEL</Button>
+          <Button variant='contained' color='success'>
+            ADD
+          </Button>
+        </div>
       </form>
     </div>
   );
