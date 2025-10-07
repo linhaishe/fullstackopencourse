@@ -1,7 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { apiBaseUrl } from '../../constants';
 import { Gender, Patient } from '../../types';
 import patientService from '../../services/patients';
 import FemaleIcon from '@mui/icons-material/Female';
@@ -17,8 +15,6 @@ export const PatientDetailPage = () => {
 
   useEffect(() => {
     if (id) {
-      void axios.get<void>(`${apiBaseUrl}/ping`);
-
       const fetchPatientList = async () => {
         const patient = await patientService.getPatient(id);
         setPatient(patient);
@@ -46,7 +42,7 @@ export const PatientDetailPage = () => {
 
       <p>ssn: {patient?.ssn}</p>
       <p>occupation: {patient.occupation}</p>
-      <Outlet />
+      <Outlet context={{ setPatient }} />
       {location.pathname.endsWith('/entry') ? null : (
         <Button
           component={Link}

@@ -1,12 +1,17 @@
 import {
+  Alert,
   Button,
   FormControlLabel,
   InputLabel,
   RadioGroup,
   TextField,
 } from '@mui/material';
-import { useState } from 'react';
+import { SyntheticEvent, useState } from 'react';
 import { Radio } from '@mui/material';
+import patientService from '../../services/patients';
+import { EntryFormValues, Patient } from '../../types';
+import axios from 'axios';
+import { useParams, useOutletContext } from 'react-router-dom';
 
 import './index.css';
 
@@ -193,7 +198,13 @@ const OccupationalHealthcareForm = (props: {
   );
 };
 
+type ContextType = {
+  setPatient: React.Dispatch<React.SetStateAction<Patient>>;
+};
+
 export default function Index() {
+  const { setPatient } = useOutletContext<ContextType>();
+  const { id } = useParams<{ id: string }>();
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [specialist, setSpecialist] = useState('');
@@ -208,11 +219,76 @@ export default function Index() {
     endDate: '',
   });
   const [employerName, setEmployerName] = useState('');
+  const [error, setError] = useState('');
   const [type, setType] = useState<EntryTypeE>(EntryTypeE.HealthCheck);
+
+  const submitNewEntry = async (values: EntryFormValues) => {
+    try {
+      const patient = await patientService.createEntry(id as string, values);
+      console.log('patient', patient);
+      setPatient((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          entries: [...prev.entries, patient],
+        };
+      });
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        if (e?.response?.data && typeof e?.response?.data === 'string') {
+          const message = e.response.data.replace(
+            'Something went wrong. Error: ',
+            ''
+          );
+          console.error(message);
+          setError(message);
+        } else {
+          setError(e?.response?.data?.error?.[0]?.message);
+          console.log('e', e?.response?.data?.error?.[0]?.message);
+        }
+      } else {
+        console.error('Unknown error', e);
+        setError('Unknown error');
+      }
+    }
+  };
+
+  const onEntrySubmit = (event: SyntheticEvent) => {
+    event.preventDefault();
+    let finalForm;
+    const basicEntryDetail = {
+      description,
+      date,
+      specialist,
+      diagnosisCodes: diagnosisCodes?.split(',') || [],
+      type,
+    };
+    if (type === EntryTypeE.HealthCheck) {
+      finalForm = {
+        ...basicEntryDetail,
+        healthCheckRating: Number(healthCheckRating),
+      };
+    } else if (type === EntryTypeE.Hospital) {
+      finalForm = {
+        ...basicEntryDetail,
+        discharge,
+      };
+    } else if (type === EntryTypeE.OccupationalHealthcare) {
+      finalForm = {
+        ...basicEntryDetail,
+        employerName,
+        sickLeave,
+      };
+    }
+
+    submitNewEntry(finalForm as EntryFormValues);
+    console.log('res', finalForm);
+  };
 
   return (
     <div>
-      <form className={'formWrap'}>
+      {error && <Alert severity='error'>{error}</Alert>}
+      <form className={'formWrap'} onSubmit={onEntrySubmit}>
         <BasicForm
           description={description}
           setDescription={setDescription}
@@ -246,8 +322,10 @@ export default function Index() {
           />
         )}
         <div className={'BtnWrap'}>
-          <Button variant='contained'>CANCEL</Button>
-          <Button variant='contained' color='success'>
+          <Button variant='contained' color='error'>
+            CANCEL
+          </Button>
+          <Button variant='contained' color='success' type='submit'>
             ADD
           </Button>
         </div>

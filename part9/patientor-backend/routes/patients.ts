@@ -8,6 +8,7 @@ import {
   NewPatientEntry,
 } from '../types/patients';
 import patientsService from '../services/patientsService';
+import { NewPatientEntrySchema } from '../utils';
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.get('/:id', (req, res) => {
 
 const newPatientParser = (req: Request, _res: Response, next: NextFunction) => {
   try {
-    NewEntrySchema.parse(req.body);
+    NewPatientEntrySchema.parse(req.body);
     console.log(req.body);
     next();
   } catch (error: any) {
@@ -50,7 +51,6 @@ router.post(
 const newEntryParser = (req: Request, _res: Response, next: NextFunction) => {
   try {
     NewEntrySchema.parse(req.body);
-    console.log(req.body);
     next();
   } catch (error: any) {
     next(error);
@@ -60,8 +60,9 @@ const newEntryParser = (req: Request, _res: Response, next: NextFunction) => {
 router.post(
   '/:id/entry',
   newEntryParser,
-  (req: Request<unknown, unknown, NewEntry>, res: Response<Entry>) => {
-    const addedEntry = patientsService.addEntry('12', req.body);
+  (req: Request<{ id: string }, unknown, NewEntry>, res: Response<Entry>) => {
+    const patientId = req.params.id;
+    const addedEntry = patientsService.addEntry(patientId, req.body);
     res.json(addedEntry);
   }
 );

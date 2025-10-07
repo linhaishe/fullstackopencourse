@@ -65,3 +65,4 @@ export type Entry =
 type UnionOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
 
 export type PatientFormValues = UnionOmit<Patient, 'id' | 'entries'>;
+export type EntryFormValues = UnionOmit<Entry, 'id'>;

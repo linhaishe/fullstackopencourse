@@ -31,7 +31,7 @@ export const toGender = (str: string): Gender => {
 
 export const BaseEntrySchema = z.object({
   description: z.string(),
-  date: z.string(),
+  date: z.iso.date(),
   specialist: z.string(),
   diagnosisCodes: z.array(z.string()).optional(),
 });
@@ -49,7 +49,7 @@ export const HealthCheckEntrySchema = BaseEntrySchema.extend({
 export const HospitalEntrySchema = BaseEntrySchema.extend({
   type: z.literal('Hospital'),
   discharge: z.object({
-    date: z.string(),
+    date: z.iso.date(),
     criteria: z.string(),
   }),
 });
@@ -59,8 +59,8 @@ export const OccupationalHealthcareEntrySchema = BaseEntrySchema.extend({
   employerName: z.string(),
   sickLeave: z
     .object({
-      startDate: z.string(),
-      endDate: z.string(),
+      startDate: z.iso.date(),
+      endDate: z.iso.date(),
     })
     .optional(),
 });
