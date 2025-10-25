@@ -4,6 +4,8 @@ library-backend
 
 node/nodemon index.js / node/nodemon demo.js
 
+node - 22.19.0
+
 ```js
 // usage in apollo server
 query {
