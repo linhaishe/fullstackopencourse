@@ -68,18 +68,19 @@ Cooking metaphor:
 Instead of modifying a container by copying files inside, we can create a new image that contains the "Hello, World!" application. The tool for this is the Dockerfile. Dockerfile is a simple text file that contains all of the instructions for creating an image. Let's create an example Dockerfile from the "Hello, World!" application.
 
 ```bash
-docker build -t fs-hello-world .  # a simple dot will mean to copy Dockerfile is in this directory
+docker build -t fs-hello-world .  
+# a simple dot will mean to copy Dockerfile is in this directory
 ```
 
 不是每个docker都有dockerfile。当你 **自己构建镜像** 时，才会有一个 `Dockerfile。`
 
-#### 没有 Dockerfile 的情况
+没有 Dockerfile 的情况
 
 - 如果你是从 **Docker Hub 拉取现成的镜像**（比如 `node:20`、`ubuntu`、`hello-world`），
    你本地并不会自动拥有对应的 `Dockerfile`。
 - 它们的 Dockerfile 是由镜像作者（官方或第三方）在构建时使用的，但不会被带到你的系统。
 
-### 🧱 举个例子：
+🧱 举个例子：
 
 你执行：
 
@@ -98,7 +99,7 @@ Docker 会：
 
 假设你的 `Dockerfile` 是这样的 👇
 
-```
+```dockerfile
 FROM node:20
 WORKDIR /usr/src/app
 COPY . .
@@ -131,7 +132,7 @@ node index.js
 
 ------
 
-### 💡 但是！
+💡 但是！
 
 如果你想临时运行别的命令，可以在 `docker run` 后面**覆盖掉 CMD**：
 
@@ -157,7 +158,7 @@ docker run -it fs-hello-world bash
 
 ------
 
-### 🔁 总结一下区别：
+🔁 总结一下区别：
 
 | 情况                                   | 执行的命令                                      |
 | -------------------------------------- | ----------------------------------------------- |
@@ -167,7 +168,7 @@ docker run -it fs-hello-world bash
 
 ------
 
-### 🧠 延伸：
+🧠 延伸：
 
 `CMD` 是给镜像提供一个**默认行为**，方便别人使用时不必记住复杂的命令。
  但它并不强制执行 —— 用户运行容器时始终可以手动指定新命令来覆盖它。
@@ -180,7 +181,8 @@ docker run -it fs-hello-world bash
 | 例子                   | `CMD ["npm", "start"]` | `ENTRYPOINT ["npm", "start"]` | `ENTRYPOINT ["npm"]` + `CMD ["start"]` |
 
 ```bash
-docker run -p 3123:3000 express-server # The -p flag in the run command will inform Docker that a port from the host machine should be opened and directed to a port in the container. The format is -p host-port:application-port.
+docker run -p 3123:3000 express-server 
+# The -p flag in the run command will inform Docker that a port from the host machine should be opened and directed to a port in the container. The format is -p host-port:application-port.
 ```
 
 ## ci diff npm i
@@ -213,16 +215,20 @@ Even better, we can use *npm ci --omit=dev* to not waste time installing develop
 
 ## nano
 
+方便在终端里对文件进行增删改的操作，微可视化。
+
+```bash
+# container 里运行
 apt update && apt install -y nano
-安装完再验证一次：
-
-bash
-复制代码
+# 安装完再验证一次：
 nano --version
-
-
-
 ```
+
+## Docker compose
+
+[Docker compose](https://docs.docker.com/compose/) is another fantastic tool, which can help us to manage containers.
+
+```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
 
@@ -231,33 +237,59 @@ start the MongoDB with *docker compose -f docker-compose.dev.yml up -d*. With *-
 Bind mount is the act of binding a file (or directory) on the host machine to a file (or directory) in the container. A bind mount is done by adding a *-v* flag with *container run*. The syntax is *-v FILE-IN-HOST:FILE-IN-CONTAINER*. Since we already learned about Docker Compose let's skip that. The bind mount is declared under key *volumes* in *docker-compose.dev.yml*. Otherwise the format is the same, first host and then container:
 
 ```yml
-  services:
-    mongo:
-      image: mongo
-      ports:
-       - 3456:27017
-      environment:
-        MONGO_INITDB_ROOT_USERNAME: root
-        MONGO_INITDB_ROOT_PASSWORD: example
-        MONGO_INITDB_DATABASE: the_database
-      volumes:       
-				- ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+services:
+  node-app:
+    build: .
+    container_name: todo-app-backend-yml
+    ports:
+      - "3123:3000" # 宿主机 3123 映射容器 3000
+    environment:
+      - DEBUG=app:* # 设置环境变量
+    volumes:
+      - .:/usr/src/app # 可选：挂载代码，方便修改立即生效
+    command: npm start # 可以覆盖 Dockerfile CMD，如果不写就默认 CMD
 ```
 
-Run *docker compose -f docker-compose.dev.yml down --volumes* to ensure that nothing is left and start from a clean slate with *docker compose -f docker-compose.dev.yml up* to initialize the database.
-
+```yml
+services:
+  mongo:
+    image: mongo
+    ports:
+      - 3456:27017 # 自定义端口:官方默认端口
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: the_database
+    volumes:
+      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+  redis:
+    image: redis
+    ports: 
+      - 3490:6379
+    command: ['redis-server', '--appendonly', 'yes'] # Overwrite the CMD
+    volumes: # Declare the volume
+      - ./redis_data:/data
 ```
+
+![image-20251027123639966](/Users/chenruo/Library/Application Support/typora-user-images/image-20251027123639966.png)
+
+```bash
+docker compose -f docker-compose.dev.yml down --volumes
+# to ensure that nothing is left
+
+docker compose -f docker-compose.dev.yml up
+# to initialize the database
+```
+
+```bash
 MONGO_URL=mongodb://root:example@localhost:3456/the_database?authSource=admin npm run dev
+# 带权限进入 mongo cli
 ```
-
-
 
 There are two distinct methods to store the data:
 
 - Declaring a location in your filesystem (called [bind mount](https://docs.docker.com/storage/bind-mounts/))
 - Letting Docker decide where to store the data ([volume](https://docs.docker.com/storage/volumes/))
-
-
 
 Now the volume is created and managed by Docker. After starting the application (*docker compose -f docker-compose.dev.yml up*) you can list the volumes with *docker volume ls*, inspect one of them with *docker volume inspect* and even delete them with *docker volume rm*:
 
@@ -289,17 +321,11 @@ $ docker volume inspect todo-backend_mongo_data
 REDIS_URL=redis://localhost:3490 MONGO_URL=mongodb://root:example@localhost:3456/the_database?authSource=admin npm run dev
 ```
 
-
-
-
-
 # QA
 
-## 1
+## 1.如何script 创建文件
 
 Step 3: Run curl http://helsinki.fi and save the output into a file. Save that file into your repository as file script-answers/exercise12_1.txt. The directory script-answers was created in the previous step. 用command 完成这件事情
-
-###### ChatGPT 说：
 
 你可以用下面这一条命令一步完成：
 
@@ -307,7 +333,7 @@ Step 3: Run curl http://helsinki.fi and save the output into a file. Save that f
 curl http://helsinki.fi -o script-answers/exercise12_1.txt
 ```
 
-### 解释：
+解释：
 
 - `curl http://helsinki.fi`：请求这个网址的内容。
 - `-o script-answers/exercise12_1.txt`：把输出保存到指定文件路径。
@@ -321,256 +347,95 @@ mkdir -p script-answers
 
 然后再运行上面的 `curl` 命令。
 
-## 2
+## 2.some command
 
-Unable to find image 'ubuntu:latest' locally latest: Pulling from library/ubuntu b8a35db46e38: Pull complete  Digest: sha256:66460d557b25769b102175144d538d88219c077c678a49af4afca6fbfc1b5252 Status: Downloaded newer image for ubuntu:latest root@b7b95f6b3de0:/ 最后一行是需要我干啥
+会在容器内的 `script-answers/` 目录下得到一个 `exercise12_1.txt` 文件，里面是网页内容
 
-###### ChatGPT 说：
-
-你看到的这行：
-
-```
-root@b7b95f6b3de0:/#
-```
-
-表示你**已经进入了一个 Ubuntu 容器的命令行环境**。
- 现在你在这个容器的根目录 `/` 下，拥有 root 权限。
-
-也就是说——Docker 的 Ubuntu 镜像已经下载并启动成功，现在可以在这个环境里执行命令了。
-
-------
-
-✅ **下一步你要做的事情：**
- 在这个提示符下（`root@...:/#` 后面），执行刚才的命令：
-
-```
+```bash
 mkdir -p script-answers
 curl http://helsinki.fi -o script-answers/exercise12_1.txt
 ```
 
-然后你就会在容器内的 `script-answers/` 目录下得到一个 `exercise12_1.txt` 文件，里面是网页内容。
+```bash
+# 想查看文件内容
+cat script-answers/exercise12_1.txt
 
-------
+# 想退出容器
+exit
 
-💡**小贴士：**
-
-- 想查看文件内容，可以运行：
-
-  ```
-  cat script-answers/exercise12_1.txt
-  ```
-
-- 想退出容器，输入：
-
-  ```
-  exit
-  ```
-
-## 3
-
-Create directory /usr/src/app 的 command
-
-###### ChatGPT 说：
-
-在你当前的 Ubuntu 容器中，创建目录 `/usr/src/app` 的命令是：
-
-```
+# 创建目录 `/usr/src/app` 的命令
 mkdir -p /usr/src/app
-```
 
-### 解释：
-
-- `mkdir`：创建目录
-- `-p`：如果上层目录不存在（比如 `/usr/src`），会自动一并创建，不报错
-
-✅ 执行完后，你可以用下面的命令确认是否创建成功：
-
-```
+# 查看文件夹是否存在
 ls -l /usr/src
-```
 
-应该能看到一个名为 `app` 的文件夹。
-
-## 4
-
-Create a file /usr/src/app/index.js
-
-###### ChatGPT 说：
-
-你可以在 Ubuntu 容器中用以下命令创建文件 `/usr/src/app/index.js`：
-
-```
+# 创建文件 `/usr/src/app/index.js`
+# `touch` 命令会新建一个空文件（如果文件已存在，则更新其修改时间）
 touch /usr/src/app/index.js
-```
 
-✅ 说明：
-
-- `touch` 命令会新建一个空文件（如果文件已存在，则更新其修改时间）。
-
-------
-
-💡 如果你想直接往里面写内容（例如测试一下），可以用：
-
-```
+# 里面写内容
 echo "console.log('Hello from index.js');" > /usr/src/app/index.js
-```
 
-然后查看文件内容：
-
-```
+# 查看内容
 cat /usr/src/app/index.js
+
 ```
 
 ![image-20251025131141794](/Users/chenruo/Library/Application Support/typora-user-images/image-20251025131141794.png)
 
 ![image-20251025143906833](/Users/chenruo/Library/Application Support/typora-user-images/image-20251025143906833.png)
 
-```
-docker cp condescending_blackburn:/script-answers/exercise12_4.txt /Users/chenruo/Documents/GitHub/part12-containers-applications/script-answers 
+```bash
+# 查看宿主机里想要存的文件的路径
+pwd
+# 复制容器文件到宿主机里
+docker cp condescending_blackburn:/script-answers/exercise12_4.txt /Users/chenruo/Documents/GitHub/part12-containers-applications/script-answers
+
 Successfully copied 689kB to /Users/chenruo/Documents/GitHub/part12-containers-applications/script-answers
 ```
 
 ```bash
+# 镜像list
 docker image ls 
 
+
+# 从镜像 hello-node-world 启动一个新容器，并在其中打开一个交互式 Bash 终端
 docker run -it hello-node-world bash
 
+# 删除容器
 docker container rm condescending_blackburn
 
-ls script-answers # 只想看文件名
+# 只想看文件名
+ls script-answers 
 
-docker ps # 查看正在运行的容器
+# 查看正在运行的容器
+docker ps 
 
-docker ps -a # 查看所有容器（包括已退出的）
+# 查看所有容器（包括已退出的）
+docker ps -a 
 
 # 保留修改并生成新的镜像
 docker commit <container_name> my-node-app:latest
+
 # <container_name> → 容器名字或 ID
 # my-node-app:latest → 新镜像名字和标签
-那就是我每提交一次就会有一个新的镜像？完全正确 ✅在 Docker 中，每次你执行 docker commit 都会生成 一个新的镜像，即使是基于同一个容器：
-
-cdb0180cb21d node:20 "docker-entrypoint.s…" 4 minutes ago Up 4 minutes hello-node 我要commit这次
+# 那就是我每提交一次就会有一个新的镜像？完全正确 ✅在 Docker 中，每次你执行 docker commit 都会生成 一个新的镜像，即使是基于同一个容器：
+# cdb0180cb21d node:20 "docker-entrypoint.s…" 4 minutes ago Up 4 minutes hello-node 我要commit这次
 
 docker commit cdb0180cb21d my-node-app:latest
-
-docker images
 ```
 
 ![image-20251025150028791](/Users/chenruo/Library/Application Support/typora-user-images/image-20251025150028791.png)
 
-## 5
+## 3. 退出或删除容器，文件就会丢失
 
-And now we can run node /usr/src/app/index.js in the container. We can commit this as another new image 我复制了一了文件进container ，还需要commit?
+> 镜像是静态的、只读的；你永远在 **容器** 里做改动，然后用 `docker commit` 把改动保存成新镜像
+>
+> 拉取镜像 → 创建容器 → 安装包 → 新建文件 → commit 保存为新镜像
 
-###### ChatGPT 说：
+### 镜像
 
-对，你理解得基本正确，但这里需要区分两件事情：
-
-------
-
-### 1️⃣ 复制文件到容器
-
-你已经用 `docker cp` 把文件放到容器里，比如 `/usr/src/app/index.js`。
-
-- 这时 **文件只在这个容器实例里存在**
-- 如果你退出或删除容器，文件就会丢失
-
-------
-
-### 2️⃣ 如果想保留修改并生成新的镜像
-
-- 这时就需要用 **`docker commit`** 把当前容器的状态保存为一个新镜像
-
-示例：
-
-```
-docker commit <container_name> my-node-app:latest
-```
-
-- `<container_name>` → 容器名字或 ID
-- `my-node-app:latest` → 新镜像名字和标签
-
-之后，你可以用这个镜像直接启动新容器，里面已经有你修改过的 `/usr/src/app/index.js` 文件了。
-
-------
-
-### ✅ 小结：
-
-- **如果只是临时在容器里运行** `node /usr/src/app/index.js` → 不必 commit
-- **如果想保存修改、生成可复用镜像** → 必须 commit
-
-------
-
-我可以帮你写一条完整命令，让你 **运行 node、测试文件，然后生成新镜像**。你希望我写吗？
-
-## 6
-
-docker commit 157d8af44e4f express-server:latest Error response from daemon: No such container: 157d8af44e4f
-
-###### ChatGPT 说：
-
-明白了，这个错误很关键：
-
-> `docker commit` 只能提交 **容器** 的更改，不能直接提交 **镜像 ID**。
-
-你现在用的是：
-
-```
-docker commit 157d8af44e4f express-server:latest
-```
-
-而 `157d8af44e4f` 是 **镜像 ID**，不是容器 ID，所以报错 **No such container**。
-
-------
-
-### ✅ 正确做法
-
-1. **找出你修改后的容器 ID 或名字**
-
-```
-docker ps -a
-```
-
-输出示例：
-
-```
-CONTAINER ID   IMAGE             STATUS         NAMES
-a357683b7c9e   express-server    Exited (0)     my-container
-```
-
-这里的 `a357683b7c9e` 才是容器 ID。
-
-------
-
-1. **使用容器 ID 进行 commit**
-
-```
-docker commit a357683b7c9e express-server:latest
-```
-
-- 这条命令会把容器当前的状态（你在里面安装的包、创建的文件等）保存为 **新的镜像**
-- 用同名 tag `express-server:latest` 会 **覆盖原镜像**
-
-------
-
-### 💡 总结
-
-| 错误用法                           | 正确用法 |
-| ---------------------------------- | -------- |
-| `docker commit <IMAGE_ID> ...`     | ❌ 报错   |
-| `docker commit <CONTAINER_ID> ...` | ✅ 成功   |
-
-## 7
-
-我不是在容器里操作的，我是在镜像里操作的文件
-
-###### ChatGPT 说：
-
-啊，明白了，你的误区就在这里了 😅
-
-------
-
-## 关键概念澄清
+<mark>不能在镜像上直接安装包或写文件</mark>
 
 1. **镜像（Image）**
 
@@ -583,129 +448,60 @@ docker commit a357683b7c9e express-server:latest
 - 容器是镜像的运行实例，你在里面安装软件、创建文件、修改内容，才是真正操作的文件系统。
 - 容器停止后，除非 commit 或使用 volume，否则改动会丢失。
 
-------
+### 容器
 
-### 🔑 正确思路
+And now we can run node /usr/src/app/index.js in the container. We can commit this as another new image 我复制了一了文件进container ，还需要commit?
 
-- 你不能在镜像上直接安装包或写文件。
+你已经用 `docker cp` 把文件放到容器里，比如 `/usr/src/app/index.js`。
 
-- 正确流程是：
+- 这时 **文件只在这个容器实例里存在**
+- 如果你退出或删除容器，文件就会丢失
 
-  1. 从镜像创建一个容器：
+<mark>如果想保留修改需要commit生成新的镜像，下次可以从新的镜像中创建新的容器再修改内容。</mark>
+<mark>但我印象中，commit之后，还可以重新进容器中，拥有上次的修改内容，然后再次commit也可以。</mark>
 
-     ```
-     docker run -it express-server bash
-     ```
-
-  2. 在容器里操作文件/安装包：
-
-     ```
-     apt update
-     apt install nano
-     echo "console.log('Hello World')" > /usr/src/app/index.js
-     ```
-
-  3. **退出容器**（`exit`）
-
-  4. **在宿主机 commit 容器** 保存为新镜像：
-
-     ```
-     docker commit <container_id> express-server:latest
-     ```
-
-> 注意：commit 是针对 **容器**，不是镜像。你在宿主机上执行即可。
-
-------
-
-### ⚡ 总结一句话
-
-> 镜像是静态的、只读的；你永远在 **容器** 里做改动，然后用 `docker commit` 把改动保存成新镜像。
-
-------
-
-如果你愿意，我可以帮你写一个 **完整操作流程命令**：
- 从拉取镜像 → 创建容器 → 安装包 → 新建文件 → commit 保存为新镜像，保证你退出后再进，所有改动都存在。
-
-## 8
-
-
-
-## ✅ 修改文件的正确流程
-
-### 1️⃣ 基于镜像创建容器（启动交互式终端）
-
-假设你想修改 `my-node-app:v2` 镜像里的文件：
-
-```
-docker run -it --name my-node-container my-node-app:v2 bash
+``` bash
+# 用 docker commit 把当前容器的状态保存为一个新镜像
+docker commit <container_name> my-node-app:latest
 ```
 
-- `-it` → 进入交互式终端
-- `--name` → 给容器取个名字，方便管理
-- 容器启动后，你就可以修改文件了
+- `<container_name>` → 容器名字或 ID
+- `my-node-app:latest` → 新/旧镜像名字和标签
 
-------
+之后，你可以用这个镜像直接启动新容器，里面已经有你修改过的 `/usr/src/app/index.js` 文件了。
 
-### 2️⃣ 在容器里修改文件
+- **如果只是临时在容器里运行** `node /usr/src/app/index.js` → 不必 commit
+- **如果想保存修改、生成可复用镜像** → 必须 commit
 
-```
-nano /usr/src/app/index.js
-# 或者直接 echo 新内容
-echo "console.log('Updated!');" > /usr/src/app/index.js
-```
+### 操作步骤
 
-安装包、修改文件都可以在这里进行。
+```bash
+# run 这是从镜像创建新容器进行修改
+docker run -it fs-world-app bash
 
-------
+# or 直接进入容器，在容器上修改
+docker start -ai objective_easley
 
-### 3️⃣ 退出容器
+# modify sth && exit 
 
-```
-exit
-```
+# commit command example
+docker commit fs-hello-world-container-v2 fs-world-app:latest
 
-- 容器停止，但改动还在容器层。
-
-------
-
-### 4️⃣ 保存改动为新镜像
-
-```
-docker commit my-node-container my-node-app:v3
+# option 1 - find container id
+docker commit <container id> fs-world-app:latest
+# option 2 - name also ok
+docker commit objective_easley fs-world-app:latest
 ```
 
-- 新镜像 `my-node-app:v3` 包含你在容器里修改的文件和安装的包
-- 下次运行这个镜像就能看到改动
+## 4. Dockerfile
 
-```
-docker run -it my-node-app:v3 bash
-```
+想用 **Dockerfile** 来创建一个包含 “Hello, World!” 应用的新镜像，而不是每次手动修改容器。
 
-------
-
-### ⚡ 总结
-
-- **不能直接修改镜像**
-- **修改文件必须在容器里进行**
-- **修改完成后 commit 为新镜像**，才能永久保存
-
-## 9
-
-想用 **Dockerfile** 来创建一个包含 “Hello, World!” 应用的新镜像，而不是每次手动修改容器。下面我帮你一步步操作。
-
-------
-
-## 1️⃣ 创建 Dockerfile
-
-在你的项目根目录（假设包含 `index.js`）新建一个文件：
-
-```
-Dockerfile
-```
+在你的项目根目录（假设包含 `index.js`）新建一个文件：`Dockerfile`
 
 然后写入以下内容：
 
-```
+```bash
 # 使用 Node 官方镜像作为基础
 FROM node:20
 
@@ -718,29 +514,12 @@ COPY . .
 # 安装依赖（假设 package.json 已经存在）
 RUN npm install
 
-# 暴露端口（可选，如果应用监听端口）
+# 暴露端口 3000 给宿主机映射
 EXPOSE 3000
 
-# 容器启动时执行命令
+# 容器启动时运行 `node index.js`
 CMD ["node", "index.js"]
 ```
-
-------
-
-### 🔹 解释
-
-| 指令                       | 作用                                     |
-| -------------------------- | ---------------------------------------- |
-| `FROM node:20`             | 选择基础镜像 Node 20                     |
-| `WORKDIR /usr/src/app`     | 设置工作目录，后续命令都在这个路径下执行 |
-| `COPY . .`                 | 将当前项目目录所有文件复制到容器中       |
-| `RUN npm install`          | 安装 Node.js 依赖                        |
-| `EXPOSE 3000`              | 暴露端口 3000 给宿主机映射               |
-| `CMD ["node", "index.js"]` | 容器启动时运行 `node index.js`           |
-
-------
-
-## 2️⃣ 构建镜像
 
 在 Dockerfile 所在目录运行：
 
@@ -750,10 +529,6 @@ docker build -t hello-world-app .
 
 - `-t hello-world-app` → 给镜像起个名字
 - `.` → 当前目录作为 build 上下文
-
-------
-
-## 3️⃣ 运行容器
 
 ```bash
 # 根据images 创建新容器，并在容器里修改内容，不可以直接在images里修改东西。给name是方便区别，不然全是id
@@ -765,9 +540,7 @@ docker run -it --name fs-hello-world fs-world-app bash
 - 容器启动后会执行 `node index.js`
 - 你会看到控制台输出 “Hello, World!”
 
-------
-
-## ✅ 优点
+### 优点
 
 - 不需要手动修改容器或复制文件
 - 镜像可以重复构建、版本化
@@ -780,24 +553,6 @@ rm index2.js index.js
 
 exit
 
-docker commit fs-hello-world-container-v2 fs-world-app:latest
-# or
-
-docker run -it fs-world-app bash
-
-# modify
-
-exit 
-
-# or 在容器上修改，并commit到images里
-docker start -ai objective_easley
-
-# find container id
-docker commit <container id> fs-world-app:latest
-# name also ok
-docker commit objective_easley fs-world-app:latest
-
-# 
 docker container ls
 docker build -t fs-hello-world . 
 
@@ -829,26 +584,25 @@ Now we can use *docker compose up* to build and run the application. If we want 
 
 You can also run the application in the background with *docker compose up -d* (*-d* for detached) and close it with *docker compose down*.
 
-```
-cp /path/to/source.txt /path/to/destination.txt
-完整复制文件，包括内容和文件名 在容器和宿主机之间复制文件
+```bash
+# cp /path/to/source.txt /path/to/destination.txt
+# 完整复制文件，包括内容和文件名 在容器和宿主机之间复制文件
 docker cp <container_name>:/path/in/container/file.txt /path/on/host/
-pwd 看host文件路径
-例如：
-
+# pwd 看host文件路径
 cp script-answers/exercise12_3.txt script-answers/exercise12_3_copy.txt
 ```
 
 ```
-3️⃣ 启动 script 来录制你的操作
+REDIS_URL=redis://localhost:3490 MONGO_URL=mongodb://root:example@localhost:3456/the_database?authSource=admin npm run dev
+```
+
+## 5. script record
+
+```bash
 script script-answers/exercise12_3.txt
 
-回到命令行后输入：
+# 回到命令行后输入：
 
 exit
-```
-
-```
-REDIS_URL=redis://localhost:3490 MONGO_URL=mongodb://root:example@localhost:3456/the_database?authSource=admin npm run dev
 ```
 
