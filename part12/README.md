@@ -1011,7 +1011,7 @@ docker start -ai objective_easley
 
 # 进bash
 docker start library-frontend-dev
-docker exec -it library-frontend-dev bash
+docker exec -it library-reverse-proxy-prod bash
 
 # modify sth && exit 
 
@@ -1023,7 +1023,8 @@ docker commit <container id> fs-world-app:latest
 # option 2 - name also ok
 docker commit objective_easley fs-world-app:latest
 
-docker compose -f docker-compose.dev.yml logs -f library-frontend
+docker compose -f docker-compose.yml logs -f library-frontend-prod
+docker compose -f docker-compose.yml logs -f nginx
 ```
 
 ## 4. Dockerfile
@@ -1107,6 +1108,11 @@ docker exec -it todo-backend-redis-1 redis-cli
 # 进入bash
 docker exec -it library-reverse-proxy-dev bash
 
+# 查看reverse proxy 是否成功代理，进入reverse proxy 中，请求前后端接口
+docker exec -it library-reverse-proxy-dev bash
+curl http://library-backend-mongodb:4000
+curl http://library-frontend:5173
+
 ```
 
 ![image-20251025193947080](/Users/chenruo/Library/Application Support/typora-user-images/image-20251025193947080.png)
@@ -1189,3 +1195,72 @@ View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux
 // 修改如上
 ```
 
+## 7.
+
+➜  library git:(main) ✗ docker compose -f docker-compose.yml logs -f library-frontend-prod docker volume inspect frontend_build ^C ➜  library git:(main) ✗ docker compose build library-frontend-prod 这两个命令有啥区别
+
+###### ChatGPT 说：
+
+明白，我来详细解释一下这两个命令的区别和作用，尤其是在你现在 **生产模式前端容器** 的场景下。
+
+------
+
+## 1️⃣ `docker compose -f docker-compose.yml logs -f library-frontend-prod`
+
+- **作用**：查看已经启动的 `library-frontend-prod` 容器的日志，并持续跟踪 (`-f`)。
+- **特点**：
+  - 只能看到 **容器正在运行时的输出**。
+  - 如果容器已经退出（export-stage 容器在生产模式下通常立即退出），**logs 会空**。
+  - 不会触发 build 或运行过程，只是显示已有容器的 stdout/stderr。
+
+> 这就是为什么你看不到任何输出——你的前端容器只是用来生成静态文件，并没有持续进程，所以容器启动后立即退出，没有日志。
+
+------
+
+## 2️⃣ `docker compose build library-frontend-prod`
+
+- **作用**：强制 **重新构建前端镜像**（build 阶段）。
+- **特点**：
+  - 会执行 Dockerfile 中的所有指令，包括 `RUN npm install`、`RUN npm run build` 等。
+  - 可以看到 build 阶段的输出，例如编译进度、警告、报错。
+  - **不会启动容器**，只是生成镜像。
+  - 对生产模式的前端来说，这是查看 build 输出的正确方式。
+
+> 所以如果你想看打包过程或 debug build 阶段的问题，用 `docker compose build`。
+
+------
+
+## 3️⃣ 总结对比
+
+| 命令                                           | 是否运行容器       | 是否显示 build 输出 | 是否显示容器日志    | 使用场景                                 |
+| ---------------------------------------------- | ------------------ | ------------------- | ------------------- | ---------------------------------------- |
+| `docker compose logs -f library-frontend-prod` | 不会运行新的 build | ❌                   | ✅（容器运行时输出） | 查看容器 stdout/stderr，调试运行中的服务 |
+| `docker compose build library-frontend-prod`   | 不会启动容器       | ✅                   | ❌                   | 查看构建过程输出，debug build 阶段问题   |
+
+------
+
+### 💡 生产模式前端容器
+
+- 容器启动后 **没有 CMD/ENTRYPOINT** → 容器立即退出 → logs 空。
+- 如果你想确认 build 是否成功 → 用 `docker compose build` 或查看 volume 里的静态文件：
+
+```
+docker run --rm -v frontend_build:/export alpine ls /export
+```
+
+#### A. 启动前端 build 阶段生成静态文件
+
+```
+docker compose build library-frontend-prod
+docker compose up library-frontend-prod
+```
+
+- 这个过程中，Docker 会自动创建 `frontend_build` volume。
+
+- **注意**：前端容器启动后可能立即退出（export-stage），只要 build 成功，volume 就有静态文件。
+
+- #### . 查看 volume 是否存在
+
+  ```
+  docker volume ls
+  ```
