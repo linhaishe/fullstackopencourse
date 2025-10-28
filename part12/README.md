@@ -232,6 +232,46 @@ nano --version
 docker compose -f docker-compose.dev.yml up -d
 ```
 
+| 参数                        | 含义                      |
+| --------------------------- | ------------------------- |
+| `-f docker-compose.dev.yml` | 使用开发环境 Compose 文件 |
+| `up`                        | 构建并启动容器            |
+| `-d`                        | 后台运行容器，不占用终端  |
+
+### 1️⃣ `docker compose`
+
+- 这是 **Docker Compose 的 CLI 命令**
+- 用来管理多容器应用（build、up、down、logs 等）
+- 注意：新版 Docker 使用 **`docker compose`**（中间没有 `-`），老版本是 `docker-compose`
+
+------
+
+### 2️⃣ `-f docker-compose.dev.yml`
+
+- 指定要使用的 Compose 文件
+- 默认情况下，`docker compose up` 会使用 `docker-compose.yml`
+- 如果你有多个环境的 Compose 文件（比如 dev / prod / test），就可以通过 `-f` 指定
+- 例子：
+  - `docker-compose.dev.yml` → 开发环境
+  - `docker-compose.prod.yml` → 生产环境
+
+------
+
+### 3️⃣ `up`
+
+- `up` 会做两件事：
+  1. **build 镜像**（如果 Compose 文件里指定了 `build`）
+  2. **启动容器**（按照 Compose 文件的 service 配置）
+- 如果镜像已经存在，默认会复用，不会重新 build
+- 可以加 `--build` 强制重建镜像
+
+------
+
+### 4️⃣ `-d`
+
+- `-d` 是 **detached 模式**，意思是让容器在后台运行
+- 如果不加 `-d`，终端会显示所有容器日志，并占用当前终端
+
 start the MongoDB with *docker compose -f docker-compose.dev.yml up -d*. With *-d* it will run it in the background. You can view the output logs with *docker compose -f docker-compose.dev.yml logs -f*. There the *-f* will ensure we *follow* the logs.
 
 Bind mount is the act of binding a file (or directory) on the host machine to a file (or directory) in the container. A bind mount is done by adding a *-v* flag with *container run*. The syntax is *-v FILE-IN-HOST:FILE-IN-CONTAINER*. Since we already learned about Docker Compose let's skip that. The bind mount is declared under key *volumes* in *docker-compose.dev.yml*. Otherwise the format is the same, first host and then container:
@@ -317,8 +357,96 @@ $ docker volume inspect todo-backend_mongo_data
 
 *Question Everything* is still applicable here. As said in [part 3](https://fullstackopen.com/en/part3/saving_data_to_mongo_db): The key is to be systematic. Since the problem can exist anywhere, *you must question everything*, and eliminate all possible sources of error one by one.
 
-```
+```bash
 REDIS_URL=redis://localhost:3490 MONGO_URL=mongodb://root:example@localhost:3456/the_database?authSource=admin npm run dev
+
+VITE_BACKEND_URL=http://localhost:3456 npm run dev
+```
+
+# multiple stages
+
+[Multi-stage builds](https://docs.docker.com/build/building/multi-stage/) are designed to split the build process into many separate stages, where it is possible to limit what parts of the image files are moved between the stages.
+
+```bash
+FROM node:20
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN npm ci
+
+RUN npm run build
+
+RUN npm install -g serve
+
+CMD ["serve", "dist"]
+
+# option 1
+# and run -  `docker build . -t hello-front`  - in bash to init image
+# `docker run -it hello-front bash` - to create a container and entry the bash
+
+# option 2
+# docker build . -t hello-front - build the image
+# docker run -p 5001:3000 hello-front - the app will be available in http://localhost:5001
+```
+
+We have also declared *another stage*, where only the relevant files of the first stage (the *dist* directory, that contains the static content) are copied.
+
+After we build it again, the image is ready to serve the static content. The default port will be 80 for Nginx, so something like *-p 8000:80* will work, so the parameters of the RUN command need to be changed a bit.
+
+```bash
+# The first FROM is now a stage called build-stage
+# ---- Build stage ----
+
+FROM node:20 AS build-stage 
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN npm ci
+
+RUN npm run build
+
+# This is a new stage, everything before this is gone, except for the files that we want to COPY
+# ---- Production stage ----
+FROM nginx:1.25-alpine
+
+# COPY the directory dist from the build-stage to /usr/share/nginx/html
+# The target location here was found from the Docker hub page
+
+COPY --from=build-stage /usr/src/app/dist /usr/share/nginx/html
+
+# nginx 默认就会启动
+```
+
+| command           | `docker build . -t hello-front` | `docker build -t my-vite-app .` |
+| ----------------- | ------------------------------- | ------------------------------- |
+| **镜像名称**      | hello-front                     | my-vite-app                     |
+| **tag 默认值**    | latest                          | latest                          |
+| **build context** | 当前目录                        | 当前目录                        |
+| **效果区别**      | 无本质区别                      | 无本质区别                      |
+
+## 如何添加环境变量在容器启动的时候
+
+```bash
+# ---- Build stage ----
+FROM node:20 AS build-stage
+
+WORKDIR /usr/src/app
+
+# 定义可传入的参数
+ARG VITE_API_URL
+
+COPY . .
+
+# 把环境变量注入构建环境
+ENV VITE_API_URL=$VITE_API_URL
+
+RUN npm ci
+RUN npm run build
+
 ```
 
 # QA
@@ -604,5 +732,51 @@ script script-answers/exercise12_3.txt
 # 回到命令行后输入：
 
 exit
+```
+
+## 6. 报错nginx tcp报错无法pull
+
+```
+[+] Building 1.9s (3/3) FINISHED                                                                                                                                                docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                                                                            0.0s
+ => => transferring dockerfile: 504B                                                                                                                                                            0.0s
+ => ERROR [internal] load metadata for docker.io/library/nginx:1.25-alpine                                                                                                                      1.9s
+ => [internal] load metadata for docker.io/library/node:20                                                                                                                                      0.4s
+------
+ > [internal] load metadata for docker.io/library/nginx:1.25-alpine:
+------
+Dockerfile:15
+--------------------
+  13 |     # This is a new stage, everything before this is gone, except for the files that we want to COPY
+  14 |     
+  15 | >>> FROM nginx:1.25-alpine
+  16 |     
+  17 |     # COPY the directory dist from the build-stage to /usr/share/nginx/html
+--------------------
+ERROR: failed to build: failed to solve: nginx:1.25-alpine: failed to resolve source metadata for docker.io/library/nginx:1.25-alpine: encountered unknown type text/html; children may not be fetched
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/21qjd7c5tc9ue95vey65g5u3y
+```
+
+切换镜像缘：
+
+| 环境                               | 配置文件路径                                     |
+| ---------------------------------- | ------------------------------------------------ |
+| 🖥️ macOS / Windows (Docker Desktop) | 在 Docker Desktop → **Settings → Docker Engine** |
+| 🐧 Linux (systemd 版 Docker)        | `/etc/docker/daemon.json`                        |
+
+```json
+{
+  "builder": {
+    "gc": {
+      "defaultKeepStorage": "20GB",
+      "enabled": true
+    }
+  },
+  "experimental": false,
+  "registry-mirrors": ["https://docker.m.daocloud.io"]
+}
+
+// 修改如上
 ```
 
