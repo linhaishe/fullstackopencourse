@@ -430,6 +430,8 @@ COPY --from=build-stage /usr/src/app/dist /usr/share/nginx/html
 
 ## 如何添加环境变量在容器启动的时候
 
+![image-20251028122735772](/Users/chenruo/Library/Application Support/typora-user-images/image-20251028122735772.png)
+
 ```bash
 # ---- Build stage ----
 FROM node:20 AS build-stage
@@ -448,6 +450,401 @@ RUN npm ci
 RUN npm run build
 
 ```
+
+```bash
+# 构建镜像，不会启动服务
+docker build -f ./dev.Dockerfile -t hello-front-dev .
+
+# 运行容器，把 容器的 5173 端口映射到宿主机的 5173 端口
+docker run -it --rm -p 5173:5173 hello-front-dev
+
+# docker run -it hello-front-dev bash 
+# 不过这个命令会build出新的容器
+```
+
+| 参数              | 含义                          |
+| ----------------- | ----------------------------- |
+| `-it`             | 交互模式（方便看日志）        |
+| `--rm`            | 容器停止后自动删除            |
+| `-p 5173:5173`    | 宿主机端口:容器端口           |
+| `hello-front-dev` | 镜像名（就是你 build 的 tag） |
+
+# Communication between containers in a Docker network
+
+[Busybox](https://www.busybox.net/) is a small executable with multiple tools that you may need. It is called "The Swiss Army Knife of Embedded Linux", and we definitely can use it to our advantage.
+
+While the hello-front-dev is running, we can do the request with [wget](https://en.wikipedia.org/wiki/Wget) since it's a tool included in Busybox to send a request from the debug-helper to hello-front-dev.
+
+```bash
+docker compose -f docker-compose.dev.yml run debug-helper wget -O - http://app:5173
+
+# 跑这段的时候，容器也需要run
+```
+
+The URL is the interesting part here. We simply said to connect to port 5173 of the service *app*. *app* is the name of the service specified in the *docker-compose.dev.yml* file:
+
+### 使用 **volumes + Nodemon** 来做热重载开发
+
+- **volumes**：把宿主机的后端源码挂载到容器里，这样你在本地改代码，容器里的应用也会看到变化。
+- **Nodemon**：监控源码变化，自动重启后端服务器。
+
+作用：你不用每次改后端代码都重新 build 容器，直接改就能生效。
+
+# Communications between containers in a more ambitious environment
+
+There are multiple different options for a reverse proxy implementation, such as Traefik, Caddy, Nginx, and Apache (ordered by initial release from newer to older). Our pick is [Nginx](https://hub.docker.com/_/nginx).
+
+> *A reverse proxy is a type of proxy server that retrieves resources on behalf of a client from one or more servers. These resources are then returned to the client, appearing as if they originated from the reverse proxy server itself.*
+>
+> **反向代理**就是**客户端的“前台门卫”**，接收所有请求，然后把请求分发到真正的服务器，最终把响应返回给客户端。
+
+```
+客户端
+   |
+   v
+[反向代理服务器]
+   |       \
+   v        v
+[后端服务器1] [后端服务器2]
+
+```
+
+假设你有一个网站：
+
+- 静态资源服务器：`10.0.0.2`
+- API 服务器：`10.0.0.3`
+
+你部署了一个 Nginx 反向代理：
+
+```nginx
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://10.0.0.2;  # 静态资源
+    }
+
+    location /api/ {
+        proxy_pass http://10.0.0.3;  # API 请求
+    }
+}
+```
+
+客户端请求：
+
+- `/index.html` → Nginx 转发到 `10.0.0.2`
+- `/api/users` → Nginx 转发到 `10.0.0.3`
+
+客户端只和 Nginx 打交道，不知道后端实际 IP。
+
+反向代理的好处挺多，我帮你整理成几个重点，分技术角度和运维角度来看：
+
+------
+
+### 1️⃣ **负载均衡**
+
+- 多台后端服务器处理请求，反向代理根据算法（轮询、最少连接、IP 哈希等）分发流量。
+- **好处**：避免单台服务器过载，提高可用性和性能。
+
+------
+
+### 2️⃣ **安全性**
+
+- 隐藏真实后端服务器的 IP。
+- 可以做请求过滤、防火墙、限流等。
+- **好处**：减少直接攻击风险，保护后端服务。
+
+------
+
+### 3️⃣ **缓存与加速**
+
+- 对静态内容（图片、CSS、JS）做缓存。
+- 减少后端服务器压力，提高响应速度。
+- **好处**：更快的页面加载，更低的服务器负载。
+
+------
+
+### 4️⃣ **统一入口 & 路由管理**
+
+- 前端只访问一个 URL，反向代理根据路径或域名转发到不同服务。
+- **好处**：多个服务统一对外暴露，内部架构可以灵活调整。
+
+------
+
+### 5️⃣ **HTTPS/TLS 终端**
+
+- 可以在反向代理上统一处理 HTTPS，后端只处理 HTTP。
+- **好处**：简化证书管理，减轻后端负担。
+
+------
+
+### 6️⃣ **高可用与故障切换**
+
+- 当某台后端服务器宕机，反向代理可以自动切换到可用服务器。
+- **好处**：提高系统可用性，减少宕机影响。
+
+## nginx 统一代理前后端接口
+
+目标是 **在前端和后端前面加一个 Nginx 反向代理**，实现一个开发环境下的统一入口。意思是你不用直接访问前端的 5173 端口或者后端的 4000 端口，而是通过 nginx 统一代理请求到相应的服务
+
+1. 创建 `nginx.dev.conf`
+
+这个文件就是 Nginx 的配置，告诉它：
+
+- `/` 路径的请求转发到前端 `todo-frontend` 的 5173 端口
+- `/api` 的请求转发到后端 `todo-backend` 的 4000 端口
+
+The *proxy_pass* directive has an interesting feature with a trailing slash. As we are using the path */api* for location but the backend application only answers in paths */* or */todos* we will want the */api* to be removed from the request. In other words, even though the browser will send a GET request to */api/todos/1* we want the Nginx to proxy the request to */todos/1*. Do this by adding a trailing slash */* to the URL at the end of *proxy_pass*.
+
+```nginx
+events {}
+
+http {
+    upstream frontend {
+        server todo-frontend:5173;
+    }
+
+    upstream backend {
+        server todo-backend:3000;
+    }
+
+    server {
+        listen 80;
+
+        # 前端请求
+        location / {
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_pass http://frontend;
+        }
+
+        # 后端 API 请求
+        location /api/ {
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_pass http://backend;
+        }
+    }
+}
+
+```
+
+![image-20251028153713156](/Users/chenruo/Library/Application Support/typora-user-images/image-20251028153713156.png)
+
+frontend should access the backend through Nginx, so the requests should be done to http://localhost:8080/api/todos: 这句话的意思，就是直接请求后端数据了，但是前端资源是什么阶段获取呢 用中文
+
+###### ChatGPT 说：
+
+用中文解释就是：
+
+这句话的意思是 **前端应用（React）在运行时请求后端数据的时候，要通过 Nginx 转发到后端**，所以请求 URL 是 `http://localhost:8080/api/todos`。
+
+至于 **前端资源（HTML/JS/CSS）** 是在浏览器第一次访问网站的时候获取的，也就是**初始加载阶段**：
+
+1. 浏览器打开 `http://localhost:8080`
+2. Nginx 将请求转发到前端容器（5173 端口），前端容器返回 React 的源码（HTML + JS + CSS）
+3. 浏览器下载并执行这些资源，React 应用开始运行
+
+随后，React 应用内部的请求（比如获取 `/api/todos` 数据）就通过 Nginx 转发到后端容器，这属于 **运行时阶段**，和初始加载前端资源是分开的两个阶段。
+
+简单说就是：
+
+- **初始加载阶段** → 获取前端资源（HTML/JS/CSS）
+- **运行时阶段** → React 应用在浏览器里向 `/api` 请求后端数据
+
+Heavyweight container orchestration tools like [Kubernetes](https://kubernetes.io/) allow us to manage containers on a completely new level. These tools hide away the physical machines and allow us, the developers, to worry less about the infrastructure.
+
+If you are interested in learning more in-depth about containers come to the [DevOps with Docker](https://devopswithdocker.com/) course and you can find more about Kubernetes in the advanced 5 credit [DevOps with Kubernetes](https://devopswithkubernetes.com/) course. You should now have the skills to complete both of them!
+
+
+
+非常好 👏，你的生产版 `docker-compose.yml` 基本正确！
+ 只差一个关键细节 👇，这就是为什么你的 **代理没真正起作用** 的原因。
+
+------
+
+## ⚠️ 问题出在这里：
+
+你在 Nginx 容器里挂载了：
+
+```
+volumes:
+  - ./nginx.conf:/etc/nginx/nginx.conf:ro
+```
+
+这表示你覆盖了整个 **Nginx 主配置文件**（`/etc/nginx/nginx.conf`），
+ 而不是 **默认的站点配置文件**（`/etc/nginx/conf.d/default.conf`）。
+
+👉 所以如果你 `nginx.conf` 文件里写的是下面这种完整结构：
+
+```
+events {}
+http {
+  upstream backend {
+    server todo-backend:3000;
+  }
+  upstream frontend {
+    server todo-frontend:80;
+  }
+
+  server {
+    listen 80;
+
+    location / {
+      proxy_pass http://frontend;
+    }
+
+    location /api/ {
+      rewrite ^/api/(.*)$ /$1 break;
+      proxy_pass http://backend;
+    }
+  }
+}
+```
+
+那是 ✅ 正确的完整 nginx.conf。
+ 但如果你误写成了只包含 `server { ... }` 这一段（没有 `events`、`http` 块），
+ 那么 nginx 启动时会报错：
+
+```
+"events" directive is not allowed here
+```
+
+------
+
+## ✅ 正确做法有两种：
+
+### **方案 A（推荐）**
+
+保持你的 nginx.conf 是完整的文件（包含 `events` 和 `http` 块），保持挂载方式不变：
+
+```
+volumes:
+  - ./nginx.conf:/etc/nginx/nginx.conf:ro
+```
+
+> ✅ 这样 nginx.conf 作为主配置文件工作。
+
+------
+
+### **方案 B**
+
+如果你的配置文件只有 `server { ... }` 这一层，就要改成挂载到默认路径：
+
+```
+volumes:
+  - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+```
+
+> ✅ 这样它会被包含在 nginx 默认的主配置 `/etc/nginx/nginx.conf` 中。
+
+# host sync contianer with yml 【WIP】
+
+宿主机的依赖和容器的依赖不互通，开发安装以来是会出现不同的问题。
+
+## 方案 1：在运行中的容器里执行安装命令
+
+```bash
+docker exec hello-front-dev npm install axios
+```
+
+`docker exec` = 在一个正在运行的容器里执行命令
+
+`hello-front-dev` = 容器名字（你可以通过 `docker ps` 查到）
+
+`npm install axios` = 在容器内部安装依赖
+
+这样安装的依赖会被添加到容器内部的 `node_modules`。
+如果你还挂载了本地目录（包含 `package.json`），也会自动把 `axios` 写入你的 `package.json`。
+
+但 ⚠️ 注意：**一旦容器被删除（`--rm`）这些安装的依赖也会丢失**。
+
+## 方案 2：改 `package.json`，重新构建镜像
+
+更“永久”的做法：
+
+1. 编辑你的 `package.json`，加上：
+
+   ```
+   "dependencies": {
+     "axios": "^1.7.2"
+   }
+   ```
+
+2. 重新构建镜像：
+
+   ```
+   docker build -f ./dev.Dockerfile -t hello-front-dev .
+   ```
+
+这样 Dockerfile 里的 `npm ci` 或 `npm install` 会重新安装所有依赖，包括新加的 `axios`。
+
+👉 优点：镜像变成新的、可重复的开发环境
+ 👉 缺点：每次加依赖都要重新 build（稍微慢一些）
+
+## 方案3: 通过yml，自动挂载本地node_modules 或通过 npm install 自动同步依赖
+
+```pgsql
+project-root/
+├── src/
+├── package.json
+├── package-lock.json
+├── dev.Dockerfile
+└── docker-compose.dev.yml
+```
+
+```Dockerfile
+# dev.Dockerfile
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+# 安装依赖（先复制 package.json）
+COPY package*.json ./
+
+RUN npm install
+
+# 默认命令交给 compose 覆盖
+CMD ["npm", "run", "dev"]
+
+```
+
+```yml
+version: '3.9'
+# docker-compose.dev.yml
+services:
+  todo-frontend:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    container_name: hello-front-dev
+    ports:
+      - "5173:5173"  # Vite 默认端口
+    environment:
+      - CHOKIDAR_USEPOLLING=true   # 让热更新在容器内也能工作
+    volumes:
+      - .:/usr/src/app              # 挂载代码
+      - /usr/src/app/node_modules   # 保留容器内 node_modules，避免冲突
+    command: npm run dev
+
+```
+
+```bash
+docker compose -f docker-compose.dev.yml up
+# 启动开发环境
+```
+
+dev.Dockerfile（热更新用）
+
+test.Dockerfile（CI 测试用）
+
+prod.Dockerfile（正式构建用）
+
+
 
 # QA
 
@@ -529,6 +926,8 @@ docker image ls
 
 # 从镜像 hello-node-world 启动一个新容器，并在其中打开一个交互式 Bash 终端
 docker run -it hello-node-world bash
+# or
+docker run -it --name testtest hello-node-world bash
 
 # 删除容器
 docker container rm condescending_blackburn
@@ -610,6 +1009,10 @@ docker run -it fs-world-app bash
 # or 直接进入容器，在容器上修改
 docker start -ai objective_easley
 
+# 进bash
+docker start library-frontend-dev
+docker exec -it library-frontend-dev bash
+
 # modify sth && exit 
 
 # commit command example
@@ -619,6 +1022,8 @@ docker commit fs-hello-world-container-v2 fs-world-app:latest
 docker commit <container id> fs-world-app:latest
 # option 2 - name also ok
 docker commit objective_easley fs-world-app:latest
+
+docker compose -f docker-compose.dev.yml logs -f library-frontend
 ```
 
 ## 4. Dockerfile
@@ -691,12 +1096,16 @@ docker run -p 3000:3000 <image-name>
 
 # 从正在运行的container里进去交互
 docker exec -it stupefied_ganguly bash
+docker exec -it library-frontend-dev sh
 
 # 使用 docker exec 进入mongo容器并打开 mongo-cli
 docker exec -it todo-backend-mongo-1 mongosh -u root -p example
 
 # 使用 docker exec 进入容器并打开 redis-cli
 docker exec -it todo-backend-redis-1 redis-cli
+
+# 进入bash
+docker exec -it library-reverse-proxy-dev bash
 
 ```
 
