@@ -109,3 +109,4 @@ dist
 part5/.env.development
 part5/.env.production
 .DS_Store
+.DS_Store
