@@ -424,6 +424,250 @@ DEFAULT 'English'
 DROP TABLE IF EXISTS mytable;
 ```
 
+# Document databases
+
+The schema of the database exists only in the program code, which interprets the data in a specific way, e.g. by identifying that some of the fields are references to objects in another collection.
+
+MongoDB also does not care what fields the entities stored in the collections have. Therefore MongoDB leaves it entirely up to the programmer to ensure that the correct information is being stored in the database.
+
+One of the advantages is the flexibility that schema agnosticism brings: since the schema does not need to be defined at the database level, application development may be faster in certain cases, and easier, with less effort needed in defining and modifying the schema in any case. 
+
+Problems with not having a schema are related to error-proneness: everything is left up to the programmer. The database itself has no way of checking whether the data in it is *honest*,
+
+The reason why the the previous sections of the course used MongoDB is precisely because of its schema-less nature, which has made it easier to use the database for someone with little knowledge of relational databases. For most of the use cases of this course, I personally would have chosen to use a relational database.
+
+# Application database
+
+ There are many options, but we will be using the currently most popular Open Source solution [PostgreSQL](https://www.postgresql.org/). 
+
+Note that if you only need the database, and are not planning to deploy the app to Fly.io, it is also possible to [just create the database to Fly.io](https://fly.io/docs/mpg/).or render https://render.com/docs/postgresql
+
+基本都在收费，render有一个30天的免费试用，用来练手我看是可以的。
+
+1. 在fly.io/others和heroku创建Postgres云数据库 / 或者尝试本地构建数据库，通过docker 跑服务
+2. 用 [sequelize](https://sequelize.org/master/)中间使用数据库
+
+# docker with Postgres Image
+
+Start Postgres [Docker image](https://hub.docker.com/_/postgres) with the command
+
+```bash
+# build postgres database in docker
+# option 1
+docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+# option 2
+docker run -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 postgres
+# option 3 (prefer)
+docker run --name hello-postgres -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres
+
+# 走bash command 操作数据库 command 4
+docker exec -it hello-postgres psql -U postgres postgres
+# Defined in this way, the data stored in the database is persisted only as long as the container exists. 
+```
+
+`--name some-postgres`：给容器起名叫 `some-postgres`，方便后续通过名字管理（例如 `docker stop some-postgres`、`docker exec -it some-postgres bash`）。
+
+`-e POSTGRES_PASSWORD=mysecretpassword`：设置 PostgreSQL 的管理员密码。
+
+`-d`：后台运行（detached mode）。
+
+`postgres`：镜像名。
+
+**特点：**
+
+- 容器会自动在内部开放 PostgreSQL 默认端口（5432），但**没有映射到宿主机**。
+- 因此，你不能直接在宿主机通过 `localhost:5432` 访问数据库。
+- 适合容器间通信（比如另一个容器连接到它）。
+
+Command 2没有 `--name`，Docker 会自动分配一个随机容器名。
+
+`-e POSTGRES_PASSWORD=mysecretpassword`：同样设置密码。
+
+`-p 5432:5432`：将容器内的 5432 端口映射到宿主机的 5432 端口。
+
+没有 `-d`，所以它会**前台运行**（除非你加上 `-d`）。
+
+**特点：**
+
+- 可以在宿主机上直接用命令连接数据库：
+
+  ```
+  psql -h localhost -U postgres
+  ```
+
+- 每次重启容器后名称可能不同（不方便管理）。
+
+`docker exec -it hello-postgres psql -U postgres postgres`
+
+| 部分             | 作用                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| `docker exec`    | 在**已运行的容器**里执行一个命令。                           |
+| `-it`            | 组合两个参数： - `-i` = 交互模式 (interactive) - `-t` = 分配一个伪终端 (tty)，让你能输入命令。 |
+| `hello-postgres` | 这是你要进入的容器名（比如用 `docker ps` 能看到的 `NAMES` 列）。 |
+| `psql`           | PostgreSQL 自带的命令行客户端，用来和数据库交互。            |
+| `-U postgres`    | 指定连接数据库的用户（这里是默认管理员用户 `postgres`）。    |
+| `postgres`       | 最后这个是**要连接的数据库名**（通常默认数据库也叫 `postgres`）。 |
+
+-----
+
+
+
+有很多操作Postgres 的可视化工具，也可以走命令。
+
+There are many ways to do this, there are several different graphical user interfaces, such as [pgAdmin](https://www.pgadmin.org/). However, we will be using Postgres [psql](https://www.postgresql.org/docs/current/app-psql.html) command-line tool.
+
+```bash
+\d # which tells you the contents of the database:
+```
+
+在命令里就可以走Sql语法来增删改查数据库了。
+
+## Connecting to a Database build in docker
+
+Usage: https://www.postgresql.org/docs/current/app-psql.html
+
+install devs
+
+```bash
+npm install express dotenv pg sequelize
+```
+
+ [sequelize](https://sequelize.org/master/) is the library through which we use Postgres. 
+
+https://sequelize.org/docs/v6/core-concepts/assocs/#one-to-many-relationships
+
+用这个中间件操作/链接数据库
+
+```bash
+docker run --name hello-postgres -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres
+
+DATABASE_URL=postgresql://postgres:mysecretpassword@localhost:5432/postgres
+
+# entry bash and into cli
+docker exec -it hello-postgres bash
+psql -U postgres
+
+# 进入数据库 CLI
+docker exec -it hello-postgres psql -U postgres
+```
+
+```sql
+# blogs table schema
+CREATE TABLE blogs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    author TEXT,
+    url TEXT NOT NULL,
+    title TEXT NOT NULL, 
+    likes INTEGER DEFAULT 0
+);
+
+INSERT INTO blogs
+(id, author, url, title)
+VALUES (1, 'chen ruo', 'https://dashboard.heroku.com/', 'book2');
+
+curl -X GET http://localhost:3001/api/users
+curl -X GET http://localhost:3001/api/blogs
+
+curl -X POST http://localhost:3001/api/blogs \
+  -H "Content-Type: application/json" \
+  -d '{"author":"Alice","title":"New Blog","url":"https://example.com"}'
+
+curl -X DELETE http://localhost:3001/api/blogs/4
+
+curl -X PUT http://localhost:3001/api/blogs/9 \
+  -H "Content-Type: application/json" \
+  -d '{"author":"Butan","title":"New Blog4","url":"https://example.com", "likes": 19}'
+  
+curl -X POST http://localhost:3001/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"username": "Alice", "name": "Alice-name", "email": "xusumu@gmail.com"}'
+  
+curl -X POST http://localhost:3001/api/users \
+-H "Content-Type: application/json" \
+-d '{"username": "Alice2", "name": "Alice-name2", "email": "xusumu@gmail.com"}'
+  
+curl -X POST http://localhost:3001/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "Alice", "name": "Alice-name", "password": "secret"}'
+  
+  curl -X POST http://localhost:3001/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "Alice2", "name": "Alice-name2", "password": "secret"}'
+  
+curl -X POST http://localhost:3001/api/blogs \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlIiwiaWQiOjIsImlhdCI6MTc2MTgyNDI5M30.joibFhBELo6MAcK5Vt1ekuYQDppZcA56LQTfWecvO3I" \
+  -d '{"author":"XXXX","title":"New Blog react22","url":"https://example.com"}'
+
+curl -X DELETE http://localhost:3001/api/blogs/5 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlMiIsImlkIjozLCJpYXQiOjE3NjE4MjQ4NzJ9.DzkvoZqp9UAuueK-r5RwHj7whOZM1ucWrZFdR9qP4rk"
+  
+  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlMiIsImlkIjozLCJpYXQiOjE3NjE4MjQ4NzJ9.DzkvoZqp9UAuueK-r5RwHj7whOZM1ucWrZFdR9qP4rk
+
+```
+
+ `express-async-errors` 是一个 **处理 Express 异步路由错误的库**，目的是让你 **不用每个 async 路由里都写 try/catch**，仍然可以让错误传到全局错误处理中间件。
+
+#### 不用 `express-async-errors`，直接全局 try/catch
+
+- Express 5 本身 **已经改进了 async 错误处理**
+- 所以你 **可以直接写 async 路由**，抛出的异常会被 Express 5 自动传到错误处理中间件
+
+```js
+// 全局错误处理中间件
+app.use((err, req, res, next) => {
+  console.error(err)
+  res.status(500).json({ error: err.message })
+})
+```
+
+```
+router.get("/", async (req, res) => {
+  const users = await User.findAll({
+    
+    // Making a join query
+    include: {
+      model: Blog,
+    },
+  });
+  res.json(users);
+});
+```
+
+```sql
+SELECT "User". "id", "User". "username", "User". "name", "Notes". "id" AS "Notes.id", "Notes". "content" AS "Notes.content", "Notes". "important" AS "Notes.important", "Notes". "date" AS "Notes.date", "Notes". "user_id" AS "Notes.UserId"
+FROM "users" AS "User" LEFT OUTER JOIN "notes" AS "Notes" ON "User". "id" = "Notes". "user_id";
+```
+
+```js
+const user = await User.findByPk(req.decodedToken.id)
+
+// create a note without saving it yet
+const note = Note.build({ ...req.body, date: new Date() })
+ // put the user id in the userId property of the created note
+note.userId = user.id
+// store the note object in the database
+await note.save()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
