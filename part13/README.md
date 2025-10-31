@@ -592,17 +592,25 @@ curl -X POST http://localhost:3001/api/login \
   
   curl -X POST http://localhost:3001/api/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "Alice2", "name": "Alice-name2", "password": "secret"}'
+  -d '{"username": "Bob", "name": "Bob-name", "password": "secret"}'
   
 curl -X POST http://localhost:3001/api/blogs \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlIiwiaWQiOjIsImlhdCI6MTc2MTgyNDI5M30.joibFhBELo6MAcK5Vt1ekuYQDppZcA56LQTfWecvO3I" \
-  -d '{"author":"XXXX","title":"New Blog react22","url":"https://example.com"}'
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBbGljZSIsImlhdCI6MTc2MTkxMDc4MCwiZXhwIjoxNzYyNTE1NTgwfQ.Gqq9CGDfH_4p-rXPFWvLcIlQOkDru9EjI6vstnWySN0" \
+  -d '{"author":"XXXX3","title":"New Blog react3","url":"https://example.com", "year": 1996}'
 
 curl -X DELETE http://localhost:3001/api/blogs/5 \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlMiIsImlkIjozLCJpYXQiOjE3NjE4MjQ4NzJ9.DzkvoZqp9UAuueK-r5RwHj7whOZM1ucWrZFdR9qP4rk"
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlIiwiaWQiOjEsImlhdCI6MTc2MTg4OTA4NX0.-0Gd3LVWWXlom3PbqdjqR_Z4qAEKoKrTbGavKZPYxy8"
   
-  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlMiIsImlkIjozLCJpYXQiOjE3NjE4MjQ4NzJ9.DzkvoZqp9UAuueK-r5RwHj7whOZM1ucWrZFdR9qP4rk
+curl -X DELETE http://localhost:3001/api/logout \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBbGljZSIsImlhdCI6MTc2MTkxMDc4MCwiZXhwIjoxNzYyNTE1NTgwfQ.Gqq9CGDfH_4p-rXPFWvLcIlQOkDru9EjI6vstnWySN0"
+  
+INSERT INTO user_marks (user_id, blog_id) values (1, 1);
+
+curl -X PUT http://localhost:3001/api/readinglist/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFsaWNlIiwiaWQiOjEsImlhdCI6MTc2MTkwMDI5NX0.jPlSRr88ttUz8mUY9W505w6BlhBfdi7meDLJpDFBdMY" \
+  -d '{"read": true}'
 
 ```
 
@@ -650,25 +658,338 @@ note.userId = user.id
 await note.save()
 ```
 
+# migrations
+
+[migrations](https://sequelize.org/master/manual/migrations.html)
+
+a migration is a single JavaScript file that describes some modification to a database. 
+
+一个 **migration（迁移）** 就是一个 **JavaScript 文件**，里面写着对数据库的一次修改。也就是说，这个文件描述了数据库结构要怎么“变”。每次你对数据库结构有变动（不管是一项还是多项），你都应该新建一个 **独立的 migration 文件**。它在数据库里有一张专门的表（通常叫 `SequelizeMeta`），存放执行过的 migration 文件名。这样一来：数据库的变化是**可控的、有记录的**；每个改动都有相应的 JS 文件；这些文件可以放进 **版本控制系统（如 Git）**，方便团队协作和回溯。
+
+We could run the migrations from the command line using the [Sequelize command line tool](https://github.com/sequelize/cli). However, we choose to perform the migrations manually from the program code using the [Umzug](https://github.com/sequelize/umzug) library. Let's install the library
+
+When defining migrations, it is essential to remember that unlike models, column and table names are written in snake case form:
+
+```js
+const { DataTypes } = require('sequelize')
+
+module.exports = {
+  up: async ({ context: queryInterface }) => {
+    await queryInterface.createTable('notes', {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      important: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+      },
+      date: {
+        type: DataTypes.DATE
+      },
+    })
+    await queryInterface.createTable('users', {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      username: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: false
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+    })
+    await queryInterface.addColumn('notes', 'user_id', {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'users', key: 'id' },
+    })
+  },
+  down: async ({ context: queryInterface }) => {
+    await queryInterface.dropTable('notes')
+    await queryInterface.dropTable('users')
+  },
+}
+```
+
+So in migrations, the names of the tables and columns are written exactly as they appear in the database, while models use Sequelize's default camelCase naming convention.（emmmm例子里面不是下划线吗。。。
+
+```
+👀 Migrations up to date { files: [] }
+```
+
+会出现文件空数组的情况，是因为只执行新的迁移（未执行过的文件）。去查看SELECT * FROM migrations;的内容的时候，会看到表输出，说明表单执行过了。
+
+## 重新运行迁移（比如修改了 migration 文件）
+
+方式 1：撤销所有迁移再重跑
+
+```js
+npx sequelize-cli db:migrate:undo:all
+npx sequelize-cli db:migrate
+
+// 或如果你用的是 Umzug 自己写的
+await migrator.down({ to: 0 }); // 回滚所有
+await migrator.up(); // 重新执行所有迁移
+```
+
+方式 2：手动清空 migrations 表
+
+```sql
+DELETE FROM migrations;
+
+npm run migrate
+```
+
+一定要删除 migrations 表！
+
+## 格式化数据库
+
+
+## 方法 1：在 **psql** 里用 SQL
+
+打开 `psql` 连接到你的数据库：
+
+```
+psql -U postgres -d postxxx
+```
+
+然后执行：
+
+```
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+```
+
+**说明：**
+
+- `DROP SCHEMA public CASCADE;` 会删除 public schema 下的所有表、序列、约束等。
+- `CREATE SCHEMA public;` 重建 schema，这样数据库就空了，可以重新建表。
+- 非常适合快速重置数据库。
+
+# token 失效
+
+Keep in mind that actions requiring login should not be successful with an "expired token", i.e. with the same token after logging out. You may also choose to use some purpose-built npm library to handle sessions.
+
+## 🧩 第一部分：解释这句话的意思
+
+> “Keep in mind that actions requiring login should not be successful with an ‘expired token’, i.e. with the same token after logging out.”
+
+意思是：
+
+> 当用户 **登出(logout)** 之后，即使他仍然保留了原来的 **JWT token**，
+>  也 **不应该再能调用任何需要登录权限的接口**。
+
+换句话说：
+
+- 你不能只让前端“忘掉 token”就完事。
+- 还需要在服务端 **让这个 token 无效化（blacklist/删除）**。
+- 否则，别人用相同 token 依然可以访问受保护的资源，**不安全**。
+
+------
+
+## 🔐 解决方案思路
+
+登出后 token 自动失效有两种常见实现方式：
+
+| 方式                       | 思路                                                         | 优点       | 缺点                                  |
+| -------------------------- | ------------------------------------------------------------ | ---------- | ------------------------------------- |
+| ✅ **存储 token（黑名单）** | 把登录生成的 token 存在数据库中（如 `UserToken` 表）。登出时删除。验证时先查数据库是否存在。 | 安全、简单 | 每次验证都要查数据库                  |
+| ⏱️ **设置过期时间 (exp)**   | token 里写入 `exp` 时间，比如 1 小时后自动过期。             | 无需数据库 | 登出前 token 仍然有效（不能立刻失效） |
+
+👉 所以最安全的做法是：
+ **两者结合：**
+ JWT 内置过期时间（比如 1 小时），
+ 同时在服务端维护一份有效 token 表。登出时从表中删掉。
+
+------
+
+## ⚙️ 第二部分：推荐的 npm 库
+
+你有两种路线可以选 👇
+
+### 🧩 路线 A — 继续用 JWT（你现在的方案）
+
+保持 `jsonwebtoken`，但配合 “token 表 + 验证逻辑”：
+
+```
+npm install jsonwebtoken
+```
+
+加一个 token 校验中间件，比如：
+
+```
+import jwt from "jsonwebtoken";
+import { UserToken } from "../models/index.js";
+
+export const authenticateToken = async (req, res, next) => {
+  const authorization = req.get("authorization");
+  if (!authorization?.toLowerCase().startsWith("bearer ")) {
+    return res.status(401).json({ error: "token missing" });
+  }
+
+  const token = authorization.substring(7);
+
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET);
+
+    // 🧠 检查 token 是否仍在数据库中（防止登出后继续使用）
+    const validToken = await UserToken.findOne({ where: { userId: decoded.id, token } });
+    if (!validToken) {
+      return res.status(401).json({ error: "token expired or invalid" });
+    }
+
+    req.decodedToken = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "token invalid" });
+  }
+};
+```
+
+这样，登出后删除 token 就完全安全了 ✅。
+
+------
+
+### 🪄 路线 B — 使用 session 管理库
+
+如果你不想自己维护 token 表，可以改用 **session 管理库**，让它自动处理登录状态和过期问题。
+
+#### 常用推荐：
+
+| 库名                  | 简介                                                         | 适合场景           |
+| --------------------- | ------------------------------------------------------------ | ------------------ |
+| **express-session**   | Express 官方推荐的 session 中间件，用 cookie+server 存储 session | 普通 Web 应用      |
+| **connect-pg-simple** | 把 express-session 存在 PostgreSQL 里                        | 你当前的数据库场景 |
+| **passport.js**       | 一整套认证框架，支持本地登录、JWT、OAuth 等多种策略          | 大型项目           |
+| **iron-session**      | 无需数据库，session 加密存在 cookie 中                       | Next.js/简单后端   |
+
+------
+
+💡 简单推荐：
+ 如果你已经用 PostgreSQL，可以直接：
+
+```
+npm install express-session connect-pg-simple
+```
+
+然后在 `app.js` 中：
+
+```
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+const PgSession = connectPgSimple(session);
+
+app.use(
+  session({
+    store: new PgSession({ conString: process.env.DATABASE_URL }),
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 3600 * 1000 } // 1 hour
+  })
+);
+```
+
+这样 Express 会自动帮你：
+
+- 登录时建立 session
+- 登出时销毁 session
+- 过期自动失效
+- 不用手动维护 token 表
 
 
 
+我看输出的命令是这个    sql: 'SELECT "id", "user_id" AS "userId", "token" FROM "user_tokens" AS "user_token" WHERE "user_token"."user_id" = 1 LIMIT 1;', 但我没有user_tokens的相关命令啊
 
+###### ChatGPT 说：
 
+非常好观察 👀！这说明 Sequelize 正在执行
 
+```
+SELECT ... FROM "user_tokens"
+```
 
+也就是说，它**期望数据库里有一张叫 `user_tokens` 的表**。
 
+------
 
+### 🔍 原因
 
+这是由你模型里的配置决定的 👇
 
+```
+UserToken.init(
+  {...},
+  {
+    sequelize,
+    underscored: true,
+    timestamps: false,
+    modelName: "user_token", // ✅ 注意这里！
+  }
+);
+```
 
+当你在 `modelName` 中写的是 `"user_token"` 并且启用了 `underscored: true`，
+ Sequelize 会自动推导出表名是 **复数形式**，即：
 
+```
+user_token → user_tokens
+```
 
+> Sequelize 默认会对 `modelName` 自动复数化作为表名，除非你显式指定 `tableName`。
 
+### ✅ 解决方案有两种
 
+#### ✅ 方案 1：保持默认复数化
 
+直接让数据库的表名改成 `user_tokens` 即可。
+ 也就是在 migration 里改成：
 
+```
+await queryInterface.createTable("user_tokens", {  // ✅ 注意这里改成复数
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: "users", key: "id" },
+  },
+  token: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+});
+```
 
+这样模型和数据库就匹配了。
 
+------
 
+#### ✅ 方案 2：强制使用单数表名
 
+如果你更想保持 `user_token`（单数），可以加上：
+
+```
+UserToken.init(
+  {...},
+  {
+    sequelize,
+    tableName: "user_token", // ✅ 强制指定表名
+    underscored: true,
+    timestamps: false,
+    modelName: "UserToken",
+  }
+);
+```
+
+这样 Sequelize 就不会复数化了。
