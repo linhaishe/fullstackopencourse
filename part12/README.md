@@ -311,7 +311,7 @@ services:
       - ./redis_data:/data
 ```
 
-![image-20251027123639966](/Users/chenruo/Library/Application Support/typora-user-images/image-20251027123639966.png)
+![image-20251027123639966](https://s2.loli.net/2025/11/11/5U9TdcqD1bsrwHx.png)
 
 ```bash
 docker compose -f docker-compose.dev.yml down --volumes

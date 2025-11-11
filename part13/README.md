@@ -1,5 +1,13 @@
 # PART 13
 
+course content: https://fullstackopen.com/en/part13
+
+project github: https://github.com/linhaishe/part13-fullstack
+
+1. docker部署Postgres Images数据库
+2. 一个后端服务bloglist-backend
+3. sequelize操作Postgres数据库
+
 # SQL Base
 
 ## 1. SELECT / FROM
@@ -22,8 +30,7 @@ FROM mytable
 WHERE condition
     AND/OR another_condition
     AND/OR …;
-    
-    
+
 SELECT * FROM movies WHERE id = 6;
 
 SELECT title, year
@@ -182,7 +189,7 @@ ON movies.id = boxoffice.movie_id
 ORDER BY total_sales_million DESC;
 ```
 
-![image-20251029180435063](/Users/chenruo/Library/Application Support/typora-user-images/image-20251029180435063.png)
+![image-20251029180435063](https://s2.loli.net/2025/11/11/3zCL8TROnJadiuW.png)
 
 ```sql
 SELECT 
@@ -442,10 +449,10 @@ The reason why the the previous sections of the course used MongoDB is precisely
 
 Note that if you only need the database, and are not planning to deploy the app to Fly.io, it is also possible to [just create the database to Fly.io](https://fly.io/docs/mpg/).or render https://render.com/docs/postgresql
 
-基本都在收费，render有一个30天的免费试用，用来练手我看是可以的。
+基本都在收费，render有一个30天的免费试用，用来练手我看是可以的
 
 1. 在fly.io/others和heroku创建Postgres云数据库 / 或者尝试本地构建数据库，通过docker 跑服务
-2. 用 [sequelize](https://sequelize.org/master/)中间使用数据库
+2. 用 [sequelize](https://sequelize.org/master/)中间件使用数据库
 
 # docker with Postgres Image
 
@@ -491,7 +498,7 @@ Command 2没有 `--name`，Docker 会自动分配一个随机容器名。
 
 - 可以在宿主机上直接用命令连接数据库：
 
-  ```
+  ```bash
   psql -h localhost -U postgres
   ```
 
@@ -509,8 +516,6 @@ Command 2没有 `--name`，Docker 会自动分配一个随机容器名。
 | `postgres`       | 最后这个是**要连接的数据库名**（通常默认数据库也叫 `postgres`）。 |
 
 -----
-
-
 
 有很多操作Postgres 的可视化工具，也可以走命令。
 
@@ -629,7 +634,7 @@ app.use((err, req, res, next) => {
 })
 ```
 
-```
+```js
 router.get("/", async (req, res) => {
   const users = await User.findAll({
     
@@ -665,6 +670,8 @@ await note.save()
 a migration is a single JavaScript file that describes some modification to a database. 
 
 一个 **migration（迁移）** 就是一个 **JavaScript 文件**，里面写着对数据库的一次修改。也就是说，这个文件描述了数据库结构要怎么“变”。每次你对数据库结构有变动（不管是一项还是多项），你都应该新建一个 **独立的 migration 文件**。它在数据库里有一张专门的表（通常叫 `SequelizeMeta`），存放执行过的 migration 文件名。这样一来：数据库的变化是**可控的、有记录的**；每个改动都有相应的 JS 文件；这些文件可以放进 **版本控制系统（如 Git）**，方便团队协作和回溯。
+
+![image-20251111213244036](https://s2.loli.net/2025/11/11/p53ERXoSmYOeGyP.png)
 
 We could run the migrations from the command line using the [Sequelize command line tool](https://github.com/sequelize/cli). However, we choose to perform the migrations manually from the program code using the [Umzug](https://github.com/sequelize/umzug) library. Let's install the library
 
@@ -731,6 +738,8 @@ So in migrations, the names of the tables and columns are written exactly as the
 会出现文件空数组的情况，是因为只执行新的迁移（未执行过的文件）。去查看SELECT * FROM migrations;的内容的时候，会看到表输出，说明表单执行过了。
 
 ## 重新运行迁移（比如修改了 migration 文件）
+
+docker里的所有相关表格需要全部删除
 
 方式 1：撤销所有迁移再重跑
 
@@ -822,13 +831,13 @@ Keep in mind that actions requiring login should not be successful with an "expi
 
 保持 `jsonwebtoken`，但配合 “token 表 + 验证逻辑”：
 
-```
+```bash
 npm install jsonwebtoken
 ```
 
 加一个 token 校验中间件，比如：
 
-```
+```js
 import jwt from "jsonwebtoken";
 import { UserToken } from "../models/index.js";
 
@@ -879,13 +888,13 @@ export const authenticateToken = async (req, res, next) => {
 💡 简单推荐：
  如果你已经用 PostgreSQL，可以直接：
 
-```
+```bash
 npm install express-session connect-pg-simple
 ```
 
 然后在 `app.js` 中：
 
-```
+```js
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 const PgSession = connectPgSimple(session);
@@ -908,15 +917,15 @@ app.use(
 - 过期自动失效
 - 不用手动维护 token 表
 
+# UserToken.init里的model name下划线默认查询数据库的名称为复数
 
-
-我看输出的命令是这个    sql: 'SELECT "id", "user_id" AS "userId", "token" FROM "user_tokens" AS "user_token" WHERE "user_token"."user_id" = 1 LIMIT 1;', 但我没有user_tokens的相关命令啊
+Q： 我看输出的命令是这个    sql: 'SELECT "id", "user_id" AS "userId", "token" FROM "user_tokens" AS "user_token" WHERE "user_token"."user_id" = 1 LIMIT 1;', 但我没有user_tokens的相关命令
 
 ###### ChatGPT 说：
 
 非常好观察 👀！这说明 Sequelize 正在执行
 
-```
+```sql
 SELECT ... FROM "user_tokens"
 ```
 
@@ -928,7 +937,7 @@ SELECT ... FROM "user_tokens"
 
 这是由你模型里的配置决定的 👇
 
-```
+```js
 UserToken.init(
   {...},
   {
@@ -956,7 +965,7 @@ user_token → user_tokens
 直接让数据库的表名改成 `user_tokens` 即可。
  也就是在 migration 里改成：
 
-```
+```js
 await queryInterface.createTable("user_tokens", {  // ✅ 注意这里改成复数
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   user_id: {
@@ -979,7 +988,7 @@ await queryInterface.createTable("user_tokens", {  // ✅ 注意这里改成复�
 
 如果你更想保持 `user_token`（单数），可以加上：
 
-```
+```js
 UserToken.init(
   {...},
   {
