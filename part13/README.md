@@ -6,7 +6,7 @@ project github: https://github.com/linhaishe/part13-fullstack
 
 1. docker部署Postgres Images数据库
 2. 一个后端服务bloglist-backend
-3. sequelize操作Postgres数据库
+3. sequelize操作postgresSQL数据库
 
 # SQL Base
 
@@ -452,7 +452,14 @@ Note that if you only need the database, and are not planning to deploy the app 
 基本都在收费，render有一个30天的免费试用，用来练手我看是可以的
 
 1. 在fly.io/others和heroku创建Postgres云数据库 / 或者尝试本地构建数据库，通过docker 跑服务
-2. 用 [sequelize](https://sequelize.org/master/)中间件使用数据库
+2. 用 [sequelize](https://sequelize.org/master/) / prisma中间件使用数据库
+
+| 项目     | Prisma                         | PostgreSQL                        |
+| -------- | ------------------------------ | --------------------------------- |
+| 类型     | ORM（对象关系映射工具）        | 关系型数据库                      |
+| 作用     | 用代码操作数据库、做查询、迁移 | 存储数据、事务处理、提供 SQL 接口 |
+| 类似工具 | Sequelize、TypeORM、Drizzle    | MySQL、MariaDB、SQLite            |
+| 运行位置 | 在你的 Node.js 服务端          | 独立服务（本地/云端）             |
 
 # docker with Postgres Image
 
@@ -668,6 +675,8 @@ await note.save()
 [migrations](https://sequelize.org/master/manual/migrations.html)
 
 a migration is a single JavaScript file that describes some modification to a database. 
+
+每次重启dev的时候，migrations里的文件会被操作一遍，但如果已经有记录操作过了，则不会再次操作。如果migrations有更新或者有新增才会重新被操作。
 
 一个 **migration（迁移）** 就是一个 **JavaScript 文件**，里面写着对数据库的一次修改。也就是说，这个文件描述了数据库结构要怎么“变”。每次你对数据库结构有变动（不管是一项还是多项），你都应该新建一个 **独立的 migration 文件**。它在数据库里有一张专门的表（通常叫 `SequelizeMeta`），存放执行过的 migration 文件名。这样一来：数据库的变化是**可控的、有记录的**；每个改动都有相应的 JS 文件；这些文件可以放进 **版本控制系统（如 Git）**，方便团队协作和回溯。
 
