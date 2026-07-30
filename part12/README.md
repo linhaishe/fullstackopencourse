@@ -2,6 +2,8 @@
 
 learn how to package code into standard units of software called containers.These containers can help us develop software faster and easier than before. We will utilize containers to create immutable execution environments for our Node.js and React projects. Containers also make it easy to include multiple services with our projects. With their flexibility, we will explore and experiment with many different and popular tools by utilizing containers.
 
+GitHub assignment link: https://github.com/linhaishe/part12-containers-applications
+
 # Containers
 
 Containers encapsulate your application into a single package. This package will include the application and all of its dependencies. As a result, each container can run isolated from the other containers.
@@ -62,6 +64,42 @@ Cooking metaphor:
 | 从镜像创建新容器 | `docker run -it --name <name> <image> bash` |
 
 ---
+
+# command
+
+| **命令**              | **功能**                                         | **示例**                                   |
+| :-------------------- | :----------------------------------------------- | :----------------------------------------- |
+| `docker run`          | 启动一个新的容器并运行命令                       | `docker run -d ubuntu`                     |
+| `docker ps`           | 列出当前正在运行的容器                           | `docker ps`                                |
+| `docker ps -a`        | 列出所有容器（包括已停止的容器）                 | `docker ps -a`                             |
+| `docker build`        | 使用 Dockerfile 构建镜像                         | `docker build -t my-image .`               |
+| `docker images`       | 列出本地存储的所有镜像                           | `docker images`                            |
+| `docker pull`         | 从 Docker 仓库拉取镜像                           | `docker pull ubuntu`                       |
+| `docker push`         | 将镜像推送到 Docker 仓库                         | `docker push my-image`                     |
+| `docker exec`         | 在运行的容器中执行命令                           | `docker exec -it container_name bash`      |
+| `docker stop`         | 停止一个或多个容器                               | `docker stop container_name`               |
+| `docker start`        | 启动已停止的容器                                 | `docker start container_name`              |
+| `docker restart`      | 重启一个容器                                     | `docker restart container_name`            |
+| `docker rm`           | 删除一个或多个容器                               | `docker rm container_name`                 |
+| `docker rmi`          | 删除一个或多个镜像                               | `docker rmi my-image`                      |
+| `docker logs`         | 查看容器的日志                                   | `docker logs container_name`               |
+| `docker inspect`      | 获取容器或镜像的详细信息                         | `docker inspect container_name`            |
+| `docker exec -it`     | 进入容器的交互式终端                             | `docker exec -it container_name /bin/bash` |
+| `docker network ls`   | 列出所有 Docker 网络                             | `docker network ls`                        |
+| `docker volume ls`    | 列出所有 Docker 卷                               | `docker volume ls`                         |
+| `docker-compose up`   | 启动多容器应用（从 `docker-compose.yml` 文件）   | `docker-compose up`                        |
+| `docker-compose down` | 停止并删除由 `docker-compose` 启动的容器、网络等 | `docker-compose down`                      |
+| `docker info`         | 显示 Docker 系统的详细信息                       | `docker info`                              |
+| `docker version`      | 显示 Docker 客户端和守护进程的版本信息           | `docker version`                           |
+| `docker stats`        | 显示容器的实时资源使用情况                       | `docker stats`                             |
+| `docker login`        | 登录 Docker 仓库                                 | `docker login`                             |
+| `docker logout`       | 登出 Docker 仓库                                 | `docker logout`                            |
+
+**常用选项说明:**
+
+- **`-d`**：后台运行容器，例如 `docker run -d ubuntu`。
+- **`-it`**：以交互式终端运行容器，例如 `docker exec -it container_name bash`。
+- **`-t`**：为镜像指定标签，例如 `docker build -t my-image .`。
 
 # Dockerfile
 
@@ -489,6 +527,144 @@ The URL is the interesting part here. We simply said to connect to port 5173 of 
 - **Nodemon**：监控源码变化，自动重启后端服务器。
 
 作用：你不用每次改后端代码都重新 build 容器，直接改就能生效。
+
+```dockerfile
+services:
+  server:
+    image: ...
+    volumes:
+      - ...
+    ports:
+      - ...
+    environment: 
+      - REDIS_URL=redisurl_here
+      - MONGO_URL=mongourl_here
+```
+
+```dockerfile
+services:
+  todo-frontend:
+    build:
+      context: ./todo-frontend
+      dockerfile: Dockerfile
+    container_name: todo-frontend-prod
+    depends_on:
+      - todo-backend
+    expose:
+      - "80"
+
+  todo-backend:
+    build:
+      context: ./todo-backend
+      dockerfile: Dockerfile
+    container_name: todo-backend-prod
+    environment:
+      - PORT=3000
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://root:example@mongo:27017/the_database?authSource=admin
+    depends_on:
+      - mongo
+      - redis
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: reverse-proxy-prod
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - todo-frontend
+      - todo-backend
+
+  mongo:
+    image: mongo:6.0
+    container_name: todo-mongo-prod
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+      - MONGO_INITDB_DATABASE=the_database
+    volumes:
+      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    container_name: todo-redis-prod
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongo_data:
+  redis_data:
+```
+
+Docker Compose 中 `volumes` 的作用可以用一句话概括：**它是数据持久化（避免容器销毁后数据丢失）和宿主机与容器共享文件/目录的核心机制。**
+
+在你的配置文件里，`volumes` 出现在两个地方：**服务级别**（各个 service 内部）和 **全局级别**（文件最底部）。它们各自承担不同的职责：
+
+#### 1. 全局定义：具名卷（Named Volumes）
+
+就是写在最底部的这一段：
+
+YAML
+
+```
+volumes:
+  mongo_data:
+  redis_data:
+```
+
+- **作用**：向 Docker 注册并声明两个由 Docker 统一管理的独立存储空间（名曰 `mongo_data` 和 `redis_data`）。
+- **为什么需要它？** 默认情况下，Docker 容器内部产生的所有数据都保存在容器的可写层中。一旦容器被删除（比如升级镜像或重新部署），**数据库里的所有数据都会彻底消失**。通过声明具名卷，数据就会被单独保存在宿主机中（通常在 `/var/lib/docker/volumes/`），哪怕把容器彻底删掉重新拉取，数据依然完好无损。
+
+#### 2. 服务应用：挂载卷（Volume Mounts）
+
+在具体的服务中，通过 `volumes:` 将声明的存储空间（或宿主机上的路径）**映射**到容器内部的某个路径。
+
+你的配置中出现了两种挂载方式：
+
+##### ① 具名卷挂载（持久化数据库数据）
+
+```YAML
+mongo:
+  volumes:
+    - mongo_data:/data/db # 将全局具名卷 mongo_data 挂载到容器内 MongoDB 的默认数据目录
+```
+
+```YAML
+redis:
+  volumes:
+    - redis_data:/data   # 将全局具名卷 redis_data 挂载到容器内 Redis 的数据存储目录
+```
+
+- **解释**：格式为 `<卷名称>:<容器内部路径>`。MongoDB 和 Redis 在运行过程中写入的数据，都会同步保存到宿主机的 `mongo_data` 和 `redis_data` 存储空间中。
+
+##### ② 绑定挂载（Bind Mounts，共享配置文件/脚本）
+
+```YAML
+nginx:
+  volumes:
+    - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+```
+
+```YAML
+mongo:
+  volumes:
+    - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+```
+
+- **解释**：格式为 `<宿主机相对路径>:<容器内部路径>:[权限]`。
+  - `./nginx.conf` 挂载：将你当前目录下的 Nginx 配置文件直接“覆盖”替换容器内部的默认配置。后缀 `:ro` 表示 **Read-Only（只读）**，防止容器修改宿主机上的配置文件。
+  - `./mongo/mongo-init.js` 挂载：把你的初始化 SQL/JS 脚本塞进 MongoDB 容器特有的启动脚本目录（`/docker-entrypoint-initdb.d/`），这样 MongoDB 在**第一次**启动时就会自动执行该脚本创建初始数据或用户。
+
+##### 总结归纳
+
+| **类型**                  | **例子**                         | **核心用途**           | **优点**                                             |
+| ------------------------- | -------------------------------- | ---------------------- | ---------------------------------------------------- |
+| **具名卷 (Named Volume)** | `mongo_data:/data/db`            | 保留数据库数据         | Docker 自动托管，安全高效，容器毁掉数据还在。        |
+| **绑定挂载 (Bind Mount)** | `./nginx.conf:/etc/nginx/...:ro` | 读取本地配置文件或脚本 | 在宿主机修改配置文件，无需重新构建镜像即可直接生效。 |
 
 # Communications between containers in a more ambitious environment
 
